@@ -67,18 +67,17 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
         $userData = array();
 		
         if ($userId) {
-        	
             $userprofileRow = $this->fetchRow("id = " . $userId);
 			
             $this->userprofileData = $userprofileRow->toArray();
-			
-            $this->userId = $userprofileData['id'];
-            $this->plantId = $userprofileData['plantId'];
-            $this->firstName = $userprofileData['firstName'];
-            $this->fullName = $userprofileData['firstName'] . " " . $userprofileData['lastName'];
-            $this->plantName = $userprofileData['plantName'];
-            $this->corporateName = $userprofileData['corporateName'];
-            $this->email = $userprofileData['email'];
+            
+            $this->userId = $this->userprofileData['id'];
+            $this->plantId = $this->userprofileData['plantId'];
+            $this->firstName = $this->userprofileData['firstName'];
+            $this->fullName = $this->userprofileData['firstName'] . " " . $userprofileData['lastName'];
+            $this->plantName = $this->userprofileData['plantName'];
+            $this->corporateName = $this->userprofileData['corporateName'];
+            $this->email = $this->userprofileData['email'];
         }
         
     }
@@ -239,9 +238,9 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
      */
     public static function getList($options = array())
     {
-        if (count($options)){
+        if (count($options['columns'])){
         	$where = " WHERE ";
-			foreach($options as $key => $value){
+			foreach($options['columns'] as $key => $value){
 				$where .= $key . " = '" . $value . "' AND ";
 			}
 			$where = substr($where,0,strlen($where)-4);
@@ -262,9 +261,9 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
      */
     public static function getCount($options = array())
     {
-        if (count($options)){
+        if (count($options['columns'])){
         	$where = " WHERE ";
-			foreach($options as $key => $value){
+			foreach($options['columns'] as $key => $value){
 				$where .= $key . " = '" . $value . "' AND ";
 			}
 			$where = substr($where,0,strlen($where)-4);

@@ -130,7 +130,7 @@ class Model_DbTable_Plant extends Zend_Db_Table_Abstract {
      */
     public static function getList($options = array()) {
         $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
-
+        
         if (count($options)) {
             if ($options['orderby'] != "") {
                 $order = "ORDER BY " . $options['orderby'];
@@ -140,10 +140,19 @@ class Model_DbTable_Plant extends Zend_Db_Table_Abstract {
                 $like = "WHERE " . $options['likeColumn'] . " LIKE '%" . $options['likeTerm'] . "%'";
             }
         }
-
-        $stmt = $dbAdapter->query("SELECT * FROM plants " . $like . " " . $order);
+        
+        if (count($options['columns'])){
+        	$where = " WHERE ";
+			foreach($options['columns'] as $key => $value){
+				$where .= $key . " = '" . $value . "' AND ";
+			}
+			$where = substr($where,0,strlen($where)-4);
+        }
+        
+        $stmt = $dbAdapter->query("SELECT * FROM plants " . $like . " " . $where . " " . $order);
         $list = $stmt->fetchAll();
         array($list);
+        
         return $list;
     }
 
@@ -175,7 +184,7 @@ class Model_DbTable_Plant extends Zend_Db_Table_Abstract {
         if ($this->plantData['plantId']) {
             $notificationData['edit'] = 0;
             //$notificationModel->setNotificationData($notificationData);
-            //$notificationModel->save();
+            //$notificationModel->save(); check for array difference here
             $where = $this->getAdapter()->quoteInto('plantId = ?', $this->plantId);
             $this->update($this->plantData, $where);
         } else {

@@ -36,10 +36,9 @@ class Model_HiveAcl extends Zend_Acl {
 		$this->add(new Zend_Acl_Resource('plant:index'), 'plant');
 		$this->add(new Zend_Acl_Resource('plant:admin'), 'plant');
 		$this->add(new Zend_Acl_Resource('plant:add'), 'plant');
-		$this->add(new Zend_Acl_Resource('plant:list'), 'plant');
 		$this->add(new Zend_Acl_Resource('plant:edit'), 'plant');
 		$this->add(new Zend_Acl_Resource('plant:view'), 'plant');
-		$this->add(new Zend_Acl_Resource('plant:clist'),'plant');
+		$this->add(new Zend_Acl_Resource('plant:list'),'plant');
 		$this->add(new Zend_Acl_Resource('plant:results'),'plant');
         $this->add(new Zend_Acl_Resource('plant:editvalidate'), 'plant');
         $this->add(new Zend_Acl_Resource('plant:addvalidate'), 'plant');
@@ -114,7 +113,7 @@ class Model_HiveAcl extends Zend_Acl {
 		$this->allow('us','userprofile');
 		$this->deny('us','userprofile','add');
 		$this->allow('us','gasturbine',array('index','view','details','plantlist'));
-		$this->allow('us','plant',array('view','index','clist','results'));
+		$this->allow('us','plant',array('view','index','list','results'));
 		$this->allow('us','authentication','logout');
 		$this->allow('us','dashboard');
 		$this->allow('us','reports');

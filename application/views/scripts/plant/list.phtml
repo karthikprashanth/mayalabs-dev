@@ -1,16 +1,65 @@
-<?php
-$list = NULL;
-$list = $list . "<table>";
-$role = Zend_Registry::get('role');
-foreach ($this->Pdata as $plant) {
-    $list = $list . "<tr>";
-    $list = $list . "<td><a href='" . $this->url(array('action' => 'view')) . "?id=" . $this->escape($plant['plantId']) . "'>" . $plant['plantName'] . "</a> (" . $plant['corporateName'] . ")</td>";
-    if($this->pid == $plant['plantId'] || $role == 'sa')
-        $list = $list . "<td><a href='" . $this->url(array('action' => 'edit')) . "?id=" . $this->escape($plant['plantId']) . "'>Edit</a></td>";
-    $list = $list . "</tr>";
-}
-$list = $list . "</table>";
-$this->tabPane("PList", $list, array('title' => 'Plant List'));
-echo $this->tabContainer("PList", array());
-echo "<div style='padding:20px;'>".$this->paginationControl($this->Pdata,'Sliding','pagination.phtml')."</div>";
-?>
+<script type = "text/javascript">
+	$(document).ready(function(){
+		text = document.getElementById("ac1").value;
+		$.ajax({
+            data: "term=" + text + "&ll=1" + "&ul=10",
+            url: "/plant/results",
+            success: function(msg){
+                if (msg != ''){
+                    $("#result").html(msg);
+                }
+            }
+        });	
+		$("#ac1").keypress(function(event){
+			if(event.which == 13)
+			{
+				text = document.getElementById("ac1").value;
+				$.ajax({
+	            data: "term=" + text + "&ll=1" + "&ul=10",
+	            url: "/plant/results",
+	            success: function(msg){
+	                if (msg != ''){
+	                    $("#result").html(msg);
+	                }
+	            }
+	        });
+	      }
+		});
+		$(".ui-autocomplete").click(function() {
+			text = document.getElementById("ac1").value;
+	   		$.ajax({
+	            data: "term=" + text + "&ll=1" + "&ul=10",
+	            url: "/plant/results",
+	            success: function(msg){
+	                if (msg != ''){
+	                    $("#result").html(msg);
+	                }
+	            }
+	        });
+		});	
+	});	
+	function clistpaginate(i)
+	{
+		var ll = (i-1) * 10;
+		var ul = ll + 10;
+		ll = ll + 1;
+		var query = document.getElementById("ac1").innerHTML;
+		$.ajax({
+            data: "term=" + query + "&ll=" + ll + "&ul=" + ul,
+            url: "/plant/results",
+            success: function(msg){
+                if (msg != ''){
+                    $("#result").html(msg);   
+                }
+            }
+        });
+	}
+</script>
+
+<?php $this->jQuery()->enable(); ?>
+	<div class='clist-search ui-corner-all' style='margin-bottom: 20px;'>
+		<span style = 'font-size:1.0em'>Plant Name : </span>
+		<?php echo $this->autoComplete("ac1","",array('source' => $this->plantNames));?>
+		<div style='clear:both; height:10px;'>&nbsp</div>
+	</div>
+	<div id = 'result'></div>

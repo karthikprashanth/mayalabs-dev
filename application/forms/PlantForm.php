@@ -130,7 +130,9 @@ class Form_PlantForm extends ZendX_JQuery_Form {
                 ->addValidator(Model_Validators::regex('/[^a-z0-9_.@]+/'))
                 ->addFilter('StripTags')
                 ->addFilter('StringTrim');
-        if ($this->mode == 'edit') {
+                
+            if ($this->mode == 'edit') {
+                
             $save1 = new Zend_Form_Element_Submit('submit1');
             $save1->setAttrib('id', 'save1')
                     ->setLabel("Save")

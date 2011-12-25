@@ -8,7 +8,8 @@ class PlantController extends Zend_Controller_Action {
 
     public function indexAction() {
         try {
-            $uprofileModel = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),Zend_Registry::get('id'));
+            $uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+            $uprofileModel = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$uid);
 			$this->_redirect("/plant/view?id=".$uprofileModel->getPlantId());
         } 
         catch (Exception $e) {
@@ -36,16 +37,19 @@ class PlantController extends Zend_Controller_Action {
                     $content = $form->getValues();
                     $content = array_merge($content['partPlant1'], $content['partPlant2'], $content['partPlant3']);
 					
-                   	
-                   	$existingPlants = Model_DbTable_Plant::getList(array('corporateName' => $content['corporateName']));
+                   	$existingPlants = Model_DbTable_Plant::getList(array('columns' => array('corporateName' => $content['corporateName'])));
 					$corpExists = count($existingPlants);
-					
+                    
 					if($corpExists)
 					{
-						$existingPlants = Model_DbTable_Plant::getList(array('plantName' => $content['plantName']));
+						$existingPlants = Model_DbTable_Plant::getList(array('columns' => array('plantName' => $content['plantName'])));
 						if(count($existingPlants))
+                        {
 							$this->view->errorMessage = "Plant name already exists";
-					}	
+                            return;
+                        }
+
+					}
                     $pModel = new Model_DbTable_Plant();
 					$pModel->setPlantData($content);
 					$pModel->save();    
@@ -65,13 +69,15 @@ class PlantController extends Zend_Controller_Action {
         try {
             $plantId = $this->_getParam('id',0);
 			$userId = Zend_Auth::getInstance()->getStorage()->read()->id;
-			$user = Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$userId);
+            
+			$user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$userId);
 			if(!$plantId){	
-				$this->_redirect("/plant/view?id=".$user->getPlantId());
+				$plantId = $user->getPlantId();
 			}
-			$plant = Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter(),$plantId);
+			$plant = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter(),$plantId);
+            $this->view->headTitle($plant->getPlantname() . '- View', 'PREPEND');
 			$this->view->plantData = $plant->getPlantData();
-			
+
 			$role = Zend_Registry::get('role');
 			if(($role == 'sa' && $role != 'us') && $user->getPlantId() == $plantId){
 				$this->view->editValid = true;
@@ -87,35 +93,37 @@ class PlantController extends Zend_Controller_Action {
     }
 
     public function editAction() {
-        $this->view->headTitle('Edit Plant', 'PREPEND');
-        try {
-
+        try{
             $form = new Form_PlantForm();
             $form->setMode("edit");
             $form->showForm();
-            //JQuery Form Enable
-            ZendX_JQuery::enableForm($form);
             $form->partPlant3->submit->setLabel('Save');
+
             $form->partPlant3->submit->setAttrib('class', 'user-save');
-
-            $this->view->form = $form;
-            $this->view->plantId = $this->_getParam('id', 0);
-
-            if ($this->getRequest()->isPost()) {
+            $plantId = $this->_getParam('id',0);
+            $userId = Zend_Auth::getInstance()->getStorage()->read()->id;
+            if(!$plantId)
+            {
+                $user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(), $userId);
+                $plantId = $user->getPlantId();
+            }
+            $plant = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter(),$plantId);
+            $plantData = $plant->getPlantData();
+            $this->view->headTitle($plant->getPlantName() . " - Edit",'PREPEND');
+            if($this->getRequest()->isPost())
+            {
                 $formData = $this->getRequest()->getPost();
-                if ($form->isValid($formData)) {
-                    $GT = new Model_DbTable_Plant();
-                    $plantDet = $GT->getPlant($this->_getParam('id', 0));
-                    $plantId = $this->_getParam('id', 0);
-                    $this->view->plantId = $plantId;
-                    $content = array_merge($form->partPlant1->getValues(), $form->partPlant2->getValues(), $form->partPlant3->getValues());
-                    if (count(array_diff($content, $plantDet)) > 0) {
-                        $nf = new Model_DbTable_Notification();
-                        $nf->add($plantId, 'plant', 0);
-                        $GT->updatePlant($plantId, $content);
-                    }
+                if($form->isValid($formData))
+                {
+                    $content = array_merge($form->partPlant1->getValues(), $form->partPlant2->getValues(),
+                                                                $form->partPlant3->getValues());
+                    $content['plantId'] = $plantId;
+                    unset($content['modeselect']);
+                    $plant->setPlantData($content);
+                    $plant->save();
+                    
                     if ($this->getRequest()->getPost("modeselect") == "redirect") {
-                        $this->_redirect('plant/view?id=' . $plantId);
+                            $this->_redirect('plant/view?id=' . $plantId);
                     }
                     if ($this->getRequest()->getPost("modeselect") == "stay1") {
                         $this->_redirect('plant/edit?id=' . $plantId . '#tabContainer-frag-1');
@@ -125,39 +133,23 @@ class PlantController extends Zend_Controller_Action {
                     }
                     if ($this->getRequest()->getPost("modeselect") == "stay3") {
                         $this->_redirect('plant/edit?id=' . $plantId . '#tabContainer-frag-3');
-                    }
-                } else {
+                    }                    
+
+                }
+                else
+                {
                     $form->populate($formData);
                 }
-            } else {
-                $plantId = $this->_getParam('id', 0);
-                $PlantVal = new Model_DbTable_Plant();
-                $form->populate($PlantVal->getPlant($plantId));
             }
-        } catch (exception $e) {
-            echo $e;
+            else {
+                $form->populate($plantData);
+            }
+
+            $this->view->form = $form;
+            $this->view->userId = $userId;
+            $this->view->lastlogin = Zend_Auth::getInstance()->getStorage()->read()->lastlogin;
         }
-    }
-
-    public function listAction() {
-        try {
-            $role = Zend_Registry::get('role');
-
-            $this->view->headTitle('List Plants', 'PREPEND');
-            $resultSet = new Model_DbTable_Plant();
-            $resultSet = $resultSet->listPlants();
-
-            $up = new Model_DbTable_Userprofile();
-            $up = $up->getUser(Zend_Auth::getInstance()->getStorage()->read()->id);
-            $pid = $up['plantId'];
-
-            $Pdata = new Zend_Paginator(new Zend_Paginator_Adapter_DbSelect($resultSet));
-            $Pdata->setItemCountPerPage(5)
-                    ->setCurrentPageNumber($this->_getParam('page', 1));
-
-            $this->view->Pdata = $Pdata;
-            $this->view->pid = $pid;
-        } catch (Exception $e) {
+        catch(Exception $e){
             echo $e;
         }
     }
@@ -177,42 +169,11 @@ class PlantController extends Zend_Controller_Action {
         }
     }
 
-    public function editvalidateAction() {
-        try {
-            $this->_helper->viewRenderer->setNoRender();
-            $this->_helper->getHelper('layout')->disableLayout();
-            $form = new Form_PlantForm();
-            $formData = $this->getRequest()->getPost();
-            $form->isValid($formData);
-            $json = $form->getMessages();
-            echo Zend_Json::encode($json);
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-    public function addvalidateAction() 
+    public function listAction() 
     {
-        try {
-            $this->_helper->viewRenderer->setNoRender();
-            $this->_helper->getHelper('layout')->disableLayout();
-            $form = new Form_PlantForm();
-            $formData = $this->getRequest()->getPost();
-            $form->isValid($formData);
-            $json = $form->partPlant1->getMessages();
-            $json = array_merge($json, $form->partPlant2->getMessages());
-            $json = array_merge($json, $form->partPlant3->getMessages());
-            echo Zend_Json::encode($json);
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-    public function clistAction() 
-    {
-    	
- 		/*$plantModel = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter());
-		$plants = $plantModel::getList("plantName");
+    
+ 		$plantModel = new Model_DbTable_Plant();
+		$plants = $plantModel::getList();
 		
 		$plantNames = array();
 		
@@ -223,7 +184,7 @@ class PlantController extends Zend_Controller_Action {
 			}	
 		}
 			
-		$this->view->plantNames = $plantNames;*/
+		$this->view->plantNames = $plantNames;
     }
 
     public function resultsAction() 
@@ -238,16 +199,19 @@ class PlantController extends Zend_Controller_Action {
         $ul = $this->_getParam('ul');
 		
         $plantModel = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter());
-        $results = $plantModel::getList("plantName","plantName",$term);
+        $results = $plantModel::getList(array('likeColumn' => 'plantName','likeTerm' => $term,'orderby' => 'plantName'));
         
         if ($term == NULL) {
-            $results = $plantModel::getList("plantName");
+            $results = $plantModel::getList(array('orderby' => 'plantName'));
         }
-		
-        $umodel = new Model_DbTable_Userprofile();
-        $this->view->usermodel = $umodel;
-		
+
+        foreach($results as $result)
+        {
+            $userlist[$result['plantId']] = Model_DbTable_Userprofile::getList(array('columns' => array('plantId' => $result['plantId'])));
+        }
+        
 		$this->view->results = $results;
+        $this->view->userlist = $userlist;
         $this->view->resultcount = $plantModel::getCount();
 		$this->view->term = $term;
         $this->view->ll = $ll;

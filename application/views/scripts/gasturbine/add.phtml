@@ -1,21 +1,21 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+    $("input").blur(function(){
+    	if(this.value == "" || this.value == null)
+    	{
+    		return;
+    	}
+        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+        doValidationPlant(formElementId,'../validation/validate?form=gasturbine');
+   });
+});
+</script>
+
 <?php
 $this->jQuery()->enable();
 echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
-echo $this->adminId;
-//echo $this->form;
-$this->tabPane("GTList", $this->form, array('title' => 'GT Add'));
+
+$this->tabPane("GTList", $this->form, array('title' => 'Gasturbine Add'));
 echo $this->tabContainer("GTList", array());
-echo $this->message;
+echo $this->errorMessage;
 ?>
-<script type="text/javascript">
-    $(document).ready(function(){
-	    $("input").blur(function(){
-	    	if(this.value == "" || this.value == null)
-	    	{
-	    		return;
-	    	}
-	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
-	        doValidationPlant($(this).attr('id'),'../validation/validate?form=gasturbine');
-	   });
-	});
-</script>

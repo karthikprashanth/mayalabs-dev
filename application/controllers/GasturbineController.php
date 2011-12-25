@@ -11,10 +11,9 @@ class GasturbineController extends Zend_Controller_Action
     public function indexAction()
     {
         try {
-	        $up = new Model_DbTable_Userprofile();
-	        $up = $up->getUser(Zend_Auth::getInstance()->getStorage()->read()->id);
-	        $pid = $up['plantId'];
-	        $this->_redirect('/gasturbine/plantlist?id='.$pid);
+	        $userId = Zend_Auth::getInstance()->getStorage()->read()->id;
+            $user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$userId);
+            $this->_redirect("gasturbine/plantlist?id=".$user->getPlantId());
 	    } catch (Exception $e) {
 	        echo $e;
 	    }
@@ -23,44 +22,29 @@ class GasturbineController extends Zend_Controller_Action
     public function addAction()
     {
         try {
-                            $this->view->headTitle('Add GT', 'PREPEND');
+                            $this->view->headTitle('Add New Gasturbine', 'PREPEND');
                             $form = new Form_GasturbineForm();
                             //JQuery Form Enable
                             ZendX_JQuery::enableForm($form);
                             $form->submit->setLabel('Add');
 							$form->submit->setAttrib('class','gt-add');
                             $this->view->form = $form;
+
                             if ($this->getRequest()->isPost()) {
                                 $formData = $this->getRequest()->getPost();
                                 if ($form->isValid($formData)) {
-                                    $userp = new Model_DbTable_Gasturbine();
                                     $content = $form->getValues();
-									$exists = false;
-									$role = Zend_Registry::get('role');
-									if($role == 'ca')
-									{
-										$umodel = new Model_DbTable_Userprofile();
-										$user = $umodel->getUser(Zend_Auth::getInstance()->getStorage()->read()->id);
-										$upid = $user['plantId'];
-										$content['plantid'] = $upid;
-									}
-									$pgt = $userp->listPlantGtArray($content['plantid']);
-									foreach($pgt as $p)
-									{
-										if($p['GTName'] == $content['GTName'])
-										{
-											$exists = true;
-											break;
-										}
-									}
-									if($exists)
-									{
-										$this->view->message = "Gasturbine name already exists";
-										return;
-									}
-                                    $newgt = $userp->add($content);
-									
-                                    $this->_redirect('/gasturbine/view?id='.$newgt);
+
+                                    $existingGTS = Model_DbTable_Gasturbine::getList(array('columns' => array('GTName' => $content['GTName'])));
+                                    if(count($existingGTS))
+                                    {
+                                        $this->view->errorMessage = "Gasturbine name already exists";
+                                        return;
+                                    }
+									$gasturbine = new Model_DbTable_Gasturbine(Zend_Db_Table_Abstract::getDefaultAdapter());
+                                    $gasturbine->setGTData($content);
+                                    $gasturbine->save();
+                                    $this->_redirect("gasturbine/view?id=".$gasturbine->getGTId());
                                 } else {
                                     $form->populate($formData);
                                 }
@@ -72,68 +56,71 @@ class GasturbineController extends Zend_Controller_Action
 
     public function editAction()
     {
-        $this->view->headTitle('Edit GT', 'PREPEND');
-                        try {
-                            $form = new Form_GasturbineForm();
-                            $form->submit->setLabel('Save');
-							$form->submit->setAttrib('class','user-save');
-                            $this->view->form = $form;
-                			
-                            if ($this->getRequest()->isPost()) {
-                                $formData = $this->getRequest()->getPost();
-                                if ($form->isValid($formData)) {
-                                    $GT = new Model_DbTable_Gasturbine();
-                                    $gtDet = $GT->getGT($this->_getParam('id',0));
-                                    $content = $form->getValues();
-                					if(count(array_diff($content,$gtDet)) > 0)
-                                    {
-                                    	$GT->updateGT($content);
-                                    	$nf = new Model_DbTable_Notification();
-	                                    $formData['GTId'] = $this->_getParam('id', 0);
-	                                    $nf->add($formData['GTId'], 'gasturbine', 0);	
-                                    }
-                                    
-                                    $this->_redirect('/gasturbine/view?id='.$this->_getParam('id',0));
-                                    if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
-                                        $this->_redirect('dashboard/index');
-                                    }
-                                } else {                                	
-                                    $form->populate($formData);
-                                }
-                            } else {
-                                $id = $this->_getParam('id', 0);
-                                $GTVal = new Model_DbTable_Gasturbine();
-								$gtdet = $GTVal->getGT($id);
-                                $form->populate($gtdet);
-								$role = Zend_Registry::get("role");
-								if($role == "sa")
-									$form->plantid->setValue($gtdet['plantId']);
-								
-                            }
-                        } catch (exception $e) {
-                            echo $e;
-                        }
+        try {
+            $gtid = $this->_getParam('id',0);
+            if(!$gtid)
+            {
+                $uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+                $user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(), $uid);
+                $this->_redirect("gasturbine/plantlist?id=".$user->getPlantId());
+            }
+            
+            $form = new Form_GasturbineForm();
+            $form->submit->setLabel('Save');
+            $form->submit->setAttrib('class','user-save');
+            $this->view->form = $form;
+
+            $gasturbine = new Model_DbTable_Gasturbine(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtid);
+            $gtData = $gasturbine->getGTData();
+
+            $this->view->headTitle($gasturbine->getGTName()." - Edit",'PREPEND');
+            
+            if ($this->getRequest()->isPost()) {
+                $formData = $this->getRequest()->getPost();
+                if ($form->isValid($formData)) {
+
+                    $content = $form->getValues();
+                    $gasturbine->setGTData($content);
+                    $gasturbine->save();
+                    $this->_redirect('/gasturbine/view?id='.$gtid);
+                    if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
+                        $this->_redirect('dashboard/index');
+                    }
+                } else {
+                    $form->populate($formData);
+                }
+            } else {
+                $form->populate($gtData);
+                $role = Zend_Registry::get("role");
+                if($role == "sa")
+                    $form->plantid->setValue($gasturbine->getPlantId());
+            }
+        } catch (exception $e) {
+            echo $e;
+        }
     }
 
     public function viewAction()
     {
-        
-                        try {
-                            $id = $this->_getParam('id', 0);
-                            $GTView = new Model_DbTable_Gasturbine();
-                            $GTData = $GTView->getGT($id);
-                
-                            $this->view->headTitle("View GT - " . $GTData['GTName'], 'PREPEND');
-                
-							
-                            $this->view->GTData = $GTData;
-							
-							
-							
-                            $this->view->id = $id;
-                        } catch (Exception $e) {
-                            echo $e;
-                        }
+        try {
+            $gtid = $this->_getParam('id',0);
+            
+            if(!$gtid){
+                $uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+                $user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$uid);
+                $userGT = Model_DbTable_Gasturbine::getList(array('columns' => array('plantId' => $user->getPlantId())));
+                if(!count($userGT)){
+                    $this->_redirect("gasturbine/plantlist?id=".$user->getPlantId());
+                }
+                $gtid = $userGT[0]['GTId'];
+            }
+
+            $gasturbine = new Model_DbTable_Gasturbine(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtid);
+            $this->view->headTitle($gasturbine->getGTName() . " - View",'PREPEND');
+            $this->view->gtid = $gtid;
+        } catch (Exception $e) {
+            echo $e;
+        }
     }
 
     public function listAction() {
@@ -161,30 +148,33 @@ class GasturbineController extends Zend_Controller_Action
 
     public function detailsAction()
     {
-        if ($this->_request->isXmlHttpRequest()) {
-                            $this->_helper->getHelper('Layout')->disableLayout();
-        }
-        $this->view->headTitle('View GT', 'PREPEND');
-
         try {
-            $id = $this->_getParam('id', 0);
-            $this->view->id = $id;
-            $GTView = new Model_DbTable_Gasturbine();
-            $GTData = $GTView->getGT($id);
-			foreach($GTData as $key=>$value)
-			{
-				if(is_int($value) && $value == 0)
-				{
-					$GTData[$key] = "-";		
-				}
-			}
-            $this->view->GTData = $GTData;
-            $plantModel = new Model_DbTable_Plant();
-            $plant = $plantModel->getPlant($GTData['plantId']);
-            $this->view->pname = $plant['plantName'];
+            if ($this->_request->isXmlHttpRequest()) {
+                $this->_helper->getHelper('Layout')->disableLayout();
+            }
+            $gtid = $this->_getParam('id',0);
+            $uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+            $user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$uid);
+           
+            $gasturbine = new Model_DbTable_Gasturbine(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtid);
+            
+            $this->view->GTData = $gasturbine->getGTData();
+            $plant = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter(),$gasturbine->getPlantId());
+            $this->view->plantName = $plant->getPlantName();
+
+            $role = Zend_Registry::get('role');
+
+            if($role == 'sa' || ($user->getPlantId() == $gasturbine->getPlantId()))
+            {
+                if($role != 'us')
+                {
+                    $this->view->editValidate = true;
+                }
+            }
+            
         } catch (Exception $e) {
             echo $e;
-            }
+        }
     }
 
     public function plantlistAction()

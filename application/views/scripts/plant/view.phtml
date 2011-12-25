@@ -105,7 +105,7 @@
 		$plantTab = $plantTab .  "<div class = 'gt-edit'><a href='/plant/edit"  . "?id=" . $this->id . "#tabContainer-frag-2' style='color: #719b3e;'>Edit</a></div>";
 
 	
-	$gtContent = "<table cellspacing='0' cellpadding='0' onmouseover='tablecloth();'>
+	$gtData = "<table cellspacing='0' cellpadding='0' onmouseover='tablecloth();'>
 	
 	    <tr>
 	        <th>Number of Gasturbines:</th>
@@ -189,21 +189,21 @@
 		$gtContent = $gtContent .  "<div class = 'gt-edit'><a href='/plant/edit"  . "?id=". 
 		$this->plantData['plantId'] . "#tabContainer-frag-3' style='color: #719b3e;'>Edit</a></div>";
 	}
-
-
+    
 	if($this->lastlogin == NULL)
 	{
 		$firstTime .= "<center><a href = '/plant/edit?id=" . $this->plantData['plantId'] . "'>
 					  &lt;&lt; Back</a>&nbsp;&nbsp;";
 		$firstTime .= "<a href = '/gasturbine/plantlist?id=" . $this->plantData['plantId'] . "'>
 					  Continue &gt;&gt;</a></center>";
-		$corporateTab .= $firstTime;
-		$plantTab .= $$firstTime;
-		$gtTab .= $$firstTime;
+		$corporateData = $corporateData . $firstTime;
+		$plantData = $plantData . $firstTime;
+		$gtData = $gtData  . $firstTime;
 	}
-	$this->tabPane("plantdata", $corporateTab, array('title' => 'Corporate Info'));
-	$this->tabPane("plantdata", $plantTab, array('title' => 'Plant Info'));
-	$this->tabPane("plantdata", $gtTab, array('title' => 'GT Statistics'));
-
+   
+	$this->tabPane("plantdata", $corporateData, array('title' => 'Corporate Info'));
+	$this->tabPane("plantdata", $plantData, array('title' => 'Plant Info'));
+	$this->tabPane("plantdata", $gtData, array('title' => 'GT Statistics'));
+    
 	echo $this->tabContainer("plantdata", array());
 ?>

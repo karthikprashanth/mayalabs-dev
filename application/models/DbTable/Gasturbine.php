@@ -36,13 +36,14 @@ class Model_DbTable_Gasturbine extends Zend_Db_Table_Abstract {
      * @var Integer
      */
     protected $plantId;
+    
 
     /**
      * Gasturbine Data
      *
      * @var Array
      */
-    protected $data;
+    protected $gtData;
 
     /**
      * Last Updated Time
@@ -62,14 +63,14 @@ class Model_DbTable_Gasturbine extends Zend_Db_Table_Abstract {
 
         $gtData = array();
         if($gtid){
-            $gtRow = $this->fetchRow("id = " . $gtid);
-
+            $gtRow = $this->fetchRow("GTId = " . $gtid);
             $this->gtData = $gtRow->toArray();
-            $this->gtId = $gtRow['GTId'];
-            $this->gtName = $gtRow['GTName'];
-            $this->gtModelNum = $gtRow['GTModelNum'];
-            $this->plantId = $gtRow['plantId'];
-            $this->time = $gtRow['timeupdate'];
+            
+            $this->gtId = $this->gtData['GTId'];
+            $this->gtName = $this->gtData['GTName'];
+            $this->gtModelNum = $this->gtData['GTModelNum'];
+            $this->plantId = $this->gtData['plantId'];
+            $this->time = $this->gtData['timeupdate'];
         }
     }
 
@@ -123,63 +124,33 @@ class Model_DbTable_Gasturbine extends Zend_Db_Table_Abstract {
      *
      * @return Array
      */
-    public function getData(){
-        return $this->data;
+    public function getGTData(){
+        return $this->gtData;
     }
-
+    
     /**
-     * Gets all rows with the specified Plant Id
+     * Gets all GTs
      *
-     * @param Integer - Plant Id
      * @return Zend_Db_Select
      */
-    public static function getGTByPlant(){
-        $db = Zend_Db_Table::getDefaultAdapter();
-        $selectGt = new Zend_Db_Select($db);
-        $selectGt->from('gasturbines')
-        		 ->where('plantId = ?',$pid);
+    public static function getList($options = array()){
+        $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
 
-        return $selectGt;
-    }
-
-    /**
-     * Gets all rows with the specified Plant Id
-     *
-     * @param Integer - Plant Id
-     * @return Array
-     */
-    public static function getGTByPlantArray($pid){
-        $pid = (int) $pid;
-        $row = $this->fetchAll('plantId = ' . $pid);
-        if(!$row){
-            throw new Exception("Could not find row with plantId =  $pid");
+        if (count($options['columns'])){
+        	$where = " WHERE ";
+			foreach($options['columns'] as $key => $value){
+				$where .= $key . " = '" . $value . "' AND ";
+			}
+			$where = substr($where,0,strlen($where)-4);
         }
-        return $row->toArray();
+        
+        $stmt = $dbAdapter->query("SELECT * FROM gasturbines " . $where);
+        $list = $stmt->fetchAll();
+        array($list);
+        return $list;
     }
 
-    /**
-     * Gets all GTs
-     *
-     * @return Zend_Db_Select
-     */
-    public static function getGTList(){
-        $db = Zend_Db_Table::getDefaultAdapter();
-        $selectPlants = new Zend_Db_Select($db);
-        $selectPlants->from('gasturbines');
-
-        return $selectPlants;
-    }
-
-    /**
-     * Gets all GTs
-     *
-     * @return Array
-     */
-    public static function getGTListArray(){
-        $row = $this->fetchAll();
-    	return $row->toArray();
-    }
-
+    
     /**
      * Sets the GT Name
      *
@@ -212,9 +183,14 @@ class Model_DbTable_Gasturbine extends Zend_Db_Table_Abstract {
      *
      * @param Array
      */
-    public function setData($data){
+    public function setGTData($data){
         if($this->gtId == 0 || $this->gtId == $data['GTId']){
-            $this->data = $data;
+            $this->gtData = $data;
+            $this->gtId = $data['GTId'];
+            $this->gtName = $data['GTName'];
+            $this->gtModelNum = $data['GTModelNum'];
+            $this->plantId = $data['plantId'];
+            $this->time = $data['timeupdate'];
         }
     }
 
@@ -222,14 +198,24 @@ class Model_DbTable_Gasturbine extends Zend_Db_Table_Abstract {
      * Updates the database with the local data
      */
     public function save(){
+        $data = $this->gtData;
         if($this->gtId){
-            $data = $this->data;
-            $where['id = ?'] = $this->gtId;
+            $where['GTId = ?'] = $this->gtId;
             $this->update($data,$where);
+            //notifications and array difference
         } else{
-            $data = $this->data;
             $this->insert($data);
+            $this->gtId = $this->getAdapter()->lastInsertId();
+
         }
+    }
+
+    /**
+     *  Deletes the GT
+     */
+    public function delete()
+    {
+        $this->delete("GTId = " . $this->gtId);
     }
 
 //    public function getGT($gtid) {

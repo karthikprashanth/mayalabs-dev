@@ -15,7 +15,7 @@
 
             <tr>
                 <td>Plant Name</td>
-                <td>".$this->pname."</td>
+                <td>".$this->plantName."</td>
             </tr>
 			
 			<tr>
@@ -66,18 +66,10 @@
         </table>";
         
         echo $gtInfo;
-        $role = Zend_Registry::get('role');
-        $uid = Zend_Auth::getInstance()->getStorage()->read()->id;
-        $usermodel = new Model_DbTable_Userprofile();
-        $user = $usermodel->getUser($uid);
-		$upid = $user['plantId'];
-		$gtmodel = new Model_DbTable_Gasturbine();
-		$gt = $gtmodel->getGT($this->id);
-		$gtpid = $gt['plantId'];
-		if($gtpid == $upid || $role == 'sa')
+
+		if($this->editValidate)
 		{
-			if($role != 'us')
-        		echo "<div class = 'gt-edit'><a href='/gasturbine/edit"  . "?id=" . $this->id . "' style='color: #719b3e;'>Edit</a></div>";
+        		echo "<div class = 'gt-edit'><a href='/gasturbine/edit"  . "?id=" . $this->GTData['GTId'] . "' style='color: #719b3e;'>Edit</a></div>";
 		}
 
 ?>

@@ -49,9 +49,9 @@
 				<clist>
 					<label>Plant Listing</label>
 					<controller>plant</controller>
-					<action>clist</action>
+					<action>list</action>
 					<resource>plant</resource>
-					<privilege>clist</privilege>
+					<privilege>list</privilege>
 				</clist>
             </pages>
         </plantlist>
@@ -127,9 +127,9 @@
 						<clist>
 							<label>Plant Listing</label>
 							<controller>plant</controller>
-							<action>clist</action>
+							<action>list</action>
 							<resource>plant</resource>
-							<privilege>clist</privilege>
+							<privilege>list</privilege>
 						</clist>                    		
                     </pages>
                 </plant>
@@ -193,9 +193,9 @@
 						<clist>
 							<label>Plant Listing</label>
 							<controller>plant</controller>
-							<action>clist</action>
+							<action>list</action>
 							<resource>plant</resource>
-							<privilege>clist</privilege>
+							<privilege>list</privilege>
 						</clist>
 					</pages>
                 </plant>
