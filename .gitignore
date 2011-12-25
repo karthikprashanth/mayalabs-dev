@@ -1,0 +1,11 @@
+public/forums/config.php
+application/configs/application.ini
+library/
+public/forums/cache/
+public/random/
+search/
+public/pdfgen/reports/
+public/server-update.php
+public/google2abe3a7e186935db.html
+nbproject/
+public/uploads/
