@@ -1,0 +1,107 @@
+<script type = "text/javascript">
+	function loadusers(pid) {
+		if(document.getElementById("userdropdown"+pid).innerHTML == "View &gt;&gt;"){
+			document.getElementById("plantuserlist"+pid).style.display = "inline";
+			document.getElementById("userdropdown"+pid).style.color='#f0724e';
+			document.getElementById("userdropdown"+pid).innerHTML = "&lt;&lt; Hide";
+		}
+		else if(document.getElementById("userdropdown"+pid).innerHTML == "&lt;&lt; Hide"){
+			document.getElementById("plantuserlist"+pid).style.display = "none";
+			document.getElementById("userdropdown"+pid).style.color = "#83ac52";
+			document.getElementById("userdropdown"+pid).innerHTML = "View &gt;&gt;";
+		}
+	}
+	
+	function showplantdet(pid) {
+		if(document.getElementById("plantdd"+pid).innerHTML == "Show Details &gt;&gt;"){
+			document.getElementById("plantdetails"+pid).style.display = "inline";
+			document.getElementById("plantdd"+pid).style.color='#f0724e';
+			document.getElementById("plantdd"+pid).innerHTML = "&lt;&lt; Hide Details";			
+		}
+		else if(document.getElementById("plantdd"+pid).innerHTML == "&lt;&lt; Hide Details"){
+			document.getElementById("plantdetails"+pid).style.display = "none";
+			document.getElementById("plantdd"+pid).style.color='#83ac52';
+			document.getElementById("plantdd"+pid).innerHTML = "Show Details &gt;&gt;";
+		}
+	}
+	
+	function clistpaginate(i)
+	{
+		var ll = (i-1) * 10;
+		var ul = ll + 10;
+		ll = ll + 1;
+		var query = document.getElementById("term").innerHTML;
+		$.ajax({
+            data: "term=" + query + "&ll=" + ll + "&ul=" + ul,
+            url: "/plant/results",
+            success: function(msg){
+                if (msg != ''){
+                    $("#result").html(msg);   
+                }
+            }
+        });
+	}
+</script>
+
+<?php 
+$j=1;
+foreach($this->results as $result) :?>
+<?php 
+	if($result['plantId'] == 1)
+	{
+		continue;
+	}
+	if($j < $this->ll || $j > $this->ul)
+	{
+		$j++;
+		continue;
+	}
+	$j++;
+	$umodel = $this->usermodel;
+	$userlist = $umodel->getUserList($result['plantId']);
+	$usercount = count($userlist);
+	$i = 1;
+	$userdet = "<table class='clist-table'><thead><tr><th>Name</th><th>Designation</th><th>Email</th></tr></thead><tbody>";
+	foreach($userlist as $list) {
+		$userdet = $userdet . "<tr><td><a href = '/userprofile/view?id=" . $list['id'] . "'>" . $list['firstName'] . " " . $list['lastName'] . "</a>  </td><td>  " . $list['designation'] . " </td><td>  <a href = 'mailto:" . $list['email'] ."'>" . $list['email'] . "</a></td></tr>";
+	}
+	$userdet = $userdet . "</tbody></table>";
+?>
+	<div id = "term" style = "display:none">
+		<?php echo $this->term; ?>
+	</div>
+	<div class = 'clist-result' onmouseover="glow(this,'f0f7ec'); this.style.borderLeft='solid 2px #2e4e68';" onmouseout="unglow(this); this.style.borderLeft='none';">
+			<a href = "/plant/view?id=<?php echo $result['plantId']?>"><span style='font-size: 16px;'><?php echo $result['plantName'];?></span></a>
+			<br>&nbsp;&nbsp;&nbsp;<span style='font-size:14px; color: #2e4e68;'>Gasturbines</span>:&nbsp;&nbsp;&nbsp;<?php echo $result['numOfGT'];?><a href = "/gasturbine/plantlist?id=<?php echo $result['plantId'];?>">(View)</a>
+			<span class='hide_view result-show' onClick = "showplantdet(<?php echo $result['plantId'];?>)" id = "plantdd<?php echo $result['plantId'];?>">Show Details &gt;&gt;</span>
+			<div id = "plantdetails<?php echo $result['plantId'];?>" style = "display:none">
+				<table class='clist-table'>
+				<thead><tr><th>Description</th><th>Value</th></tr></thead>
+				<tbody>
+				<tr><td>Location : </td><td><?php echo $result['corporateState'] . " , " . $result['corporateCountry']; ?></td></tr>
+				<tr><td>Website : </td><td><a href = "http://<?php echo $result['plantWebsite']; ?>"><?php echo $result['plantWebsite'];?></a></td></tr>
+				<tr><td>GT Model : </td><td><?php echo $result['GTBaseModel']; ?></td></tr>
+				</tbody>
+				</table>
+				<?php if($usercount != 0) : ?>
+				<b>Users : </b> <?php echo $usercount; ?>  <span class='hide_view result-show' id = "userdropdown<?php echo $result['plantId'];?>" onClick = "loadusers(<?php echo $result['plantId']?>)">View &gt;&gt;</span> <div style = "display:none" id = "plantuserlist<?php echo $result['plantId'];?>"><?php echo $userdet; ?></div>
+				<?php endif; ?>
+			</div>
+	</div>
+<?php endforeach; ?>
+<?php
+	if($this->term != ""){
+		$this->resultcount = count($this->results);
+	}
+	$i = 1;
+	$max = $this->resultcount;
+	$n = (int)($max/10);
+	if($max % 10 != 0){
+		$n++;
+	}
+	if($n != 1){
+		for($i=1;$i<=$n;$i++){
+			echo "<a id = 'clistpaginate' onclick = 'clistpaginate($i)'>" . $i . "</a>&nbsp;&nbsp;";
+		}	
+	}
+?>

@@ -1,0 +1,12 @@
+<?php
+
+if(isset($this->lastlogin)){
+	$this->lastlogin = "Your last visit was on ".$this->lastlogin;
+} else{
+	$this->lastlogin = "This is your First Time logging in";
+}
+
+echo "<div style='margin-left: 25px;'><div style='font-size: 16px; color: #2e4e68; padding-bottom: 3px;'><img src='/images/welcome.png' style='margin-right:5px;'/><b>Welcome to the Portal of v93.4a User Group</b></div><i>$this->lastlogin</i></div>";
+?>
+<!--	<img src="<?php //echo $this->baseUrl(); ?>/images/search_img.png" alt="Gas Turbine"/>-->
+<!--<div align = 'right'><a href="https://www.sitelock.com/verify.php?site=www.hiveusers.com" target="_blank"><img alt="website security" title="SiteLock" border="0" src="//shield.sitelock.com/shield/www.hiveusers.com"/></a></div>-->

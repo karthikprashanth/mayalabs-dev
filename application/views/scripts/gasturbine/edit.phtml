@@ -1,0 +1,18 @@
+<?php
+$this->jQuery()->enable();
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+$this->tabPane("GTEdit", $this->adminId.$this->form, array('title' => 'Edit Gasturbine'));
+echo $this->tabContainer("GTEdit", array());
+?>
+<script type="text/javascript">
+    $(document).ready(function(){
+    $("input").blur(function(){
+    	if(this.value == "" || this.value == null)
+    	{
+    		return;
+    	}
+        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+        doValidationPlant(formElementId,'../validation/validate?form=gasturbine');
+   });
+});
+</script>

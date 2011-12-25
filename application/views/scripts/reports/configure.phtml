@@ -1,0 +1,108 @@
+<div style="margin-left: 15px;"><h1 style="color: #83ac52;">Configre Report</h1>
+
+<div style="float: left; margin-right: 50px;" class="rep-form">
+<?php
+	echo $this->form;
+?>
+</div>
+<div style="float:left;">
+<div id = "findingcheck" onclick = 'findings()' class="rep-toggle">Uncheck All Findings</div>
+<div id = "upgradecheck" onclick = 'upgrades()' class="rep-toggle">Uncheck All Upgrades</div>
+<div id = "ltecheck" onclick = 'ltes()' class="rep-toggle">Uncheck All LTEs</div>
+</div>
+</div>
+
+
+
+<script type = 'text/javascript'>
+	var f = document.getElementsByName("findings[]");
+	var u = document.getElementsByName("upgrades[]");
+	var l = document.getElementsByName("ltes[]");
+	if(f.length == 0)
+	{
+		document.getElementById("findingcheck").style.display = "none";
+	}
+	if(u.length == 0)
+	{
+		document.getElementById("upgradecheck").style.display = "none";
+	}
+	if(l.length == 0)
+	{
+		document.getElementById("ltecheck").style.display = "none";
+	}
+	function findings()
+	{
+		var f = document.getElementsByName("findings[]");
+		var i = 0;
+		if(document.getElementById('findingcheck').innerHTML == "Uncheck All Findings") {
+			
+			document.getElementById('findingcheck').style.color = "#83ac52";
+                        document.getElementById('findingcheck').innerHTML = "Check All Findings";
+			
+
+			for(i=0;i<f.length;i++)
+			{
+				f[i].checked = false;
+			}
+		}
+		else {
+			document.getElementById('findingcheck').style.color = "#ec2d19";
+                        document.getElementById('findingcheck').innerHTML = "Uncheck All Findings";
+			for(i=0;i<f.length;i++)
+			{
+				f[i].checked = true;
+			}
+			
+		}
+			
+	}
+	
+	function upgrades()
+	{
+		var u = document.getElementsByName("upgrades[]");
+		var i = 0;
+		if(document.getElementById('upgradecheck').innerHTML == "Uncheck All Upgrades") {
+			
+			document.getElementById('upgradecheck').style.color = "#83ac52";
+                        document.getElementById('upgradecheck').innerHTML = "Check All Upgrades";
+			for(i=0;i<u.length;i++)
+			{
+				u[i].checked = false;
+			}
+		}
+		else {
+			document.getElementById('upgradecheck').style.color = "#ec2d19";
+                        document.getElementById('upgradecheck').innerHTML = "Uncheck All Upgrades";
+			for(i=0;i<u.length;i++)
+			{
+				u[i].checked = true;
+			}
+			
+		}
+	}
+	
+	function ltes()
+	{
+		var l = document.getElementsByName("ltes[]");
+		var i = 0;
+		if(document.getElementById('ltecheck').innerHTML == "Uncheck All LTEs") {
+			
+			document.getElementById('ltecheck').style.color = "#83ac52";
+                        document.getElementById('ltecheck').innerHTML = "Check All LTEs";
+			for(i=0;i<l.length;i++)
+			{
+				l[i].checked = false;
+			}
+		}
+		else {
+			document.getElementById('ltecheck').style.color = "#ec2d19";
+                        document.getElementById('ltecheck').innerHTML = "Uncheck All LTEs";
+			for(i=0;i<l.length;i++)
+			{
+				l[i].checked = true;
+			}
+			
+		}
+	}
+	
+</script>

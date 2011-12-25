@@ -1,0 +1,20 @@
+<?php
+$this->jQuery()->enable();
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxbookmark.js');
+?>
+<h3>Bookmarks - Long List</h3>
+<br/>
+<br/>
+
+<?php foreach($this->longList as $ll){ ?>
+
+    <a href ="/<?php echo $this->escape($ll['category'])."/view?id=".$this->escape($ll['catId']);?>"><?php echo $ll['bmName']; ?></a>
+    <button id="remove-bookmark" onclick="removeBookmark('<?php echo $this->escape($ll['bmId']);?>','longlist')">Remove Bookmark</button>
+    <br/>
+
+<?php   }
+if(!count($this->longList))
+{
+	echo "No bookmarks added";
+}
+?>

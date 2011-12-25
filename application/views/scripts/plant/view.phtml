@@ -1,0 +1,209 @@
+<link href="/js/tablecloth/tablecloth.css" rel="stylesheet" type="text/css"/>
+<script type='text/javascript' src='/js/tablecloth/tablecloth.js'></script>
+<?php 
+	$corporateData = 
+	"<table cellspacing='0' cellpadding='0' onmouseover='tablecloth();'>
+
+        <tr>
+            <th>Name:</th>
+            <th><b>" . $this->plantData['corporateName'] . "</b></th>
+        </tr>
+
+        <tr>
+            <td>Location:</td>
+            <td>" . $this->plantData['corporateLocation'] . "</td>
+        </tr>
+
+        <tr>
+            <td>Province:</td>
+            <td>" . $this->plantData['corporateProvince'] . "</td>
+        </tr>
+
+        <tr>
+            <td>State:</td>
+            <td>" . $this->plantData['corporateState'] . "</td>
+        </tr>
+
+        <tr>
+            <td>Country:</td>
+            <td>" . $this->plantData['corporateCountry'] . "</td>
+        </tr>
+
+        <tr>
+            <td>Zip:</td>
+            <td>" . $this->plantData['corporateZip'] . "</td>
+        </tr>
+
+        <tr>
+            <td>Telephone:</td>
+            <td>" . $this->plantData['corporateTelephone'] . "</td>
+        </tr>
+        
+        <tr>
+            <td>Fax:</td>
+            <td>" . $this->plantData['corporateFax'] . "</td>
+        </tr>
+
+        <tr>
+            <td>Website:</td>
+            <td>" . $this->plantData['corporateWebsite'] . "</td>
+            </tr>
+	</table>";
+
+	if($this->editValid)
+		$corporateData = $corporateData .  "<div class = 'gt-edit'><a href='/plant/edit"  . "?id=" . $this->id . "#tabContainer-frag-1' style='color: #719b3e;'>Edit</a></div>";
+
+	$plantData = "<table cellspacing='0' cellpadding='0' onmouseover='tablecloth();'>
+
+        <tr>
+            <th>Name:</th>
+            <th>" . $this->plantData['plantName'] . "</th>
+        </tr>
+
+        <tr>
+            <td>Location:</td>
+            <td>" . $this->plantData['plantLocation'] . "</td>
+        </tr>
+
+        <tr>
+            <td>State:</td>
+            <td>" . $this->plantData['plantState'] . "</td>
+        </tr>
+
+        <tr>
+            <td>Country:</td>
+            <td>" . $this->plantData['plantCountry'] . "</td>
+        </tr>
+
+        <tr>
+            <td>Zip:</td>
+            <td>" . $this->plantData['plantZip'] . "</td>
+        </tr>
+
+        <tr>
+            <td>Telephone:</td>
+            <td>" . $this->plantData['plantTelephone'] . "</td>
+        </tr>
+        
+		<tr>
+            <td>Fax:</td>
+            <td>" . $this->plantData['plantFax'] . "</td>
+        </tr>
+
+        <tr>
+            <td>Website:</td>
+            <td>" . $this->plantData['plantWebsite'] . "</td>
+        </tr>
+   </table>";
+       
+	if($this->plantData['numOfGT'])
+		$numOfGT = "<th style='min-width:50%;'>" . $this->plantData['numOfGT'] . " <a href = '/gasturbine/plantlist?id=".$this->plantData['plantId'] . "'> (View) </a></th>";
+	else
+		$numOfGT = "<th style='min-width:50%;'>" . $this->plantData['numOfGT'];
+     
+	if($this->editValid)
+		$plantTab = $plantTab .  "<div class = 'gt-edit'><a href='/plant/edit"  . "?id=" . $this->id . "#tabContainer-frag-2' style='color: #719b3e;'>Edit</a></div>";
+
+	
+	$gtContent = "<table cellspacing='0' cellpadding='0' onmouseover='tablecloth();'>
+	
+	    <tr>
+	        <th>Number of Gasturbines:</th>
+	        
+	        $numOfGT
+	    </tr>
+	
+	    <tr>
+	        <td>Make:</td>
+	        <td>" . $this->plantData['GTMake'] . "</td>
+	    </tr>
+	
+	    <tr>
+	        <td>Maximum Ambient Temperature:</td>
+	        <td>" . $this->plantData['plantAmbientTempMax'] . "</td>
+	    </tr>
+	
+	    <tr>
+	        <td>Minimum Ambient Temperature:</td>
+	        <td>" . $this->plantData['plantAmbientTempMin'] . "</td>
+	    </tr>
+	
+	    <tr>
+	        <td>Average Ambient Temperature:</td>
+	        <td>" . $this->plantData['plantAmbientTempAvg'] . "</td>
+	    </tr>
+	
+	    <tr>
+	        <td>PLF Maximum:</td>
+	        <td>" . $this->plantData['PLFMax'] . "</td>
+	    </tr>
+	
+	    <tr>
+	        <td>PLF Minimum:</td>
+	        <td>" . $this->plantData['PLFMin'] . "</td>
+	    </tr>
+	
+	
+	    <tr>
+	        <td>PLF Average:</td>
+	        <td>" . $this->plantData['PLFAvg'] . "</td>
+	    </tr>
+	
+	
+	    <tr>
+	        <td>Start Maximum:</td>
+	        <td>" . $this->plantData['GTStartMax'] . "</td>
+	    </tr>
+	
+	
+	    <tr>
+	        <td>Start Minimum:</td>
+	        <td>" . $this->plantData['GTStartMin'] . "</td>
+	    </tr>
+	
+	
+	    <tr>
+	        <td>Start Average:</td>
+	        <td>" . $this->plantData['GTStartAvg'] . "</td>
+	    </tr>
+	
+	
+	    <tr>
+	        <td>Trip Maximum:</td>
+	        <td>" . $this->plantData['GTTripMax'] . "</td>
+	    </tr>
+	
+	
+	    <tr>
+	        <td>Trip Minimum:</td>
+	        <td>" . $this->plantData['GTTripMin'] . "</td>
+	    </tr>
+	
+	
+	    <tr>
+	        <td>Trip Average:</td>
+	        <td>" . $this->plantData['GTTripAvg'] . "</td>
+	        </tr>
+	   </table>";
+	if($this->editValid){
+		$gtContent = $gtContent .  "<div class = 'gt-edit'><a href='/plant/edit"  . "?id=". 
+		$this->plantData['plantId'] . "#tabContainer-frag-3' style='color: #719b3e;'>Edit</a></div>";
+	}
+
+
+	if($this->lastlogin == NULL)
+	{
+		$firstTime .= "<center><a href = '/plant/edit?id=" . $this->plantData['plantId'] . "'>
+					  &lt;&lt; Back</a>&nbsp;&nbsp;";
+		$firstTime .= "<a href = '/gasturbine/plantlist?id=" . $this->plantData['plantId'] . "'>
+					  Continue &gt;&gt;</a></center>";
+		$corporateTab .= $firstTime;
+		$plantTab .= $$firstTime;
+		$gtTab .= $$firstTime;
+	}
+	$this->tabPane("plantdata", $corporateTab, array('title' => 'Corporate Info'));
+	$this->tabPane("plantdata", $plantTab, array('title' => 'Plant Info'));
+	$this->tabPane("plantdata", $gtTab, array('title' => 'GT Statistics'));
+
+	echo $this->tabContainer("plantdata", array());
+?>

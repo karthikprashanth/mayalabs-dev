@@ -1,0 +1,120 @@
+<link href="/js/tablecloth/tablecloth.css" rel="stylesheet" type="text/css"/>
+<script type='text/javascript' src='/js/tablecloth/tablecloth.js'></script> 
+<?php
+echo $this->headScript()->prependFile($this->baseUrl() . '/js/frontend.js');
+
+$conf = $this->confDet;
+echo "<center><h3>Conference " . $conf['year'] . " held in " . $conf['place'] . " hosted by " . $this->plantDet->getPlantName($conf['host']) . "</h3></center>";
+$synopsis = "<center>" . $conf['abstract'] . "</center>";
+
+
+
+$i = 0;
+$role = Zend_Registry::get("role");
+if($role == "sa" || $this->iscc)
+	$gallery = $gallery . "<a href = '/conference/gallery?id=".$conf['cId']."'>Add a new photo</a><br><br>";
+$tag[] = array();
+
+foreach ($this->confGallery as $photos) {
+    $img = 'random/confgal' . $i;
+    file_put_contents($img, $photos['data']);
+    $tag[$i] = $photos['tag'];
+    $gallery = $gallery . "<a href = '#' onClick = 'javascript:showPhoto($i)'><img src = '/$img' width = 160 height = 120 style = border:none; text-decoration=none;alt = " . $photos['tag'] . "></a>&nbsp;&nbsp;&nbsp;";
+    if ($i % 3 == 0 && $i != 0) {
+        $gallery = $gallery . "<br><br>";
+    }
+	if($role == "sa" || $this->iscc)
+	{
+		$gallery .= "<a href = '/conference/delphoto?id=".$photos['photoId'] ."' class = 'gt-delete' method = 'post'>   &nbsp;&nbsp;&nbsp;</a>";
+		 
+	}
+    $i++;
+}
+$max = $i;
+if ($i == 0) {
+    $gallery = $gallery . "<center>No photos available</center>";
+}
+$i = 0;
+$prestype['pdf'] = "PDF File";
+$prestype['jpeg'] = "Image File";
+$prestype['jpg'] = "Image File";
+$prestype['png'] = "Image File";
+$prestype['gif'] = "Image File";
+$prestype['doc'] = "Word Document File";
+$prestype['docx'] = "Word Document File";
+$prestype['xls'] = "Excel Sheet";
+$prestype['xlsx'] = "Excel Sheet";
+$prestype['ppt'] = "Powerpoint Presentation";
+$prestype['pptx'] = "Powerpoint Presentation";
+
+$pres = "<table id='tables1' onmouseover='tablecloth();'><thead><tr><th>Title</th><th>File Type</th><th>Plant Name</th><th>Upload Date and Time</th><th></th></tr></thead><tbody>";
+$role = Zend_Registry::get('role');
+foreach ($this->presList as $presentation) {
+    $pres = $pres . "<tr><td>";
+    $pres = $pres . "<a href='/conference/view?id=" . $presentation['presentationId'] . "'>" . $presentation['title'] . "</a>";
+    $pres = $pres . "</td><td>";
+	$pres = $pres . $prestype[$presentation['filetype']];
+    $pres = $pres . "</td><td>";
+    $pres = $pres . $this->plantDet->getPlantName($presentation['plantId']);
+    $pres = $pres . "</td><td>";
+    $pres = $pres . $this->escape($presentation['uploadTime']);
+    $pres = $pres . "</td>";
+    if($role == 'sa' || $this->iscc)
+    {
+    	$pres = $pres . "<td><form action = '/conference/delpres' method = 'post'><input type = 'hidden' name = 'presid' value = '" . $presentation['presentationId'] . "'><input type = 'submit' value = '' class = 'gt-delete'></form></td>";
+    }
+    $pres = $pres . "</tr>";
+    $i++;
+}
+$pres = $pres . "</tbody></table>";
+if($role == 'sa' || $this->iscc)
+	$pres = $pres . "<br><br><form action = '" . $this->baseUrl . "/conference/addpresentation?id=".$this->id."' method = 'post'><input type = 'submit' class = 'gt-add' name = 'add' value = 'Add New Attachment'></form></center>";
+if ($i == 0) {
+    $pres = NULL;
+    $pres = $pres . "<center>No attachments available";
+	if($role == 'sa' || $this->iscc)
+    	$pres = $pres . "<br><br><form action = '" . $this->baseUrl . "/conference/addpresentation?id=".$this->id."' method = 'post'><input class='gt-add' type = 'submit' name = 'add' value = 'Add New Attachment'></form></center>";
+}
+$this->tabPane("confdata", $synopsis, array('title' => 'Synopsis'));
+$this->tabPane("confdata", $empty, array('title' => 'Schedule', 'contentUrl' => "/schedule/view?id=$this->id"));
+$this->tabPane("confdata", $pres, array('title' => 'Attachments'));
+$this->tabPane("confdata", $gallery, array('title' => 'Gallery'));
+
+echo $this->tabContainer("confdata", array());
+?>
+
+
+        <script>
+            function showPhoto($i){
+                var tag  = document.getElementById("tag"+$i).value;
+                var max = document.getElementById("max"+$i).value;
+                if(max != $i){
+                    closePhoto($i-1);
+                    closePhoto($i+1);
+                    $("#image_view"+$i).dialog({width:900,
+                        height:700,
+                        title:tag});
+                }
+											
+            }
+		    
+            function closePhoto($i){
+                $("#image_view"+$i).dialog('close');
+            }
+		    
+			
+        </script>
+
+    <body>
+<?php
+for ($j = 0; $j < $max; $j++) {
+    echo "<div style = 'display:none' id = 'image_view" . $j . "'>";
+    echo "<img src = '/random/confgal" . $j . "' height=600 width=800>";
+    echo "<form><input type = 'hidden' value = '" . $tag[$j] . "' id = 'tag" . $j . "'>";
+    echo "<form><input type = 'hidden' value = '" . $max . "' id = 'max" . $j . "'></form>";
+    echo "<center><a href='#' style='text-decoration:none' onClick='javascript:showPhoto($j-1)'> &#60;&#60;Previous</a>";
+    echo "&nbsp;&nbsp;&nbsp;<a href='#' style='text-decoration:none' onClick='javascript:showPhoto($j+1)'> &#62;&#62;Next</a></center>";
+    echo "</div>";
+}
+?>
+    </body>

@@ -1,0 +1,59 @@
+<?php
+$this->jQuery()->enable();
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+echo $this->adminId;
+echo $this->form;
+$content = array_merge($this->form->partPlant1->getValues(), $this->form->partPlant2->getValues(), $this->form->partPlant3->getValues());
+$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+$lastlogin = Zend_Auth::getInstance()->getStorage()->read()->lastlogin;
+if($lastlogin == NULL)
+	echo "<a href = '/userprofile/view?id=$uid'>&lt;&lt; Back</a>";
+?>
+
+	<div style = 'display:none' id = 'plantId'><?php echo $this->plantId; ?></div>
+
+
+<div id = 'sample-div'></div>
+<script type="text/javascript">
+	$("#savec1").click(function()
+	{
+		document.getElementById("modeselect").value = "redirect";
+	});
+	
+	$("#savec2").click(function()
+	{
+		document.getElementById("modeselect").value = "redirect";
+	});
+	
+	$("#savec3").click(function()
+	{
+		document.getElementById("modeselect").value = "redirect";
+	});
+	
+	$("#save1").click(function()
+	{
+		document.getElementById("modeselect").value = "stay1";
+	});
+	
+	$("#save2").click(function()
+	{
+		document.getElementById("modeselect").value = "stay2";
+	});
+	
+	$("#save3").click(function()
+	{
+		document.getElementById("modeselect").value = "stay3";
+	});
+	
+    $(document).ready(function(){
+    	
+	    $("input").blur(function(){
+	    	if(this.value == "" || this.value == null)
+	    	{
+	    		return;
+	    	}
+	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+	        doValidationPlant($(this).attr('id'),'../validation/validate?form=plant');
+	   });
+	});
+</script>

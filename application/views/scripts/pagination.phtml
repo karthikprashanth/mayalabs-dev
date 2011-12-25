@@ -1,0 +1,39 @@
+<?php
+/* 
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+$params = ($_SERVER['REQUEST_URI']!=$this->baseUrl()) ? str_replace($this->baseUrl()."/","",$_SERVER['REQUEST_URI']) : $_SERVER['REQUEST_URI'] ; 
+  $params = explode("?",$params);
+  if (empty($params[1])) $get = ""; 
+    else $get = "?".$params[1];	 
+
+if(count($this->pagesInRange) <= 1)
+{
+	return;
+}
+	
+if(isset ($this->previous)){
+    echo '<a href="'.$this->url(array('page'=>$this->first)).$get.'">Beginning</a> | ';
+}
+else{
+    echo "Beginning | ";
+}
+foreach ($this->pagesInRange as $page){
+    if($this->current!=$page){
+        echo '<a href="'.$this->url(array('page'=>$page)).$get.'">'.$page.'</a> | ';
+    }
+    else{
+        echo $page.' | ';
+    }
+
+}
+
+if(isset ($this->next)){
+    echo '<a href="'.$this->url(array('page'=>$this->last)).$get.'">End</a>';
+}
+else{
+    echo "End";
+}
+?>

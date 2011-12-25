@@ -1,0 +1,43 @@
+<?php
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+$data .= $this->form;
+if ($this->message == "")
+    $data .= $this->message;
+else
+    $data .= "<div class = 'errors'>" . $this->message . "</div>";
+$this->tabPane("PresAdd", $data, array('title' => 'Add Presentation'));
+echo $this->tabContainer("PresAdd", array());
+?>
+<div id = "spinnerimage" style = "display:none">Uploading ... <img src = "/images/spinner.gif"></div>
+<script type = "text/javascript" src = "/js/file_ext_check.js"></script>
+<script type = "text/javascript">
+	
+    $("#submitbutton").click(function() {
+    	var file = document.getElementById("content").value;
+		var title = document.getElementById("title").value;
+    	if(file != "" && title != "")
+        	document.getElementById("spinnerimage").style.display = "block";
+    });
+	
+	$("#attachments").submit(function(){
+		var file = document.getElementById("content").value;
+		var title = document.getElementById("title").value;
+		if(file == "" || title == "")
+		{
+			alert("One or more fields empty");
+			return false;
+		}
+	});
+</script>
+<script type="text/javascript">
+    $(document).ready(function(){
+	    $("input").blur(function(){
+	    	if(this.value == "" || this.value == null)
+	    	{
+	    		return;
+	    	}
+	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+	        doValidationPlant($(this).attr('id'),'../validation/validate?form=presentation');
+	   });
+	});
+</script>

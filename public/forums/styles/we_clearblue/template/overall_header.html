@@ -1,0 +1,531 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="{S_CONTENT_DIRECTION}" lang="{S_USER_LANG}" xml:lang="{S_USER_LANG}">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset={S_CONTENT_ENCODING}" />
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9" />
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	<meta name="copyright" content="2000, 2002, 2005, 2007 phpBB Group" />
+	{META}
+	<style>
+		#breadcrumbs a{
+		    margin-left: 10px;
+		    padding: 2px;
+		    font-style: italic;
+		    font-size: 11px;
+		    color: #0e4b78;
+		    font-family: Avantgarde, sans-serif;
+		    text-decoration: none;
+		    font-weight: normal;
+		}
+
+	</style>
+	<title>{SITENAME} - Forums</title>
+	<link rel="shortcut icon" href="favicon.ico" />
+	<link href="{T_THEME_PATH}/print.css" rel="stylesheet" type="text/css" media="print" title="printonly" />
+	<link href="{T_STYLESHEET_LINK}" rel="stylesheet" type="text/css" media="screen, projection" />
+	<!-- IF S_CONTENT_DIRECTION eq 'rtl' --><link href="{T_THEME_PATH}/bidi.css" rel="stylesheet" type="text/css" media="screen, projection" /><!-- ENDIF -->
+	
+	<!-- IF S_ENABLE_FEEDS -->
+		<!-- IF S_ENABLE_FEEDS_OVERALL --><link rel="alternate" type="application/atom+xml" title="{L_FEED} - {SITENAME}" href="{U_FEED}" /><!-- ENDIF -->
+		<!-- IF S_ENABLE_FEEDS_NEWS --><link rel="alternate" type="application/atom+xml" title="{L_FEED} - {L_FEED_NEWS}" href="{U_FEED}?mode=news" /><!-- ENDIF -->
+		<!-- IF S_ENABLE_FEEDS_FORUMS --><link rel="alternate" type="application/atom+xml" title="{L_FEED} - {L_ALL_FORUMS}" href="{U_FEED}?mode=forums" /><!-- ENDIF -->
+		<!-- IF S_ENABLE_FEEDS_TOPICS --><link rel="alternate" type="application/atom+xml" title="{L_FEED} - {L_FEED_TOPICS_NEW}" href="{U_FEED}?mode=topics" /><!-- ENDIF -->
+		<!-- IF S_ENABLE_FEEDS_TOPICS_ACTIVE --><link rel="alternate" type="application/atom+xml" title="{L_FEED} - {L_FEED_TOPICS_ACTIVE}" href="{U_FEED}?mode=topics_active" /><!-- ENDIF -->
+		<!-- IF S_ENABLE_FEEDS_FORUM and S_FORUM_ID --><link rel="alternate" type="application/atom+xml" title="{L_FEED} - {L_FORUM} - {FORUM_NAME}" href="{U_FEED}?f={S_FORUM_ID}" /><!-- ENDIF -->
+		<!-- IF S_ENABLE_FEEDS_TOPIC and S_TOPIC_ID --><link rel="alternate" type="application/atom+xml" title="{L_FEED} - {L_TOPIC} - {TOPIC_TITLE}" href="{U_FEED}?f={S_FORUM_ID}&amp;t={S_TOPIC_ID}" /><!-- ENDIF -->
+	<!-- ENDIF -->
+
+	<link href="../css/ddsmoothmenu.css" media="screen" rel="stylesheet" type="text/css" >
+	<script type = "text/javascript" src = "../js/jquery/js/jquery-1.5.1.min.js"></script>
+	<script type = "text/javascript" src = "../js/ddsmoothmenu.js"></script>
+	<script type="text/javascript">
+	// <![CDATA[
+		var jump_page = '{LA_JUMP_PAGE}:';
+		var on_page = '{ON_PAGE}';
+		var per_page = '{PER_PAGE}';
+		var base_url = '{A_BASE_URL}';
+		var style_cookie = 'phpBBstyle';
+		var style_cookie_settings = '{A_COOKIE_SETTINGS}';
+		var onload_functions = new Array();
+		var onunload_functions = new Array();
+
+		<!-- IF S_USER_PM_POPUP -->
+			if ({S_NEW_PM})
+			{
+				var url = '{UA_POPUP_PM}';
+				window.open(url.replace(/&amp;/g, '&'), '_phpbbprivmsg', 'height=225,resizable=yes,scrollbars=yes, width=400');
+			}
+		<!-- ENDIF -->
+
+		/**
+		* Find a member
+		*/
+		function find_username(url)
+		{
+			popup(url, 960, 570, '_usersearch');
+			return false;
+		}
+
+		/**
+		* New function for handling multiple calls to window.onload and window.unload by pentapenguin
+		*/
+		window.onload = function()
+		{
+			for (var i = 0; i < onload_functions.length; i++)
+			{
+				eval(onload_functions[i]);
+			}
+		}
+
+		window.onunload = function()
+		{
+			for (var i = 0; i < onunload_functions.length; i++)
+			{
+				eval(onunload_functions[i]);
+			}
+		}
+
+		ddsmoothmenu.init({
+                mainmenuid: "smoothmenu1", //menu DIV id
+                orientation: 'h', //Horizontal or vertical menu: Set to "h" or "v"
+                classname: 'ddsmoothmenu', //class added to menu's outer DIV
+                customtheme: ["#2e4e68", "#00192c"],
+                contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
+        })
+
+	// ]]>
+	</script>
+	
+	<script type="text/javascript" src="{T_TEMPLATE_PATH}/forum_fn.js"></script>
+</head>
+<body id="phpbb" class="section-{SCRIPT_NAME} {S_CONTENT_DIRECTION}">
+
+	<div id="header-bg">
+	<div id="header">
+			<div id="header-logo">
+                    <a href="/dashboard/index"><img src="/images/logo_small_new.png"/></a>
+			</div>
+		<div id = "header-menu">
+			<!-- IF HIVE_USER_ROLE == 'sa' -->
+			<div id="smoothmenu1" class="ddsmoothmenu" >
+				<ul class="navigation">
+				    <li>
+				        <a href="/dashboard">Home</a>
+				    </li>
+				    <li>
+				        <a href="#">Users</a>
+				
+				        <ul>
+				            <li>
+				                <a href="/administration/createacc">Add</a>
+				            </li>
+				            <li>
+				                <a href="/administration/list">List</a>
+				            </li>
+				        </ul>
+				
+				    </li>
+				    <li>
+				        <a href="#">Plant</a>
+				        <ul>
+				            <li>
+				                <a href="/plant/add">Add</a>
+				            </li>
+				            <li>
+				
+				                <a href="/plant/list">List</a>
+				            </li>
+				            <li>
+				                <a href="/plant/admin">Admin</a>
+				            </li>
+				            <li>
+				                <a href="/plant/clist">Company Listing</a>
+				
+				            </li>
+				        </ul>
+				    </li>
+				    <li>
+				        <a href="#">Gasturbine</a>
+				        <ul>
+				            <li>
+				                <a href="/gasturbine/add">Add</a>
+				
+				            </li>
+				            <li>
+				                <a href="/gasturbine/list">List</a>
+				            </li>
+				        </ul>
+				    </li>
+				    <li>
+				        <a href="/conference">Conference</a>
+				
+				        <ul>
+				            <li>
+				                <a href="/conference/list/id/{CONF_ID_ONE}">{CONF_STR_ONE}</a>
+				            </li>
+				            <li>
+				                <a href="/conference/list/id/{CONF_ID_TWO}">{CONF_STR_TWO}</a>
+				            </li>
+				            <li>
+				
+				                <a href="/conference">Others</a>
+				            </li>
+				            <li><a href = "/conference/add">Add Conference</a></li>
+				        </ul>
+				    </li>
+				    <li class = "active">
+				        <a class = "active" href="/forums">Forums</a>
+				    </li>
+				    <li>
+				        <a href="/authentication/logout">Logout</a>
+				    </li>
+				</ul></div> <!-- ENDIF -->
+				<!-- IF HIVE_USER_ROLE == 'ca' -->
+					<div id="smoothmenu1" class="ddsmoothmenu" >
+<ul class="navigation">
+    <li>
+        <a href="/dashboard">Home</a>
+    </li>
+    <li>
+        <a href="#">Profile</a>
+        <ul>
+            <li>
+
+                <a href="/userprofile/view">Personal Details</a>
+            </li>
+            <li>
+                <a href="#">Plant Details</a>
+                <ul>
+                    <li>
+                        <a href="/plant/view">View</a>
+
+                    </li>
+                    <li>
+                        <a href="/plant/edit">Edit</a>
+                    </li>
+                    <li>
+                        <a href="/plant/clist">Company Listing</a>
+                    </li>
+                </ul>
+
+            </li>
+            <li>
+                <a href="/administration/list">Manage Users</a>
+            </li>
+        </ul>
+    </li>
+    <li>
+        <a href="#">Gasturbines</a>
+
+        <ul>
+            <li>
+                <a href="/gasturbine/plantlist">View</a>
+            </li>
+            <li>
+                <a href="/gasturbine/add">Add</a>
+            </li>
+        </ul>
+
+    </li>
+    <li>
+				        <a href="/conference">Conference</a>
+				
+				        <ul>
+				            <li>
+				                <a href="/conference/list/id/{CONF_ID_ONE}">{CONF_STR_ONE}</a>
+				            </li>
+				            <li>
+				                <a href="/conference/list/id/{CONF_ID_TWO}">{CONF_STR_TWO}</a>
+				            </li>
+				            <li>
+				
+				                <a href="/conference">Others</a>
+				            </li>
+				        </ul>
+				    </li>
+    <li class = "active">
+        <a href="/forums">Forums</a>
+    </li>
+    <li>
+
+        <a href="/authentication/logout">Logout</a>
+    </li>
+</ul></div>
+				
+				<!-- ENDIF -->
+				<!-- IF HIVE_USER_ROLE == 'us' or HIVE_USER_ROLE == 'ed' -->
+				<div id="smoothmenu1" class="ddsmoothmenu" >
+<ul class="navigation">
+    <li>
+        <a href="/dashboard">Home</a>
+    </li>
+    <li>
+        <a href="#">Profile</a>
+        <ul>
+            <li>
+
+                <a href="/userprofile/view">Personal Details</a>
+            </li>
+            <li>
+                <a href="#">Plant Details</a>
+                <ul>
+                    <li>
+                        <a href="/plant/view">View</a>
+
+                    </li>
+                    <li>
+                        <a href="/plant/edit">Edit</a>
+                    </li>
+                    <li>
+                        <a href="/plant/clist">Company Listing</a>
+                    </li>
+                </ul>
+
+            </li>
+        </ul>
+    </li>
+    <li>
+        <a href="/gasturbine/plantlist">Gasturbines</a>
+    </li>
+    <li>
+				        <a href="/conference">Conference</a>
+				
+				        <ul>
+				            <li>
+				                <a href="/conference/list/id/{CONF_ID_ONE}">{CONF_STR_ONE}</a>
+				            </li>
+				            <li>
+				                <a href="/conference/list/id/{CONF_ID_TWO}">{CONF_STR_TWO}</a>
+				            </li>
+				            <li>
+				
+				                <a href="/conference">Others</a>
+				            </li>
+				        </ul>
+				    </li>
+    <li class = "active">
+        <a href="/forums">Forums</a>
+    </li>
+    <li>
+        <a href="/authentication/logout">Logout</a>
+    </li>
+</ul></div><!-- ENDIF -->
+		</div>
+	</div>
+	</div>
+	
+	<div id="wrapper">
+	<div id="container">
+		<div id = "breadcrumbs">
+	<!-- PHP -->
+		global $phpbb_root_path;
+		require($phpbb_root_path . 'config.php');
+		
+		mysql_connect($dbhost,$dbuser,$dbpasswd);
+		
+		mysql_select_db($dbname);
+		
+		$host = $_SERVER['HTTP_HOST'];
+		$uri = $_SERVER['PHP_SELF'];
+		$uri = substr($uri,8);
+		$separator = " &gt; ";
+		$breadcrumb = "<a href = 'http://" . $host . "'>Home</a>" . $separator;
+		switch($uri)
+		{
+			case "index.php":
+				$breadcrumb .= "<a href = 'http://" . $host . "/forums'>Forums</a>";
+				break;
+			case "viewforum.php":
+				$params = $_SERVER['QUERY_STRING'];
+				$f = (int)substr($params,2);
+				$sql = "SELECT * FROM forum_forums WHERE forum_id = " . $f;
+				$result = mysql_query($sql);
+				if(!$result)
+				{
+					break;
+				}
+				$row = mysql_fetch_row($result);
+				$fname = $row[5];
+				$breadcrumb .= "<a href = 'http://" . $host . "/forums'>Forums</a>" . $separator . "<a href = 'http://" .$host . "/forums/viewforum.php?f=" . $f . "'>" . $fname . "</a>";
+				break;
+			case "viewtopic.php":
+				$params = $_SERVER['QUERY_STRING'];
+				$params = explode("&",$params);
+				$f = substr($params[0],2);
+				$t = substr($params[1],2);
+				$sql = "SELECT * FROM forum_forums WHERE forum_id = " . $f;
+				$result = mysql_query($sql);
+				if(!$result)
+				{
+					break;
+				}
+				$row = mysql_fetch_row($result);
+				$fname = $row[5];
+				$sql = "SELECT * FROM forum_topics WHERE topic_id = " . $t;
+				$result = mysql_query($sql);
+				if(!$result)
+				{
+					break;
+				}
+				$row = mysql_fetch_row($result);
+				$tname = $row[6];
+				$breadcrumb .= "<a href = 'http://" . $host . "/forums'>Forums</a>" . $separator . "<a href = 'http://" .$host . "/forums/viewforum.php?f=" . $f . "'>" . $fname . "</a>" . $separator;
+				$breadcrumb .= "<a href = 'http://" . $host . "/forums/viewtopic.php?f=" . $f . "&t=" . $t . "'>" . $tname . "</a>";
+				break;
+			case "posting.php":
+				$params = $_SERVER['QUERY_STRING'];
+				$params = explode("&",$params);
+				$mode = substr($params[0],5);
+				switch($mode)
+				{
+					case "post":
+						$f = substr($params[1],2);
+						$sql = "SELECT * FROM forum_forums WHERE forum_id = " . $f;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$fname = $row[5];
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums'>Forums</a>" . $separator . "<a href = 'http://" .$host . "/forums/viewforum.php?f=" . $f . "'>" . $fname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host. "/forums/posting.php?mode=" . $mode . "&f=" . $f . "'>New Topic</a>";
+						break;
+					case "reply":
+						$params = $_SERVER['QUERY_STRING'];
+						$params = explode("&",$params);
+						$f = substr($params[1],2);
+						$t = substr($params[2],2);
+						$sql = "SELECT * FROM forum_forums WHERE forum_id = " . $f;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$fname = $row[5];
+						$sql = "SELECT * FROM forum_topics WHERE topic_id = " . $t;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$tname = $row[6];
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums'>Forums</a>" . $separator . "<a href = 'http://" .$host . "/forums/viewforum.php?f=" . $f . "'>" . $fname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/viewtopic.php?f=" . $f . "&t=" . $t . "'>" . $tname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/posting.php?mode=reply&f=" . $f . "&t=" . $t . "'>New Reply</a>";
+						break;
+					case "quote":
+						$params = $_SERVER['QUERY_STRING'];
+						$params = explode("&",$params);
+						$f = substr($params[1],2);
+						$p = substr($params[2],2);
+						$sql = "SELECT * FROM forum_forums WHERE forum_id = " . $f;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$fname = $row[5];
+						$sql = "SELECT * FROM forum_posts WHERE post_id = " . $p;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$pname = $row[14];
+						$t = $row[1];
+						$sql = "SELECT * FROM forum_topics WHERE topic_id = " . $t;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$tname = $row[6];
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums'>Forums</a>" . $separator . "<a href = 'http://" .$host . "/forums/viewforum.php?f=" . $f . "'>" . $fname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/viewtopic.php?f=" . $f . "&t=" . $t . "'>" . $tname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/viewtopic.php?f=" . $f . "&t=" . $t . "#" . $p . "'>" . $pname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/posting.php?mode=edit&f=" . $f . "&p=" . $p . "'>Quote</a>";
+						break;
+					case "edit":
+						$params = $_SERVER['QUERY_STRING'];
+						$params = explode("&",$params);
+						$f = substr($params[1],2);
+						$p = substr($params[2],2);
+						$sql = "SELECT * FROM forum_forums WHERE forum_id = " . $f;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$fname = $row[5];
+						$sql = "SELECT * FROM forum_posts WHERE post_id = " . $p;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$pname = $row[14];
+						$t = $row[1];
+						$sql = "SELECT * FROM forum_topics WHERE topic_id = " . $t;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$tname = $row[6];
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums'>Forums</a>" . $separator . "<a href = 'http://" .$host . "/forums/viewforum.php?f=" . $f . "'>" . $fname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/viewtopic.php?f=" . $f . "&t=" . $t . "'>" . $tname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/viewtopic.php?f=" . $f . "&t=" . $t . "#" . $p . "'>" . $pname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/posting.php?mode=edit&f=" . $f . "&p=" . $p . "'>Edit</a>";
+						break;
+					case "delete":
+						$params = $_SERVER['QUERY_STRING'];
+						$params = explode("&",$params);
+						$f = substr($params[1],2);
+						$p = substr($params[2],2);
+						$sql = "SELECT * FROM forum_forums WHERE forum_id = " . $f;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$fname = $row[5];
+						$sql = "SELECT * FROM forum_posts WHERE post_id = " . $p;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$pname = $row[14];
+						$t = $row[1];
+						$sql = "SELECT * FROM forum_topics WHERE topic_id = " . $t;
+						$result = mysql_query($sql);
+						if(!$result)
+						{
+							break;
+						}
+						$row = mysql_fetch_row($result);
+						$tname = $row[6];
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums'>Forums</a>" . $separator . "<a href = 'http://" .$host . "/forums/viewforum.php?f=" . $f . "'>" . $fname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/viewtopic.php?f=" . $f . "&t=" . $t . "'>" . $tname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/viewtopic.php?f=" . $f . "&t=" . $t . "#" . $p . "'>" . $pname . "</a>" . $separator;
+						$breadcrumb .= "<a href = 'http://" . $host . "/forums/posting.php?mode=edit&f=" . $f . "&p=" . $p . "'>Delete</a>";
+						break;
+				}
+				
+		}
+		echo $breadcrumb;
+	<!-- ENDPHP -->
+	</div>
+	

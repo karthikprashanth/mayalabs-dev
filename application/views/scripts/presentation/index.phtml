@@ -1,0 +1,10 @@
+<?php 
+	echo $this->form;
+	echo $this->message;
+?>
+<div id = "spinnerimage" style = "display:none">Uploading ... <img src = "/images/spinner.gif"></div>
+<script type = "text/javascript">
+	$("#submitbutton").click(function() {
+		document.getElementById("spinnerimage").style.display = "block";
+	});
+</script>

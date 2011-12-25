@@ -1,0 +1,22 @@
+<?php
+$this->jQuery()->enable();
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+echo $this->adminId;
+echo $this->form;
+if($this->message == "")
+	echo $this->message;
+else 
+	echo "<div class = 'errors'>" . $this->message . "</div>";
+?>
+<script type="text/javascript">
+    $(document).ready(function(){
+	    $("input").blur(function(){
+	    	if(this.value == "" || this.value == null)
+	    	{
+	    		return;
+	    	}
+	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+	        doValidationPlant($(this).attr('id'),'../validation/validate?form=plant');
+	   });
+	});
+</script>

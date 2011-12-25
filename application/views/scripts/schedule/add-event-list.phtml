@@ -1,0 +1,9 @@
+<?php
+	$data = $this->form;
+	if ($this->message == "")
+	    $data.= $this->message;
+	else
+	    $data.= "<div class = 'errors'>" . $this->message . "</div>";
+	$this->tabPane("SchEventAdd", $data, array('title' => 'Add Events'));
+	echo $this->tabContainer("SchEventAdd", array());
+?>

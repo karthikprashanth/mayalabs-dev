@@ -1,0 +1,45 @@
+<?php
+$role = Zend_Registry::get('role');
+if ($this->schCount == 0) {
+    echo "<center>No schedule available</center>";
+
+    if ($this->iscc || $role == 'sa') {
+        echo "<center><form method = 'post' action = '/schedule/add?id=$this->id'><input type = 'submit' class = 'gt-add' value = 'Add Schedule'></form></center>";
+    }
+    exit;
+}
+
+echo "<h4><center>Conference held from " . $this->eventDet['first_day'] . " to " . $this->eventDet['last_day'] . "</h4></center>";
+if(count($this->eventList))
+{
+	echo "<table id='tables2' onmouseover='tablecloth();'>";
+	echo "<thead><tr>";
+	echo "<th>No.</th>";
+	echo "<th style='min-width: 90px;'>Date</th>";
+	echo "<th style='min-width: 90px;'>Timings</th>";
+	echo "<th>Description</th></tr></thead><tbody>";
+}
+else {
+	echo "<center>No events added</center>";
+}
+$c=1;
+foreach ($this->eventList as $eList) {    
+    echo "<tr>";
+    echo "<td>" . $c++ . "</td>";
+    echo "<td>" . date("M jS, Y", strtotime($eList['event_date'])) . "</td>";
+    echo "<td>" . $eList['timings'] . "</td>";
+    echo "<td>" . $eList['description'] . "</td>";
+    echo "</tr>";
+}
+echo "</tbody></table>";
+
+if($role == 'sa' || $this->iscc)
+{
+	if($c != 1)
+	{
+		echo "<a class='a-delete ui-corner-all' href = '/schedule/delete?id=" . $this->id . "'>&nbsp;Delete Schedule</a>";
+		echo "<a class='a-add ui-corner-all' href = '/schedule/add-event-list?id=" . $this->id . "&n=1&mode=nomail'>&nbsp;Add a new event</a>";
+	}
+		
+}
+?>

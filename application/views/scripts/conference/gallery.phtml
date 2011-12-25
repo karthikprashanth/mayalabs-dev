@@ -1,0 +1,36 @@
+<?php
+$data = $this->form.$this->message;
+$this->tabPane("ConfGall",$data,array('title' => 'Conference Gallery'));
+echo $this->tabContainer("ConfGall",array());
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+?>
+<script type = "text/javascript">
+	$("#data").change(function(){
+		var filename = document.getElementById("data").value;
+		var file_ext = filename.substring(filename.indexOf(".")+1);
+		file_ext = file_ext.toLowerCase();
+		if(file_ext == 'jpeg' || file_ext == 'jpg' || file_ext == 'gif' ||
+		file_ext == 'png' )
+		{
+			return;
+		}
+		else
+		{
+			alert("'" + file_ext + "' Files are not allowed");
+			document.getElementById("data").value = "";
+		}
+			
+	});
+</script>
+<script type="text/javascript">
+    $(document).ready(function(){
+	    $("input").blur(function(){
+	    	if(this.value == "" || this.value == null)
+	    	{
+	    		return;
+	    	}
+	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+	        doValidationPlant($(this).attr('id'),'../validation/validate?form=gallery');
+	   });
+	});
+</script>

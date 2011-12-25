@@ -1,0 +1,27 @@
+<?php
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+$data = $this->form;
+$data .= $this->message;
+$this->tabPane("ConfAddPres",$data,array('title' => 'Add Conference Attachment'));
+echo $this->tabContainer("ConfAddPres",array());
+?>
+<div id = "spinnerimage" style = "display:none">Uploading ... <img src = "/images/spinner.gif"></div>
+<script type = "text/javascript" src = "/js/file_ext_check.js"></script>
+<script type = "text/javascript">
+    $("#submitbutton").click(function() {
+    	if(document.getElementById("content").value != "" && document.getElementById("content").value != null)
+        	document.getElementById("spinnerimage").style.display = "block";
+    });
+</script>
+<script type="text/javascript">
+    $(document).ready(function(){
+	    $("input").blur(function(){
+	    	if(this.value == "" || this.value == null)
+	    	{
+	    		return;
+	    	}
+	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+	        doValidationPlant($(this).attr('id'),'../validation/validate?form=confpresentation');
+	   });
+	});
+</script>

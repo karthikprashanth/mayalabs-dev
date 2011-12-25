@@ -1,0 +1,313 @@
+<script type="text/javascript" src="../js/timeago.js"></script>
+<script type="text/javascript">
+    jQuery(document).ready(function() {
+        jQuery("abbr.timeago").timeago();
+        jQuery.timeago.settings.allowFuture = true;
+    });
+</script>
+<br/>
+<div id = 'notifications'>
+    <div style='margin-top: 10px;  margin-left: 25px; margin-bottom: 10px; width: 540px;'><div style='font-size: 18px; color: #2e4e68;'><b style="background: url(../images/notification.png) left no-repeat; padding-left: 25px;">Notifications</b></div></div>
+    <br/>
+    <div>
+    <?php
+    $j = 1;
+    $edit[0] = 'edited';
+    $edit[1] = 'added';
+	$cnt_note = 0;
+    foreach ($this->notiList as $list) {
+    	if($list['category'] == 'gasturbine')
+		{
+			continue;
+		}
+		if($list['category'] == 'plant' && $list['edit'] == 0)
+		{
+			continue;
+		}
+		$cnt_note++;
+        $p = $list['category'];
+        $extra = "";
+        $fextra = "";
+        $gextra = "";
+        $gtdataextra = "";
+        echo "<div class = 'note_element ui-corner-top' onmouseover=\"glow(this,'c1e199')\" onmouseout='unglow(this)' id = 'notification " . $j . "'>";
+        $url = $this->baseUrl();
+        $uDet = $this->uProfile->getUser($list['userupdate']);
+        $pmodel = new Model_DbTable_Plant();
+		$plant = $pmodel->getPlant($uDet['plantId']);
+		$plantname = $plant['plantName'];
+        if ($list['category'] == 'plant') {
+            $catdet = $this->pdet->getPlant($list['catid']);
+            $catname = $catdet['plantName'];
+            $url = $url . "/plant/view?id=" . $catdet['plantId'];
+        } else if ($list['category'] == 'gasturbine') {
+            $catdet = $this->gdet->getGT($list['catid']);
+            $catname = $catdet['GTName'];
+            $url = $url . "/gasturbine/view?id=" . $catdet['GTId'];
+            if ($list['edit'] == 1) {
+                $pid = $catdet['plantId'];
+                $pmodel = new Model_DbTable_Plant();
+                $plant = $pmodel->getPlant($pid);
+                $plantName = $plant['plantName'];
+                $gextra = " <i> to</i><a href = '" . $this->baseUrl() . "/plant/view?id=" . $pid . "'><b>" . $plantName . "</b></a> ";
+            }
+        } else if ($list['category'] == 'finding') {
+            $sModel = new Model_DbTable_Gtsystems();
+            $ssModel = new Model_DbTable_Gtsubsystems();
+            $data = $this->fdet->getFinding($list['catid']);
+            $ss = $ssModel->getSubSystem($data['subSysId']);
+            $sys = $sModel->getSystem($data['sysId']);
+            $systemName = $sys['sysName'];
+			$subsystemname = $ss['subSysName'];
+            if ($list['edit'] == 1) {
+            	if($subsystemname == "-")
+				{
+					$gtdataextra = " to <b>" . $systemName . "</b>";
+				}
+				else
+				{
+					$gtdataextra = " to <b>" . $systemName . "/" . $subsystemname . "</b>";
+				}
+            } else {
+            	if($subsystemname == "-")
+				{
+					$gtdataextra = " </b>belonging to <b>" . $systemName;
+				}
+                else
+				{
+					$gtdataextra = " </b>belonging to <b>" . $systemName . "/" . $subsystemname;
+				}
+            }
+			
+            $catdet = $this->fdet->getFinding($list['catid']);
+			$datagtid = $catdet['gtid'];
+			$gtmodel = new Model_DbTable_Gasturbine();
+			$gt = $gtmodel->getGT($datagtid);
+			$datagtname = $gt['GTName']; 
+            $catname = $catdet['title'];
+            $url = $url . "/findings/view?id=" . $catdet['id'];
+        } else if ($list['category'] == 'upgrade') {
+
+            $sModel = new Model_DbTable_Gtsystems();
+            $ssModel = new Model_DbTable_Gtsubsystems();
+            $data = $this->udet->getUpgrade($list['catid']);
+            $ss = $ssModel->getSubSystem($data['subSysId']);
+            $sys = $sModel->getSystem($data['sysId']);
+            $systemName = $sys['sysName'];
+			$subsystemname = $ss['subSysName'];
+            if ($list['edit'] == 1) {
+            	if($subsystemname == "-")
+				{
+					$gtdataextra = " to <b>" . $systemName . "</b>";
+				}
+				else
+				{
+					$gtdataextra = " to <b>" . $systemName . "/" . $subsystemname . "</b>";
+				}
+            } else {
+            	if($subsystemname == "-")
+				{
+					$gtdataextra = " </b>belonging to <b>" . $systemName;
+				}
+                else
+				{
+					$gtdataextra = " </b>belonging to <b>" . $systemName . "/" . $subsystemname;
+				}
+            }
+            $catdet = $this->udet->getUpgrade($list['catid']);
+			$datagtid = $catdet['gtid'];
+			$gtmodel = new Model_DbTable_Gasturbine();
+			$gt = $gtmodel->getGT($datagtid);
+			$datagtname = $gt['GTName'];
+            $catname = $catdet['title'];
+            $url = $url . "/upgrades/view?id=" . $catdet['id'];
+        } else if ($list['category'] == 'lte') {
+
+            $sModel = new Model_DbTable_Gtsystems();
+            $ssModel = new Model_DbTable_Gtsubsystems();
+            $data = $this->ldet->getLTE($list['catid']);
+            $ss = $ssModel->getSubSystem($data['subSysId']);
+            $sys = $sModel->getSystem($data['sysId']);
+            $systemName = $sys['sysName'];
+            $subsystemname = $ss['subSysName'];
+            if ($list['edit'] == 1) {
+            	if($subsystemname == "-")
+				{
+					$gtdataextra = " to <b>" . $systemName . "</b>";
+				}
+				else
+				{
+					$gtdataextra = " to <b>" . $systemName . "/" . $subsystemname . "</b>";
+				}
+            } else {
+            	if($subsystemname == "-")
+				{
+					$gtdataextra = " </b>belonging to <b>" . $systemName;
+				}
+                else
+				{
+					$gtdataextra = " </b>belonging to <b>" . $systemName . "/" . $subsystemname;
+				}
+            }			
+            $catdet = $this->ldet->getLTE($list['catid']);
+			$datagtid = $catdet['gtid'];
+			$gtmodel = new Model_DbTable_Gasturbine();
+			$gt = $gtmodel->getGT($datagtid);
+			$datagtname = $gt['GTName'];
+            $catname = $catdet['title'];
+            $url = $url . "/lte/view?id=" . $catdet['id'];
+        } else if ($list['category'] == 'schedule') {
+            $catdet = $this->confDet->getConfDetail($list['catid']);            
+            $url = $url . "/conference/list?id=" . $catdet['cId'] . "#ui-tabs-1";
+            $extra = "<a href = '" . $url . "'>" . $extra . "</a> Schedule";
+            $extra = $extra . " was added to the conference -<a href = " . $this->baseUrl() . "/conference/list?id=" . $catdet['cId'] . "#ui-tabs-1>" . $catdet['year'] . "(" . $catdet['place'] . ")</a>";
+        } else if ($list['category'] == 'forum_topic') {
+            $catdet = $this->fTopics->getTopic($list['catid']);
+            $forumData = $this->fData->getForum($catdet['forum_id']);
+            $fextra = $fextra . "New Topic - <a href = '/forums/viewtopic.php?f=" . $catdet['forum_id'] . "&t=" . $list['catid'] . "'><b>" . $catdet['topic_title'] . "</b></a>";
+            $fextra = $fextra . " was added to forum - <a href = '/forums/viewforum.php?f=" . $catdet['forum_id'] . "'>" . $forumData['forum_name'] . "</a>";
+			if($uDet['plantId'] != 1)
+			{
+				$fextra = $fextra . "<br><font size = 2><i>by<a href = '/userprofile/view?id=".$list['userupdate']."'>" . $uDet['firstName'] . " " . $uDet['lastName'] . "</a> -<a href = '/plant/view?id=".$uDet['plantId']."'>" . $plantname."</i></font></a>";	
+			}
+			else {
+				$fextra = $fextra . "<br><font size = 2><i>by " . $uDet['firstName'] . " " . $uDet['lastName'] . " - " . $plantname."</i></font>";
+			}
+            
+        } else if ($list['category'] == 'forum_post' && $list['edit']) {
+            $catdet = $this->fPosts->getPost($list['catid']);
+            $topicDet = $this->fTopics->getTopic($catdet['topic_id']);
+            $forumData = $this->fData->getForum($catdet['forum_id']);            
+            $fextra = $fextra . "New Post - <a href = '/forums/viewtopic.php?f=" . $catdet['forum_id'] . "&t=" . $catdet['topic_id'] . "#p" . $list['catid'] . "'>" . $catdet['post_subject'] .
+            "</a> was added to topic - <a href = '/forums/viewtopic.php?f=" . $catdet['forum_id'] . "&t=" . $catdet['topic_id'] . "'>" . $topicDet['topic_title'] . "</a>";
+            if($uDet['plantId'] != 1)
+			{
+				$fextra = $fextra . "<br><font size = 2><i>by<a href = '/userprofile/view?id=".$list['userupdate']."'>" . $uDet['firstName'] . " " . $uDet['lastName'] . "</a> -<a href = '/plant/view?id=".$uDet['plantId']."'>" . $plantname."</i></font></a>";	
+			}
+			else {
+				$fextra = $fextra . "<br><font size = 2><i>by " . $uDet['firstName'] . " " . $uDet['lastName'] . " - " . $plantname."</i></font>";
+			}
+        } else if ($list['category'] == 'forum_post' && $list['edit'] == 0) {
+            $catdet = $this->fPosts->getPost($list['catid']);
+            $topicDet = $this->fTopics->getTopic($catdet['topic_id']);
+            $forumData = $this->fData->getForum($catdet['forum_id']);            
+            $fextra = $fextra . "Post - <a href = '/forums/viewtopic.php?f=" . $catdet['forum_id'] . "&t=" . $catdet['topic_id'] . "#p" . $list['catid'] . "'>" . $catdet['post_subject'] .
+            "</a> of topic - <a href = '/forums/viewtopic.php?f=" . $catdet['forum_id'] . "&t=" . $catdet['topic_id'] . "'>" . $topicDet['topic_title'] . "</a> was edited";
+            if($uDet['plantId'] != 1)
+			{
+				$fextra = $fextra . "<br><font size = 2><i>by<a href = '/userprofile/view?id=".$list['userupdate']."'>" . $uDet['firstName'] . " " . $uDet['lastName'] . "</a> -<a href = '/plant/view?id=".$uDet['plantId']."'>" . $plantname."</i></font></a>";	
+			}
+			else {
+				$fextra = $fextra . "<br><font size = 2><i>by " . $uDet['firstName'] . " " . $uDet['lastName'] . " - " . $plantname."</i></font>";
+			}
+        }
+        echo "<img src='../images/$p.png' height='36px' width='36px' />";
+
+
+        if ($list['category'] == 'schedule') {
+            echo $extra;
+        } else if ($list['category'] == 'forum_post' || $list['category'] == 'forum_topic') {
+            echo $fextra;
+        } 
+		else if(in_array($list['category'],array('plant','gasturbine'))) {
+			
+			if ($list['edit'] == 1) {
+				if($list['category'] == 'gasturbine')
+				{
+                	echo "<b><a href=$url>" . $catname . "</a></b><i> was  " . $edit[$list['edit']] . "</i>" . $gextra;
+				}
+				else {
+					echo "Plant - <b><a href=$url>" . $catname . "</a></b><i> was  " . $edit[$list['edit']] . "</i>" . $gextra . " to " . Zend_Registry::get('gtgroupname') . " usergroup";
+				}
+            } else {
+                echo "<b><a href=$url>" . $catname . "</a></b><i> was  " . $edit[$list['edit']] . "</i>" . $gextra . "<i> by </i><b>" . $uDet['firstName'] . " " . $uDet['lastName'] ." - " . $plantname ."</b>";
+            }
+		}
+        else {
+        	$listcat['finding'] = "Finding";
+			$listcat['upgrade'] = "Upgrade";
+			$listcat['lte'] = "LTE";
+            if ($list['edit'] == 1) {
+            	if($uDet['plantId'] != 1)
+				{
+	                echo "<b>" .$listcat[$list['category']]."</b> - <b><a href=$url>" . $catname . "</a></b><i> was  " . $edit[$list['edit']] . "</i>" . $gextra . $gtdataextra .
+	                "<br><b>Gasturbine</b> : <a href = '/gasturbine/view?id=$datagtid'>$datagtname</a>" . 
+	                "<br><font size = 2><i>by <a href = '/userprofile/view?id=" . $list['userupdate'] ."'>" .$uDet['firstName'] . " " . $uDet['lastName'] . " - <a href='/plant/view?id=" .$uDet['plantId'] ."'>" . $plantname."</i></font></a>";
+				}
+				else
+				{
+					echo "<b>" . $listcat[$list['category']]."</b> - <b><a href=$url>" . $catname . "</a></b><i> was  " . $edit[$list['edit']] . "</i>" . $gextra . $gtdataextra .
+					"<br><b>Gasturbine</b> : <a href = '/gasturbine/view?id=$datagtid'>$datagtname</a>" . 
+	                "<br><font size = 2>by <i>" .$uDet['firstName'] . " " . $uDet['lastName'] . " - " . $plantname."</i></font></a>";
+				}
+            } else {
+                if($uDet['plantId'] != 1)
+				{
+	                echo "<b>" .$listcat[$list['category']]."</b> - <b><a href=$url>" . $catname . "</a>" . $gextra . $gtdataextra ."</b><i> was  " . $edit[$list['edit']] . ".</i>" . 
+	                "<br><b>Gasturbine</b> : <a href = '/gasturbine/view?id=$datagtid'>$datagtname</a>" . 
+	                "<br><font size = 2><i>by <a href = '/userprofile/view?id=" . $list['userupdate'] ."'>" .$uDet['firstName'] . " " . $uDet['lastName'] . " - <a href='/plant/view?id=" .$uDet['plantId'] ."'>" . $plantname."</i></font></a>";
+				}
+				else
+				{
+					echo "<b>" . $listcat[$list['category']]."</b> - <b><a href=$url>" . $catname . "</a></b>" . $gextra . $gtdataextra ."</b><i> was  " . $edit[$list['edit']] . ".</i>" .
+					"<br><b>Gasturbine</b> : <a href = '/gasturbine/view?id=$datagtid'>$datagtname</a>" . 
+	                "<br><font size = 2>by <i>" .$uDet['firstName'] . " " . $uDet['lastName'] . " - " . $plantname."</i></font></a>";
+				}
+            }
+        }
+        $ts = $list['timeupdate'];
+        $timeiso = date('c', strtotime($ts));
+        $timenml = date('M d, Y', strtotime($ts));
+
+        echo "<span style='margin-left:10px; float:right;'><font size=2 color=#808080><abbr class='timeago' title='$timeiso'>$timenml</abbr></font></span></div>";
+
+        $j++;
+        if($j == $this->ul+1){
+        	$x = (int)($j/10);
+            echo "<span id='note-view' onClick='showMore($x)' class='note-link'>Show More</span>";
+        }
+    }
+    if($j > 10)
+    {
+    	$x = (int)($j/10)-1;
+		if($j%10 != 0)
+		{
+			$x++;
+		}
+    	echo "<span id='note-view' onClick='showLess($x)' class='note-link'>Show Less</span>";
+    }
+	if($cnt_note == 0)
+	{
+		echo "<center><i>No notifications to display</i></center>";
+	}
+    ?>
+</div>
+</div>
+<script type = "text/javascript">
+		
+	function showMore(x)
+	{
+		var upperlimit = ((x*10)-1)+10;
+		$.ajax({
+            data: "ul=" + upperlimit + "&mode=paginate",
+            url: "/notification/view",
+            success: function(msg){
+                if (msg != ''){
+                    $("#notifications").html(msg);
+                }
+            }
+        });		
+	}
+	function showLess(x)
+	{
+		$.ajax({
+            data: "ul=" + ((x*10)-1) + "&mode=paginate",
+            url: "/notification/view",
+            success: function(msg){
+                if (msg != ''){
+                    $("#notifications").html(msg);
+                }
+            }
+        });		
+	}
+</script>

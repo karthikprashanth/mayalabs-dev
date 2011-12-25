@@ -1,0 +1,29 @@
+<head><?php
+$this->layout()->disableLayout();
+echo $this->headLink()->prependStylesheet($this->baseUrl().'/css/style.css');
+echo $this->headScript()->prependFile($this->baseUrl().'/js/frontend.js');
+?>
+<script>
+    window.onload = autocenter;
+    window.onresize = autocenter;
+</script>
+</head>
+
+<body bgcolor="#e5f1fa">
+	
+<div id ="login-container">
+
+    <div id="login-form" >
+        <?php
+            echo $this->form;
+            echo $this->errorMessage;
+        ?>
+    </div>
+
+    <div id="logo-container">
+        <img src="/images/line.jpg" style="float:right; opacity:0.4" />
+        <img src="/images/logo.png" style="margin-top:145px;margin-left:139px;"/>
+    </div>
+    
+</div>
+</body>

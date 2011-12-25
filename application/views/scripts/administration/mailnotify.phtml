@@ -1,0 +1,54 @@
+<?php
+	$cont['finding'] = "findings";
+	$cont['upgrade'] = "upgrades";
+	$cont['lte'] = "lte";
+	$i=0;
+	$hiddencont = "";
+	echo "<h2>Unmailed GT Data</h2>";
+	foreach($this->gtdata as $list)
+	{
+		
+		if(!$list['mailed'])
+		{
+			$i++;
+			if($i<=10){
+				echo "<a href = '/".$cont[$list['type']] . "/view?id=".$list['id']."'>".$list['title']."</a> - ".$list['type']."<br><br>";
+			}
+			else {
+				$hiddencont = $hiddencont . "<a href = '/".$cont[$list['type']] . "/view?id=".$list['id']."'>".$list['title']."</a> - ".$list['type']."<br><br>";
+			}
+		}
+		
+	}
+	if(!$i)
+	{
+		echo "<i>No unmailed GT Data</i><br><br>";
+	}
+	if($i>10)
+	{
+		echo "<div id = 'hiddencont1' style = 'display:none'>".$hiddencont."</div>
+		<div id = 'showhide1' onclick = 'showcontent(1)'>More &gt;&gt;</div>";
+	}
+	if($i)
+	{
+		echo "<form action = '/administration/sendmail' method = 'post'><input class = 'reset-button' type = 'submit' value = 'Send Mail'></form>";
+	}
+?>
+
+
+
+<script type = "text/javascript">
+	function showcontent(i)
+	{	
+		if(document.getElementById('showhide'+i).innerHTML == "More &gt;&gt;")
+		{
+			document.getElementById('hiddencont'+i).style.display = 'inline';
+			document.getElementById('showhide'+i).innerHTML = "&lt;&lt; Less";
+		}
+		else 
+		{
+			document.getElementById('hiddencont'+i).style.display = 'none';
+			document.getElementById('showhide'+i).innerHTML = "More &gt;&gt;";
+		}
+	}
+</script>

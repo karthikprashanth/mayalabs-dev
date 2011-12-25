@@ -1,0 +1,19 @@
+<?php
+        $list="<h3 class='ui-corner-top'><img src='/images/bookmarks-mini.png' alt='' style='margin-left:-20px; margin-right:5px;'/>Bookmarks</h3><div class='bookmarks-list'>";
+		$i=0;
+        foreach($this->list as $l){
+            $t = $this->escape($l['category']);
+            $list=$list."<img src='/images/$t.png' width='15px' height='15px'/>";
+			if($l['category'] != 'conference')
+            	$list=$list."<a href='/".$this->escape($l['category'])."/view/?id=".$this->escape($l['catId'])."'>".$l['bmName']."</a><br/><br/>";
+			else 
+				$list=$list."<a href='/".$this->escape($l['category'])."/list/?id=".$this->escape($l['catId'])."'>".$l['bmName']."</a><br/><br/>";
+			
+			$i++;
+        }
+		if(!$i)
+			$list = $list."<center> No Bookmarks Added </center></div>";
+		else
+			$list = $list."<b><a href='/bookmark/longlist'>Full List</a></b></div>";
+        echo $list;
+?>

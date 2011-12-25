@@ -1,0 +1,57 @@
+<!--<br /><br /><center>View script for controller <b>Advertisement</b> and script/action name <b>list</b></center>-->
+
+
+<table>
+<tr>
+<th>Title</th>
+<th>GT Model</th>
+<th>&nbsp;</th>
+<th>&nbsp;</th>
+</tr>
+
+<?php foreach($this->adList as $ad) : ?>
+
+<tr>
+
+<td><?php
+echo "<a href='".$this->url(array('action'=>'view'))."?id=".$this->escape($ad['advertId'])."'>".$ad['title']."</a><br/>";
+?></td>
+
+<td><?php echo "&nbsp;&nbsp;". $this->escape($ad['GTModel']); ?></td>
+
+<?php 
+	if($this->role != 'sa') {
+		continue;
+	}
+	$editUrl = $this->url(
+					array(
+						'action' => 'edit',
+						'advertId' => $ad['advertId']
+					)
+				);
+?>
+					
+						
+<td>
+<form action="<?php echo $editUrl; ?>" method="post">
+<input type="hidden" name="advertId" value="<?php echo $this->escape($ad['advertId']);?>" />
+<input type="submit" name="edit" value="Edit" />
+</form>
+</td>
+
+<td>
+<form action="<?php echo $this->url(array('action'=>'delete')); ?>" method="post">
+<input type="hidden" name="id" value="<?php echo $this->escape($ad['advertId']);?>" />
+<input type="submit" name="del" value="Delete" />
+</form>
+</td>
+
+
+</tr>
+<?php endforeach; ?>
+
+</table>
+<?php 
+echo "<div style='padding:20px;'>".$this->paginationControl($this->adList,'Sliding','pagination.phtml')."</div>"; 
+?>
+

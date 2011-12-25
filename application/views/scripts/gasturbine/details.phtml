@@ -1,0 +1,83 @@
+<?php
+		
+		
+        $gtInfo="<table cellspacing='0' cellpadding='0' onmouseover='tablecloth();'>
+
+            <tr>
+                <th>GT Name</th>
+                <th style='min-width: 50%;'><b>".$this->GTData['GTName']."</b></th>
+            </tr>
+
+            <tr>
+                <td>GT Model Number</td>
+                <td>".$this->GTData['GTModelNum']."</td>
+            </tr>
+
+            <tr>
+                <td>Plant Name</td>
+                <td>".$this->pname."</td>
+            </tr>
+			
+			<tr>
+                <td>EOH</td>
+                <td>".$this->GTData['EOH']."</td>
+            </tr>
+            
+            <tr>
+                <td>EOH Date</td>
+                <td>".$this->GTData['EOHDate']."</td>
+            </tr>
+
+            <tr>
+                <td>Number of Starts</td>
+                <td>".$this->GTData['numStarts']."</td>
+            </tr>
+
+            <tr>
+                <td>Number of Trips</td>
+                <td>".$this->GTData['numTrips']."</td>
+            </tr>
+
+            <tr>
+                <td>Minor Inspection Inter</td>
+                <td>".$this->GTData['minorInspInter']."</td>
+            </tr>
+
+            <tr>
+                <td>HGPI Inspection Inter</td>
+                <td>".$this->GTData['HGPIInspInter']."</td>
+            </tr>
+
+            <tr>
+                <td>EHGPI Inspection Inter</td>
+                <td>".$this->GTData['EHGPIInspInter']."</td>
+            </tr>
+
+            <tr>
+                <td>Next Minor Inspection</td>
+                <td>".$this->GTData['nextMinor']."</td>
+            </tr>
+
+            <tr>
+                <td>Next Major Inspection</td>
+                <td>".$this->GTData['nextMajor']."</td>
+            </tr>
+
+        </table>";
+        
+        echo $gtInfo;
+        $role = Zend_Registry::get('role');
+        $uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+        $usermodel = new Model_DbTable_Userprofile();
+        $user = $usermodel->getUser($uid);
+		$upid = $user['plantId'];
+		$gtmodel = new Model_DbTable_Gasturbine();
+		$gt = $gtmodel->getGT($this->id);
+		$gtpid = $gt['plantId'];
+		if($gtpid == $upid || $role == 'sa')
+		{
+			if($role != 'us')
+        		echo "<div class = 'gt-edit'><a href='/gasturbine/edit"  . "?id=" . $this->id . "' style='color: #719b3e;'>Edit</a></div>";
+		}
+
+?>

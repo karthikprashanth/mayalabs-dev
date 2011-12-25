@@ -1,0 +1,96 @@
+<?php
+
+	foreach($this->plist as $pvalue){	
+		$pres = $this->presmodel->getPresentation(key($pvalue));
+		$filetype = $pres['filetype'];
+		$h = 30;
+		$w = 30;
+		 if($filetype == 'doc' || $filetype == 'docx')
+		 {
+		 	$filename = "images/word.png";
+			$list=$list."<a href='/presentation/view/?id=".$this->escape(key($pvalue))."'><img src = '/".$filename."' height = $h width = $w>".current($pvalue)."</a><br>";
+		 }
+		 else if($filetype == 'xls' || $filetype == 'xlsx')
+		{
+			$filename = "images/excel.png";
+			$list=$list."<a href='/presentation/view/?id=".$this->escape(key($pvalue))."'><img src = '/".$filename."' height = $h width = $w>".current($pvalue)."</a><br>";
+		}
+		else if($filetype == 'ppt' || $filetype == 'pptx')
+		{
+			$filename = "images/ppt.png";
+			$list=$list."<a href='/presentation/view/?id=".$this->escape(key($pvalue))."'><img src = '/".$filename."' height = $h width = $w>".current($pvalue)."</a><br>";
+		}
+		else if($filetype == 'pdf')
+		{
+			$filename = "images/pdf.png";
+			$list=$list."<a href='/presentation/view/?id=".$this->escape(key($pvalue))."'><img src = '/".$filename."' height = $h width = $w>".current($pvalue)."</a><br>";
+		}
+		 else {
+		 	$h = 300;
+			 $w = 400;
+		 	$filename = "random/thnail" . rand(0,999999);
+			$data = $pres['content'];
+			file_put_contents($filename,$data);
+			$ilist=$ilist."<a href='/presentation/view/?id=".$this->escape(key($pvalue))."'><img src = '/".$filename."' height = $h width = $w>".current($pvalue)."</a><br>";
+		 }
+     
+}
+$list .= $ilist;
+$dataid = $this->upgrade['id'];
+
+$role = Zend_Registry::get("role");
+$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+$umodel = new Model_DbTable_Userprofile();
+$user = $umodel->getUser($uid);
+$upid = $user['plantId'];
+$gtid = $this->upgrade['gtid'];
+$gtmodel = new Model_DbTable_Gasturbine();
+$gt = $gtmodel->getGT($gtid);
+$gtpid = $gt['plantId'];
+$valid = false;
+if($upid == $gtpid || $role == 'sa')
+{
+	$editlink = "<div style='float:left;' class='gt-edit'><a href = '/upgrades/edit?id=$dataid' style='color: #719b3e;'>Edit</a></div>";
+}
+
+$ssModel = $this->subSysModel;
+$ss = $ssModel->getSubSystem($this->upgrade['subSysId']);
+$system = $this->sysModel->getSystem($this->upgrade['sysId']);
+
+$content = $content . "<div class='gtdata-title'>".$this->upgrade['title'];
+if($ss['subSysName'] == "-")
+{
+	$content = $content." <span style='color:#77B464;'>".$system['sysName'] ."</span>";
+}
+else
+{
+	$content = $content." <span style='color:#77B464;'>".$system['sysName'] . "/" . $ss['subSysName'] ."</span>";
+}
+$content = $content." <span style='color:#268FBB;'>".$this->gt['GTName']."</span><br/>";
+if($this->upgrade['EOH'] != 0 && $this->upgrade['EOH'] != "")
+	$content = $content." <span style='color:#268FBB;'><b>EOH at Occurence</b>: ". $this->upgrade['EOH']."</span>";
+if($this->upgrade['DOF'] != "" && $this->upgrade['DOF'] != "0000-00-00")
+	$content = $content." <span style='color:#268FBB;'><b>Date of Finding</b>: ".$this->upgrade['DOF']."</span>";
+if($this->upgrade['TOI'] != "")
+	$content = $content." <span style='color:#268FBB;'><b>Type of Inspection</b>: ".$this->upgrade['TOI']."</span>";
+$content = $content."<br> <span style='color:#268FBB; font-size: 12px; font-style: normal; font-weight:bold;'>Updated On ".$this->upgrade['updatedate']."</span></div>";
+$content = $content."<div class='gtdata-data'>".$this->upgrade['data']."</div>";
+if($list == "")
+	$list="<span style='color:#d95e1c;'>No Presentations Added</span>";
+$content = $content."<div class='gtdata-presentations'><div style='font-size: 16px; padding-bottom: 5px;'>Presentations:</div>$list</div>";
+
+$content = $content .$editlink;
+
+$content = $content . "<form action = '/reports/generate' method = 'post' style='float:right;'>
+	<input type = 'hidden' name = 'type' value = 'upgrade'>
+	<input type = 'hidden' name = 'id' value = '".$this->upgrade['id']."'>
+	<input class='gt-report' type = 'submit' name = 'report' value = 'Generate Upgrades Report'>
+</form>";
+$content = $content . "<div align='right'>
+	<form action = '/reports/configure?id=".$this->upgrade['id']."&type=gtdataview' method = 'post'>
+		<input class='gt-configure' type = 'submit' name = 'reportgen' value = 'Configure Report'>
+	</form>
+</div>";
+$this->tabPane("upgradeView",$content,array('title' => 'Upgrade View'));
+echo $this->tabContainer("upgradeView",array());
+?>

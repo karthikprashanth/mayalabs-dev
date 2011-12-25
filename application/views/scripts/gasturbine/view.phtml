@@ -1,0 +1,23 @@
+<link href="/js/tablecloth/tablecloth.css" rel="stylesheet" type="text/css"/>
+<script type='text/javascript' src='/js/tablecloth/tablecloth.js'></script> 
+<?php
+
+        $this->tabPane("gtview",$empty,array('title' => 'GT Info','contentUrl'=>"".$this->baseUrl()."/gasturbine/details?id=$this->id"));
+        $this->tabPane("gtview",$empty,array('title' => 'Findings','contentUrl'=>"".$this->baseUrl()."/findings/list?id=$this->id"));
+        $this->tabPane("gtview",$empty,array('title' => 'Upgrades','contentUrl'=>"".$this->baseUrl()."/upgrades/list?id=$this->id"));
+        $this->tabPane("gtview",$empty,array('title' => 'LTE','contentUrl'=>"".$this->baseUrl()."/lte/list?id=$this->id"));
+        $this->tabPane("gtview",$empty,array('title' => 'Attachments','contentUrl'=>"".$this->baseUrl()."/presentation/list?id=$this->id"));
+
+        echo $this->tabContainer("gtview",array());
+?>
+
+<div align = 'right'>
+	<form action = '<?php echo $this->baseUrl(); ?>/reports/generate' style='float:right;' method = 'post'>
+		<input type = 'hidden' name = 'type' value = 'machinedet'>
+		<input type = 'hidden' name = 'id' value = "<?php echo $this->id; ?>">
+		<input class='gt-report' type = 'submit' name = 'report' value = 'Generate GT Report'>
+	</form>
+	<form action = '<?php echo $this->baseUrl(); ?>/reports/configure?id=<?php echo $this->id;?>&type=gtreport' style='float:right;' method = 'post'>
+		<input class='gt-configure' type = 'submit' name = 'reportgen' value = 'Configure'>
+	</form>
+</div>

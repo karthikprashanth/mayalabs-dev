@@ -1,0 +1,17 @@
+<?php
+
+$list = NULL;
+$list = $list . "<table>";
+
+foreach ($this->gt as $gasturbines) {
+	if($this->pid == $gasturbines['plantId']) {
+	    $list = $list . "<tr>";
+	    $list = $list . "<td><a href='" . $this->url(array('action' => 'view')) . "?id=" . $this->escape($gasturbines['GTId']) . "'>" . $gasturbines['GTName'] . "</a></td>";
+	    $list = $list . "<td><a href='" . $this->url(array('action' => 'edit')) . "?id=" . $this->escape($gasturbines['GTId']) . "'>Edit</a></td>";
+	    $list = $list . "</tr>";
+	}
+}
+$list = $list . "</table>";
+$this->tabPane("GTList", $list, array('title' => 'GT List'));
+echo $this->tabContainer("GTList", array());
+?>

@@ -1,0 +1,96 @@
+<?php
+	if(!count($this->ltes))
+	{
+		echo "<center>No LTEs Added</center>";
+		
+	}
+	else {
+		echo"<table cellspacing='0' cellpadding='0' onmouseover='tablecloth();'>
+		<tr>
+		<th>Title</th>
+		<th>System/Subsystem</th>
+		<th>EOH</th>
+		<th>Type of Inspection</th>
+		<th>User</th>
+		<th>Date</th>
+		<th>&nbsp;</th>
+		<th>&nbsp;</th>
+		</tr>";
+	}
+?>
+
+<?php
+foreach($this->ltes as $lte) :?>
+<tr>
+<td><?php
+echo "<a href='".$this->url(array('action'=>'view'))."?id=".$this->escape($lte['id'])."'>".$lte['title']."</a><br/>";
+$user = $this->umodel->getUser($lte['userupdate']);
+$username = $user['firstName'] . " " . $user['lastName'] . " - " . $user['plantName'];
+?></td>
+<?php
+	$ssModel = $this->subSysModel;
+	$ss = $ssModel->getSubSystem($lte['subSysId']);
+	$system = $this->sysModel->getSystem($lte['sysId']);
+?>
+<?php if($ss['subSysName'] == '-') : ?>
+	<td><?php echo $system['sysName']; ?></td>
+<?php else : ?>
+	<td><?php echo $system['sysName']; ?> / <?php echo $ss['subSysName']; ?></td>
+<?php endif; ?>
+
+<?php if($lte['EOH'] != "") : ?>
+	<td><?php echo $lte['EOH']; ?></td>
+<?php else : ?>
+	<td> </td>
+<?php endif; ?>
+<?php if($lte['TOI'] != "") : ?>
+	<td><?php echo $lte['TOI']; ?></td>
+<?php else : ?>
+	<td> </td>
+<?php endif; ?>
+<td><?php echo $username;?></td>
+<td><?php echo $this->escape($lte['updatedate']); ?></td>
+<?php
+    $valid = false;
+    foreach ($this->gt as $temp) {
+        if ((int) $temp['GTId'] == (int) $lte['gtid']) {
+            $valid = true;
+        }
+    }
+    $role = Zend_Registry::get('role');
+    if($valid || $role == 'sa') {
+?>
+<td><a href="/lte/edit?id=<?php echo $lte['id']; ?>">Edit</a>
+</td>
+<td>
+<form action="<?php echo $this->url(array('action'=>'delete')); ?>" method="post" style='float:left;'>
+<input type="hidden" name="id" value="<?php echo $this->escape($lte['id']);?>" />
+<input class='gt-delete' type="submit" name="del" value="Delete" />
+</form>
+</td>
+<?php 
+}
+?>
+<?php endforeach; ?>
+</table>
+
+<?php if($this->ubool) : ?>
+<form action="<?php echo $this->url(array('action'=>'add')); ?>" method="post" style='float:left;'>
+<input type="hidden" name="gtid" value="<?php echo $this->escape($this->id);?>" />
+<input class='gt-add' type="submit" name="add" value="Add New LTE" />
+</form>
+<?php endif; ?>
+<div style='clear:both; height:5px;'>&nbsp;</div>
+<?php if(count($this->ltes) != 0) :?>
+	<form action = '/reports/generate' method = 'post' style='float:right;'>
+		<input type = 'hidden' name = 'type' value = 'ldatalist'>
+		<input type = 'hidden' name = 'id' value = "<?php echo $this->id; ?>">
+		<input class='gt-report' type = 'submit' name = 'report' value = 'Generate LTEs Report'>
+	</form>
+	<div align = 'right'>
+		<form action = '/reports/configure?id=<?php echo $this->id;?>&type=lte' method = 'post'>
+			<input class='gt-configure' type = 'submit' name = 'reportgen' value = 'Configure'>
+		</form>
+	</div>
+<?php endif;
+?>

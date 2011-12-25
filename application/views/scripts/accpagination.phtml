@@ -1,0 +1,35 @@
+<?php
+/* 
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+if(count($this->pagesInRange) <= 1)
+{
+	return;
+}
+ 
+if(isset ($this->previous)){
+    echo "<a href = '" . $this->url() . "?page=" . $this->first . "'> Beginning </a> | ";
+}
+else{
+    echo "Beginning | ";
+}
+
+foreach ($this->pagesInRange as $page){
+    if($this->current!=$page){
+        echo "<a href = '" . $this->url() . "?page=" . $page . "'> " . $page . " </a> | ";
+    }
+    else{
+        echo $page.' | ';
+    }
+
+}
+
+if(isset ($this->next)){
+    echo "<a href = '" . $this->url() . "?page=" . $this->last . "'> End </a> | ";
+}
+else{
+    echo "End";
+}
+?>

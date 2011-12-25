@@ -1,0 +1,16 @@
+<?php
+$this->jQuery()->enable();
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+echo $this->adminId;
+//echo $this->form;
+$this->tabPane("UPEdit", $this->form, array('title' => 'User profile - Edit'));
+echo $this->tabContainer("UPEdit", array());
+?>
+<script type="text/javascript">
+    $(document).ready(function(){
+    $("input").blur(function(){
+        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+        doValidation(formElementId,'/userprofile/editValidate/');
+   });   
+    });
+</script>

@@ -1,0 +1,27 @@
+<?php
+$this->jQuery()->enable();
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+$data = $this->adminId;
+$data .= $this->form;
+if($this->message == "")
+	$data .= $this->message;
+else 
+	$data .= "<div class = 'errors'>" . $this->message . "</div>";
+$this->tabPane("UPAdd",$data,array('title' => 'Userprofile Add'));
+echo $this->tabContainer("UPAdd",array());
+?>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+	    $("input").blur(function(){
+	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+	        doValidation(formElementId,'/hive/public/userprofile/addvalidate/');
+	   	});
+	});
+
+   function unloadPage(){
+       return "Leaving this page will lead to loss of data";
+   }   
+   window.onbeforeunload = unloadPage;
+
+</script>

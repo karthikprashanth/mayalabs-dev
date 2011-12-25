@@ -1,0 +1,74 @@
+<?php
+	if(!count($this->presentations))
+	{
+		echo "<center>No Attachments Added</center>";
+		
+	}
+	else {
+		echo"<table cellspacing='0' cellpadding='0' onmouseover='tablecloth();'>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>File Type</th>
+            <th>User</th>
+            <th>Date</th>
+        </tr>
+    </thead>";
+	}
+?>
+
+    <tbody>
+        <?php 
+        $prestype['pdf'] = "PDF File";
+		$prestype['jpeg'] = "Image File";
+		$prestype['jpg'] = "Image File";
+		$prestype['png'] = "Image File";
+		$prestype['gif'] = "Image File";
+		$prestype['doc'] = "Word Document File";
+		$prestype['docx'] = "Word Document File";
+		$prestype['xls'] = "Excel Sheet";
+		$prestype['xlsx'] = "Excel Sheet";
+		$prestype['ppt'] = "Powerpoint Presentation";
+		$prestype['pptx'] = "Powerpoint Presentation";
+        $umodel = new Model_DbTable_Userprofile();
+		$gtid = $this->id;
+		$gtmodel = new Model_DbTable_Gasturbine();
+		$gt = $gtmodel->getGT($gtid);
+		$pid = $gt['plantId'];
+		$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+		$gtuser = $umodel->getUser($uid);
+		$upid = $gtuser['plantId'];
+		$role = Zend_Registry::get('role');
+		$allowed = false;
+		if ((int)$pid == (int)$upid || $role == 'sa')
+		{
+			$allowed = true;
+		}
+        foreach ($this->presentations as $presentation) : ?>
+            <tr>
+                <td><?php
+                $user = $umodel->getUser($presentation['userupdate']);
+				$uname = $user['firstName'] . " " . $user['lastName'] . " - " . $user['plantName'];
+            echo "<a href='/presentation/view?id=" . $this->escape($presentation['presentationId']) . "'>" . $presentation['title'] . "</a><br/>";
+        ?></td>
+        	<td><?php echo $prestype[$presentation['filetype']]; ?></td>
+            <td><?php echo $uname; ?></td>
+            <td><?php echo $this->escape($presentation['timeupdate']); ?></td>
+            <?php if($allowed) : ?>
+            <td>
+            	<form action = "/presentation/delete" method = "post">
+            		<input type = 'hidden' name = 'id' value = '<?php echo $presentation['presentationId'];?>'>
+            		<input type = 'submit' class = 'gt-delete' name = 'delete' value = 'Delete'>
+            	</form>		
+            </td>
+            <?php endif; ?>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+	<?php if($allowed) : ?>
+    <form action="<?php echo $this->url(array('action' => 'add')); ?>" method="post">
+        <input type="hidden" name="gtid" value="<?php echo $this->escape($this->id); ?>" />
+    <input class='gt-add' type="submit" name="add" value="Add New Attachment" />
+    <?php endif; ?>
+</form>
