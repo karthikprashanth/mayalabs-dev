@@ -90,6 +90,7 @@ class AdministrationController extends Zend_Controller_Action {
                 $plantId = $form->getValue('plantId');
                 $register = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),0,"");
 				$users = $register->fetchAll();
+                
 				$exists = false;
 				foreach($users as $user)
 				{
@@ -107,7 +108,7 @@ class AdministrationController extends Zend_Controller_Action {
                  * Wont work, lacks add user
                  */
                 $register->setUserName($username);
-                $register->setRole($role);
+                $register->setRole($role);                
                 $register->save();
 //                $register = $register->createAccount($username, $role, $plantId);
                 $this->_redirect('/userprofile/add?id=' . $register);
@@ -118,26 +119,21 @@ class AdministrationController extends Zend_Controller_Action {
     }
 
     public function deleteaccAction() {
-        if ($this->getRequest()->isPost()) {
-			
+        if ($this->getRequest()->isPost()) {			
             $del = $this->getRequest()->getPost('del');
             if ($del == 'Delete') {
             	$role = Zend_Registry::get('role');
 				$id = $this->getRequest()->getPost('id');
-				if($role == 'ca')
-				{					
-					$umodel = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
+				if($role == 'ca'){					
+					$umodel = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),$id);
                     $comGrp = $umodel->getList(array("plantId" => $umodel->getPlantId()));
 					$belong = false;
-					foreach($compGrp as $user)
-					{
-						if((int)$id == (int)$user['id'])
-						{
+					foreach($compGrp as $user){
+						if((int)$id == (int)$user['id']){
 							$belong = true;
 						}
-					}	
-					if(!$belong)
-					{
+                    }
+					if(!$belong){
 						return;
 					}
 				}
@@ -247,19 +243,16 @@ class AdministrationController extends Zend_Controller_Action {
         }
     }
 
-    public function listAction() {
+    public function listAction() {        
         try {
             $this->view->headTitle('List Users', 'PREPEND');            
             $umodel = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
             $plantId = $umodel->getPlantId();
             $listObj = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id,"");
-            $users = $listObj->getUsersList(array("plantId" => $plantId));
+            $users = $listObj->getList(array("plantId" => $plantId));
             $this->view->users = $users;
-
-            /**
-             * Function not created
-             */
-            $validcc = $listObj->ccinfo();
+            
+            $validcc = $listObj->getConferenceChairman();
             $this->view->validcc = $validcc;
         } catch (Exception $e) {
             echo $e;
@@ -268,24 +261,18 @@ class AdministrationController extends Zend_Controller_Action {
 
     public function setccAction() {
         $id = $this->_getParam('id', 0);
-        $uModel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id,"");
+        $uModel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$id,"");
         $setcc = $uModel->setConfChair();
-        /**
-         * Won't work, function parameters not passed
-         */
-        $uModel->save();
-        $this->_redirect('/plant/admin');
+
+        $this->_redirect('/administration/list');
     }
 
     public function unsetccAction() {
         $id = $this->_getParam('id', 0);
         $uModel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id,"");
         $uModel->unSetConfChair();
-        /**
-         * Won't work, function parameters not passed
-         */
-        $uModel->save();
-        $this->_redirect('/plant/admin');
+        
+        $this->_redirect('/administration/list');
     }
 
     public function showmenuAction() {

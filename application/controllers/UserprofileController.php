@@ -58,9 +58,8 @@ class UserprofileController extends Zend_Controller_Action {
             if ($this->getRequest()->isPost()) {
                 $formData = $this->getRequest()->getPost();
                 if ($form->isValid($formData)) {
-					
-                    $userp = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(), Zend_Auth::getInstance()->getStorage()->read()->id);
                     $id = $this->_getParam('id');
+                    $userp = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(), $id);
                     $content = $form->getValues();
                    	$users = $userp->getList();
 					$exists = false;
@@ -99,11 +98,10 @@ class UserprofileController extends Zend_Controller_Action {
             $this->view->form = $form;
             if ($this->getRequest()->isPost()) {
                 $formData = $this->getRequest()->getPost();
-                if ($form->isValid($formData)) {
+                if ($form->isValid($formData)) {                    
+                    $content = $form->getValues();                    
                     $userup = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
-                    $content = $form->getValues();
-
-                    $userup->setUserprofileData($content);
+                    $userup->setUserprofileData($content);                    
                     $userup->save();
                     if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
                         /*if (Zend_Auth::getInstance()->getStorage()->read()->role != 'us')
@@ -112,6 +110,7 @@ class UserprofileController extends Zend_Controller_Action {
                         $ses->storage->lastlogin = $d = date('Y-m-d H:i:s');
                         $this->_redirect('dashboard/index');
                     }
+                    
                     $this->_helper->redirector('view');
                 }
                 else {
@@ -135,13 +134,13 @@ class UserprofileController extends Zend_Controller_Action {
 	            $role = Zend_Registry::get('role');
 	            $myUser = Zend_Auth::getInstance()->getStorage()->read()->id;
 	        }
-            $userView = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
+            $userView = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),$myUser);
             $profileData = $userView->getUserprofileData();
 			$pmodel = new Model_DbTable_Plant(Zend_Db_Table::getDefaultAdapter(), $profileData['plantId']);			
 			$this->view->uPlantName = $pmodel->getPlantName();
 			$this->view->uPlantId = $pmodel->getPlantId();
 			
-			$uModel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id, "");
+			$uModel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$myUser, "");
 			$iscc = $uModel->isConfChair();
     		$this->view->iscc = $iscc;
 			if($this->view->iscc)
@@ -173,8 +172,8 @@ class UserprofileController extends Zend_Controller_Action {
             if ($this->getRequest()->isPost()) {
                 $formData = $this->getRequest()->getPost();
                 if ($form->isValid($formData)) {
-                    $userPass = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id, "");
-                    $content = $form->getValues();                    
+                    $content = $form->getValues();
+                    $userPass = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$content['id'], "");
                     $oldPassword = $form->getValue('oldPassword');
                     $newPassword = $form->getValue('newPassword');
                     $reNewPassword = $form->getValue('reNewPassword');
@@ -186,7 +185,7 @@ class UserprofileController extends Zend_Controller_Action {
 							
 							//Send Mail
 							
-							$umodel = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
+							$umodel = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),$content['id']);
 							$user = $umodel->getUserprofileData();
 							$mailbody = "<div style='width: 100%; '><div style='border-bottom: solid 1px #aaa; margin-bottom: 10px;'>";
 					        $mailbody = $mailbody . "<a href='http://www.hiveusers.com' style='text-decoration: none;'><span style='font-size: 34px; color: #2e4e68;'><b>hive</b></span>";
@@ -229,7 +228,6 @@ class UserprofileController extends Zend_Controller_Action {
 
     public function editvalidateAction() {
         try {
-
             $this->_helper->viewRenderer->setNoRender();
             $this->_helper->getHelper('layout')->disableLayout();
 

@@ -65,7 +65,7 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
 
         if ($userId || $username != "") {
         	if($userId)
-            	$userRow = $this->fetchRow("id = " . $id);
+            	$userRow = $this->fetchRow("id = " . $userId);
 			else if($username != "")
 				$userRow = $this->fetchRow("username = '" . $username . "'");
 
@@ -76,7 +76,7 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
             $this->secureId = $userRow['sid'];
             $this->lastLogin = $userRow['lastlogin'];
             $this->isConfChair = $userRow['conf_chair'];
-        }        
+        }
     }
 
     /**
@@ -265,12 +265,17 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      */
     public static function getList($options = array())
     {
-        if (count($options))
-            $where = "WHERE id IN(SELECT id FROM userprofile WHERE plantId = " . $options['plantId'] . ")";
+        if (count($options['columns'])){
+        	$where = " WHERE ";
+			foreach($options['columns'] as $key => $value){
+				$where .= $key . " = '" . $value . "' AND ";
+			}
+			$where = substr($where,0,strlen($where)-4);
+        }
 
         $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
         $stmt = $dbAdapter->query("SELECT * FROM users " . $where);
-        $list = $stmt->fetchAll();
+        $list = $stmt->fetchAll();        
         array($list);
         return $list;
     }
@@ -290,6 +295,23 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
         $stmt = $dbAdapter->query("SELECT COUNT(*) AS count FROM users " . $where);
         $countRow = $stmt->fetchAll();
 		return $countRow[0]["count"];
+    }
+
+    /**
+     * Gets the Conference Chairman's Id, if exists
+     *
+     * @return Integer
+     */
+    public static function getConferenceChairman(){
+        $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $stmt = $dbAdapter->query("SELECT * FROM users WHERE `conf_chair` = '1';");
+        $countRow = $stmt->fetchAll();
+        
+        if (count($rset) != 0) {
+            return $rSet['id'];
+        } else {
+            return 0;
+        }
     }
 	
 	/**
@@ -338,25 +360,31 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      * Updates details about users
      */
     public function save()
-    {
-        $forumData = array(
-            'user_id' => $this->userId,
-            'user_type' => 0,
-            'group_id' => 2,
-            'username' => $this->userName,
-            'user_password' => encryptPassword($this->userData['password'],1)
-        );
-        if($userData['id']){
-            $forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
-            $forumUserModel->setForumData($forumData);
-            $forumUserModel->save();
-            $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);    
+    {        
+//        $forumData = array(
+//            'user_id' => $this->userId,
+//            'user_type' => 0,
+//            'group_id' => 2,
+//            'username' => $this->userName,
+//            'user_password' => encryptPassword($this->userData['password'],1)
+//        );
+        if($this->userId){
+//            $forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
+//            $forumUserModel->setForumData($forumData);
+//            $forumUserModel->save();
+            $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);
             $this->update($this->userData, $where);
         }
         else {
-            $forumUserModel = new Model_DbTable_Forum_Users();
-            $forumUserModel->setForumData($forumData);
-            $forumUserModel->save();
+//            $forumUserModel = new Model_DbTable_Forum_Users();
+//            $forumUserModel->setForumData($forumData);
+//            $forumUserModel->save();
+
+            /*
+             * Adding Hard-Coded Values for non-NOTNULL fields
+             */
+            $this->userData['password'] = md5("password");
+            $this->userData['conf_chair'] = 0;
             $this->userId = $this->insert($this->userData);
         }
         

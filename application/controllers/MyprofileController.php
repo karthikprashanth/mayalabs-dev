@@ -12,30 +12,28 @@ class MyprofileController extends Zend_Controller_Action {
                 $this->view->role = Zend_Registry::get('role');
                 $this->_helper->viewRenderer->setResponseSegment('sidebar1');
             }						
-            $up = new Model_DbTable_Userprofile();
-            $up = $up->getUser(Zend_Auth::getInstance()->getStorage()->read()->id);
-            $name = $up['firstName'] . " " . $up['lastName'];
+            $up = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(), Zend_Auth::getInstance()->getStorage()->read()->id);
+            $name = $up->getFullName();
 			
 			$role = Zend_Registry::get("role");
 			
 			if($role != 'sa')
 			{
-				$pid = $up['plantId'];
-				$gtmodel = new Model_DbTable_Gasturbine();
-				$gt = $gtmodel->getGTP($pid);
+                $pid = $up->getPlantId();
+				$gtmodel = new Model_DbTable_Gasturbine(Zend_Db_Table::getDefaultAdapter());
+                $gt = $gtmodel->getList(array("plantId" => $pid));
 				
-				$plantmodel = new Model_DbTable_Plant();
-				$plant = $plantmodel->getPlant($pid);
-				$plantname = $plant['plantName'];
+				$plantmodel = new Model_DbTable_Plant(Zend_Db_Table::getDefaultAdapter(), $pid);
+				$plantname = $plantmodel->getPlantName();
 			}
 			$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
-			$uModel = new Model_DbTable_User();
-			$iscc = $uModel->is_confchair($uid);
+			$uModel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(), Zend_Auth::getInstance()->getStorage()->read()->id, "");
+			$iscc = $uModel->isConfChair();
     		$this->view->iscc = $iscc;
             $this->view->name = $name;
 			$this->view->pid = $pid;
 			$this->view->pname = $plantname;
-			$this->view->gt = $gt;
+			$this->view->gt = $gt;            
         } catch (Exception $e) {
             echo $e;
 		}

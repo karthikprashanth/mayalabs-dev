@@ -77,12 +77,12 @@ class AuthenticationController extends Zend_Controller_Action {
 
             if ($request->isPost()) {
                 if ($form->isValid($this->_request->getPost())) {
-                    $authAdapter = $this->getAuthAdapter();                    
+                    $authAdapter = $this->getAuthAdapter();
                     $username = $form->getValue('username');
 
                     $umodel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),0,$username);
-                    $user = $umodel->getUserData();
-                    $id = $user['id'];
+//                    $user = $umodel->getUserData();
+                    $id = $umodel->getUserId();
                     $plain_password = $form->getValue('password');
                     $password = md5($form->getValue('password') . "{" . $id . "}");
 
@@ -93,7 +93,6 @@ class AuthenticationController extends Zend_Controller_Action {
                     
                     try {
                         if ($result->isValid()) {
-                            
                             $identity = $authAdapter->getResultRowObject();
                             $authStorage = $auth->getStorage();
                             $authStorage->write($identity);
