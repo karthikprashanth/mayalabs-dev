@@ -74,7 +74,7 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
             $this->userId = $this->userprofileData['id'];
             $this->plantId = $this->userprofileData['plantId'];
             $this->firstName = $this->userprofileData['firstName'];
-            $this->fullName = $this->userprofileData['firstName'] . " " . $userprofileData['lastName'];
+            $this->fullName = $this->userprofileData['firstName'] . " " . $this->userprofileData['lastName'];
             $this->plantName = $this->userprofileData['plantName'];
             $this->corporateName = $this->userprofileData['corporateName'];
             $this->email = $this->userprofileData['email'];

@@ -76,7 +76,7 @@ foreach($this->results as $result) :?>
 	</div>
 	<div class = 'clist-result' onmouseover="glow(this,'f0f7ec'); this.style.borderLeft='solid 2px #2e4e68';" onmouseout="unglow(this); this.style.borderLeft='none';">
 			<a href = "/plant/view?id=<?php echo $result['plantId']?>"><span style='font-size: 16px;'><?php echo $result['plantName'];?></span></a>
-			<br>&nbsp;&nbsp;&nbsp;<span style='font-size:14px; color: #2e4e68;'>Gasturbines</span>:&nbsp;&nbsp;&nbsp;<?php echo $result['numOfGT'];?><a href = "/gasturbine/plantlist?id=<?php echo $result['plantId'];?>">(View)</a>
+			<br>&nbsp;&nbsp;&nbsp;<span style='font-size:14px; color: #2e4e68;'>Gasturbines</span>:&nbsp;&nbsp;&nbsp;<?php echo $result['numOfGT'];?><a href = "/gasturbine/list?id=<?php echo $result['plantId'];?>">(View)</a>
 			<span class='hide_view result-show' onClick = "showplantdet(<?php echo $result['plantId'];?>)" id = "plantdd<?php echo $result['plantId'];?>">Show Details &gt;&gt;</span>
 			<div id = "plantdetails<?php echo $result['plantId'];?>" style = "display:none">
 				<table class='clist-table'>

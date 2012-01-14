@@ -26,7 +26,7 @@ $(document).ready(function() {
 
 <tr>
 <td><?php echo "<a href = '/userprofile/view?id=" . $user['id'] ."'>" .$this->escape($user['username']) . "</a>";?></td>
-<td><?php echo $this->escape($user['firstName']).', '.$this->escape($user['lastName']); ?></td>
+<td><?php echo $user['fullname']; ?></td>
 <td><?php echo $this->escape($user['role']);?></td>
 <td>
 
@@ -67,7 +67,6 @@ $(document).ready(function() {
 			echo "</form></td>";
 		}
 	}
-			
 ?>
 </tr>
 <?php endforeach; 

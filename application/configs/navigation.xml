@@ -139,7 +139,7 @@
 			<label>Gasturbines</label>
 			<codename>gtplantlist</codename>
 			<controller>gasturbine</controller>
-			<action>plantlist</action>
+			<action>list</action>
 		</gasturbines>
 		<conference>
 			<label>Conference</label>
@@ -210,7 +210,7 @@
 			<label>Gasturbines</label>
 			<codename>gtplantlist</codename>
 			<controller>gasturbine</controller>
-			<action>plantlist</action>
+			<action>list</action>
 		</gasturbines>
 		<conference>
 			<label>Conference</label>

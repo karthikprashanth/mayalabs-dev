@@ -344,10 +344,15 @@ class AdministrationController extends Zend_Controller_Action {
 	{
 		
 		$this->_helper->getHelper('layout')->disableLayout();
-		$pid = $this->getRequest()->getPost('plantid');
+		//$pid = $this->getRequest()->getPost('plantid');
+		$pid = $this->_getParam('plantid',0);
 		$this->view->plantid = $pid;
-		$umodel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),0,"");
-		$users = $umodel->getList(array("plantId" => $pid));
+		$users = Model_DbTable_User::getList(array("plantId" => $pid));
+		
+		for($i=0;$i<count($users);$i++){
+			$uprofile = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$users[$i]['id']);
+			$users[$i]['fullname'] = $uprofile->getFullName();
+		}
 		if(count($users) == 0)
 		{
 			echo "<center>No users added</center>";
@@ -355,9 +360,8 @@ class AdministrationController extends Zend_Controller_Action {
 			return;
 		}
 		$this->view->users = $users;
-		$this->view->usercount = count($users);
-		$validcc = $umodel->ccinfo();
-        $this->view->validcc = $validcc;
+		$this->view->usercount = Model_DbTable_User::getCount(array("plantId" => $pid));
+		$this->view->confchair = Model_DbTable_User::getConferenceChairman();
 	}
 	
 	public function dbinitAction()

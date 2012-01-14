@@ -1,27 +1,51 @@
 <?php
-$list = NULL;
-$list = $list . "<table>";
-$role = Zend_Registry::get('role');
-foreach ($this->GTdata as $gasturbines) {
-    $list = $list . "<tr>";
-    $list = $list . "<td><a href='" . $this->url(array('action' => 'view')) . "?id=" . $this->escape($gasturbines['GTId']) . "'>" . $gasturbines['GTName'] . "</a></td>";
-    $role = Zend_Registry::get('role');
-    $valid = false;
-	if($role == 'sa')
-	{
-		$valid = true;
+	
+	if (count($this->GTData) == 0) {
+	    $list = "<center>No gasturbines added</center>";
 	}
-    foreach ($this->gt as $temp) {
-        if ((int) $temp['GTId'] == (int) $gasturbines['GTId']) {
-            $valid = true;
-        }
-    }
-    if($valid)
-        $list = $list . "<td><a href='" . $this->url(array('action' => 'edit')) . "?id=" . $this->escape($gasturbines['GTId']) . "'>Edit</a></td>";
-    $list = $list . "</tr>";
-}
-$list = $list . "</table>";
-$this->tabPane("GTList", $list, array('title' => 'GT List'));
-echo $this->tabContainer("GTList", array());
-echo "<div style='padding:20px;'>".$this->paginationControl($this->GTdata,'Sliding','pagination.phtml')."</div>";
-?>
+	else{
+	foreach ($this->GTData as $gasturbines) {
+	    $list .=  "<div>";
+	    $list .=  "<span style='margin-right:10px;'><a href='/gasturbine/view?id=" . $this->escape($gasturbines['GTId']) . "'>" . $gasturbines['GTName'] . "</a></span>";
+	    $modelnum = Zend_Registry::get("gtgroupname");
+	    $list .=  "<span style='margin-right:10px;'>$modelnum</span>";
+	    
+	    if ($this->valid || $this->userRole == 'sa') {
+	        $list .=  "<span class = 'gt-edit'><a href='/gasturbine/edit" . "?id=" . $this->escape($gasturbines['GTId']) . "' style='color: #719b3e;'>Edit</a></span>";
+	    }
+	    $list .=  "</div>";	    
+	    if ($gasturbines['fcount'] == 0) {
+	        $fline = "<span style='color: #ec2d19; margin-left: 15px;'>No Findings</span>";
+	    } else {
+	        $fline = "<a href = '/gasturbine/view?id=" . $gasturbines['GTId'] . "#ui-tabs-2' style='color: #2e4e68;'>" . $fcount . " Findings</a>";
+	    }
+	    if ($gasturbines['ucount'] == 0) {
+	        $uline = "<span style='color: #ec2d19; margin-left: 15px;'>No Upgrades</span>";
+	    } else {
+	        $uline = "<a href = '/gasturbine/view?id=" . $gasturbines['GTId'] . "#ui-tabs-3' style='color: #2e4e68;'>" . $ucount . " Upgrades</a>";
+	    }
+	    if ($gasturbines['lcount'] == 0) {
+	        $lline = "<span style='color: #ec2d19; margin-left: 15px;'>No LTEs</span>";
+	    } else {
+	        $lline = "<a href = '/gasturbine/view?id=" . $gasturbines['GTId'] . "#ui-tabs-4' style='color: #2e4e68;'>" . $lcount . " LTEs</a>";
+	    }
+	    $plant = $pmodel->getPlant($gasturbines['plantId']);
+	    $pname = $plant['plantName'];
+	    $pid = $gasturbines['plantId'];
+	    $list .= "<div style='padding:15px; padding-left: 0px;'>";
+	    $list .= "<span>$fline, </span>";
+	    $list .= "<span>$uline, </span>";
+	    $list .= "<span>$lline</span>";
+	    $list .= "</div>";
+	    $list .= "<hr/><br/>";
+	}
+	}
+	if ($this->lastlogin == NULL) {
+	    $list .= "<center><a href = '/plant/view?id=$this->pid'>&lt;&lt; Back &nbsp;&nbsp;</a>";
+	    $list .= "<a href = '/dashboard/index'>Continue &gt;&gt;</a></center>";
+	}
+	$this->tabPane("GTList", $list, array('title' => 'GT List'));
+	echo $this->tabContainer("GTList", array());
+	if (count($this->GTData) != 0) {
+	    echo "<div style='padding:20px;'>" . $this->paginationControl($this->GTData, 'Sliding', 'pagination.phtml') . "</div>";
+	}

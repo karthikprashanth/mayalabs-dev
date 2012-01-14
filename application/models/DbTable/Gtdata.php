@@ -202,7 +202,7 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
         $row = $this->fetchAll("gtid = " . $gtid . " AND type = '" . $type . "'");
 		return count($row->toArray());
     }
-
+	
     /*
      * Sets the Mailed status of all Un-Mailed GT Data to Mailed
      */
@@ -249,7 +249,75 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
             $this->gtData = $gtData;            
         }
     }
+	
+	/**
+     * Returns a list containing all the GTData
+     *
+     * @param Array - Options to filter the results
+     * @return Array - A list of all Gtdata
+     */
+    public static function getList($options = array()) {
+        $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
+        
+        if (count($options)) {
+            if ($options['orderby'] != "") {
+                $order = "ORDER BY " . $options['orderby'];
+            }
 
+            if ($options['likeColumn'] != "") {
+                $like = "WHERE " . $options['likeColumn'] . " LIKE '%" . $options['likeTerm'] . "%'";
+            }
+        }
+        
+        if (count($options['columns'])){
+        	$where = " WHERE ";
+			foreach($options['columns'] as $key => $value){
+				$where .= $key . " = '" . $value . "' AND ";
+			}
+			$where = substr($where,0,strlen($where)-4);
+        }
+        
+        $stmt = $dbAdapter->query("SELECT * FROM gtdata " . $like . " " . $where . " " . $order);
+        $list = $stmt->fetchAll();
+        array($list);
+        
+        return $list;
+    }
+	
+	/**
+     * Returns the count of Gtdata
+     *
+     * @param Array - Options to filter the results
+     * @return Array - A list of all Gtdata
+     */
+    public static function getCount($options = array()) {
+        $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
+        
+        if (count($options)) {
+            if ($options['orderby'] != "") {
+                $order = "ORDER BY " . $options['orderby'];
+            }
+
+            if ($options['likeColumn'] != "") {
+                $like = "WHERE " . $options['likeColumn'] . " LIKE '%" . $options['likeTerm'] . "%'";
+            }
+        }
+        
+        if (count($options['columns'])){
+        	$where = " WHERE ";
+			foreach($options['columns'] as $key => $value){
+				$where .= $key . " = '" . $value . "' AND ";
+			}
+			$where = substr($where,0,strlen($where)-4);
+        }
+        
+        $stmt = $dbAdapter->query("SELECT COUNT(*) as count FROM gtdata " . $like . " " . $where . " " . $order);
+        $countRow = $stmt->fetchAll();
+        array($countRow);
+        
+        return $countRow[0]["count"];
+    }
+	
     /*
      * Updates the Table based on the local values stored
      */

@@ -125,15 +125,18 @@ class PlantController extends Zend_Controller_Action {
                     if ($this->getRequest()->getPost("modeselect") == "redirect") {
                             $this->_redirect('plant/view?id=' . $plantId);
                     }
-                    if ($this->getRequest()->getPost("modeselect") == "stay1") {
-                        $this->_redirect('plant/edit?id=' . $plantId . '#tabContainer-frag-1');
+                    if ($this->getRequest()->getPost("modeselect") == "go2") {
+                        $this->_redirect('plant/edit?id=' . $plantId . '#tabContainer-frag-2');
+                    }
+                    if ($this->getRequest()->getPost("modeselect") == "go3") {
+                        $this->_redirect('plant/edit?id=' . $plantId . '#tabContainer-frag-3');
                     }
                     if ($this->getRequest()->getPost("modeselect") == "stay2") {
                         $this->_redirect('plant/edit?id=' . $plantId . '#tabContainer-frag-2');
                     }
-                    if ($this->getRequest()->getPost("modeselect") == "stay3") {
+					if ($this->getRequest()->getPost("modeselect") == "stay3") {
                         $this->_redirect('plant/edit?id=' . $plantId . '#tabContainer-frag-3');
-                    }                    
+                    }                                        
 
                 }
                 else
@@ -156,10 +159,9 @@ class PlantController extends Zend_Controller_Action {
 
     public function adminAction() {
         try {
-            $resultSet = new Model_DbTable_Plant();
-            $resultSet = $resultSet->listPlants();
-
-            $plants = new Zend_Paginator(new Zend_Paginator_Adapter_DbSelect($resultSet));
+          	$plantList = Model_DbTable_Plant::getList(array('orderby' => 'plantName'));
+			
+            $plants = new Zend_Paginator(new Zend_Paginator_Adapter_Array($plantList));
             $plants->setItemCountPerPage(5)
                     ->setCurrentPageNumber($this->_getParam('page', 1));
 

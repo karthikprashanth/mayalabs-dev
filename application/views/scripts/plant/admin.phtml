@@ -3,14 +3,12 @@
 <?php
 try {
     $this->jQuery()->enable();
-	//$currentgitcommit = Zend_Registry::get('currentgitcommit');
-	//echo "Current GIT Commit Name - '" . $currentgitcommit . "'";
     echo $this->headScript()->prependFile($this->baseUrl().'/js/frontend.js');
     $i=0;
     foreach($this->plants as $plant) {
         echo $this->accordionPane('plants',"Loading Content... Please Wait...",
-                                  array('title' => $plant['plantName']),
-                                  array('id' => $plant['plantId'])
+                                  	array('title' => $plant['plantName']),
+                                  	array('id' => $plant['plantId'])
                                   );
         echo "<div style = 'display:none'><form><input type = 'hidden' id = 'plant".$i++."' value = '".$plant['plantId']."'></form></div>";
     }

@@ -24,7 +24,6 @@ class Model_HiveAcl extends Zend_Acl {
 		$this->add(new Zend_Acl_Resource('gasturbine:edit'), 'gasturbine');
 		$this->add(new Zend_Acl_Resource('gasturbine:view'), 'gasturbine');
 		$this->add(new Zend_Acl_Resource('gasturbine:list'), 'gasturbine');
-		$this->add(new Zend_Acl_Resource('gasturbine:plantlist'), 'gasturbine');
         $this->add(new Zend_Acl_Resource('gasturbine:index'), 'gasturbine');
         $this->add(new Zend_Acl_Resource('gasturbine:editvalidate'), 'gasturbine');
         $this->add(new Zend_Acl_Resource('gasturbine:addvalidate'), 'gasturbine');
@@ -112,7 +111,7 @@ class Model_HiveAcl extends Zend_Acl {
 		
 		$this->allow('us','userprofile');
 		$this->deny('us','userprofile','add');
-		$this->allow('us','gasturbine',array('index','view','details','plantlist'));
+		$this->allow('us','gasturbine',array('index','view','details','list'));
 		$this->allow('us','plant',array('view','index','list','results'));
 		$this->allow('us','authentication','logout');
 		$this->allow('us','dashboard');
