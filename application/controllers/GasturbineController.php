@@ -180,29 +180,34 @@ class GasturbineController extends Zend_Controller_Action
     public function listAction()
     {
     	$pid = $this->_getParam('id',0);
-    	
+    	$plant = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter(),$pid);
+		$this->view->headTitle($plant->getPlantName() . " - Gasturbines",'PREPEND');
+		
     	$gts = Model_DbTable_Gasturbine::getList(array('columns' => array('plantId' => $pid)));
     	
-		for($i=0;$i<count($gts);$i++){
+		for($i=0;$i<count($gts);$i++){			
 			$gts[$i]['fcount'] = Model_DbTable_Gtdata::getCount(array('columns' => array('type' => 'finding','GTId' => $gts[$i]['GTId'])));
 			$gts[$i]['ucount'] = Model_DbTable_Gtdata::getCount(array('columns' => array('type' => 'upgrade','GTId' => $gts[$i]['GTId'])));
 			$gts[$i]['lcount'] = Model_DbTable_Gtdata::getCount(array('columns' => array('type' => 'lte','GTId' => $gts[$i]['GTId'])));
+			
 		}
     	$GTdata = new Zend_Paginator(new Zend_Paginator_Adapter_Array($gts));
         $GTdata->setItemCountPerPage(5)
                ->setCurrentPageNumber($this->_getParam('page', 1));
-                                    
-       	$user = new Model_DbTable_User(Zend_Db_Table_Adapter::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
+                              
+       	$user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
 		
 		if($user->getPlantId() == $pid)
 			$this->view->valid = true;
 		else
 			$this->view->valid = false;
-		   
-    	$this->view->pid = $pid;
+		
+    	$this->view->pid = $pid;		
     	$this->view->GTData = $GTdata;
-		$this->view->userRole = Zend_Registry::getRole('role');
-		$this->lastlogin = Zend_Auth::getInstance()->getStorage()->read()->lastlogin;
+		
+		$this->view->userRole = Zend_Registry::get('role');
+		$this->view->lastlogin = Zend_Auth::getInstance()->getStorage()->read()->lastlogin;
+		
     }
 
 

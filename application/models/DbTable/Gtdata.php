@@ -1,9 +1,8 @@
-
 <?php
 
 class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
-
-    /*
+	
+	/*
 	 * Overrides the $_name of the parent class to indicate the name of the table it maps to
 	 *
 	 * @var String 
@@ -43,7 +42,7 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      *
      * @var String
      */
-    protected $time;
+    protected $updatetime;
 
     /*
      * Last Update User's Id
@@ -65,7 +64,7 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
 	 * @param Integer - Primary Key of the table
 	 */
     function  __construct($config = array(), $id = 0) {
-
+		
         parent::__construct($config);
 		
         $gtData = array();
@@ -76,7 +75,7 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
             $this->id = $gtDataRow['id'];
             $this->gtid = $gtDataRow['gtid'];
             $this->title = $gtDataRow['title'];
-            $this->time = $gtDataRow['updatetime'];
+            $this->updatetime = $gtDataRow['updatedate'];
             $this->user = $gtDataRow['userupdate'];
             $this->mailed = $gtDataRow['mailed'];
         }
@@ -115,7 +114,7 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      * @return String
      */
     public function getLastUpdateTime(){
-        return $this->time;
+        return $this->updatetime;
     }
 
     /*
@@ -123,7 +122,7 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      *
      * @return Integer
      */
-    public function getLastUpdateTime(){
+    public function getUserupdate(){
         return $this->user;
     }
 
@@ -142,8 +141,8 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      * @return Array
      */
     public static function getUnmailedData(){
-        $row = $this->fetchAll("mailed = 0");
-     	return $row->toArray();
+        //$row = $this->fetchAll("mailed = 0");
+     	//return $row->toArray();
     }
 
     /*
@@ -176,8 +175,8 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      * @return Array
      */
     public static function getByType($type){
-        $row = $this->fetchAll("gtid = " . $this->gtid . " AND type = '" . $type . "'");
-     	return $row->toArray();
+        //$row = $this->fetchAll("gtid = " . $this->gtid . " AND type = '" . $type . "'");
+     	//return $row->toArray();
     }
 
     /*
@@ -187,8 +186,8 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      * @return Array
      */
     public static function getByGT($gtid){
-        $row = $this->fetchAll("gtid = " . $gtid);
-     	return $row->toArray();
+        //$row = $this->fetchAll("gtid = " . $gtid);
+     	//return $row->toArray();
     }
 
     /*
@@ -199,17 +198,17 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      * @return Integer
      */
     public static function getTypeCount($type, $gtid){
-        $row = $this->fetchAll("gtid = " . $gtid . " AND type = '" . $type . "'");
-		return count($row->toArray());
+        //$row = $this->fetchAll("gtid = " . $gtid . " AND type = '" . $type . "'");
+		//return count($row->toArray());
     }
 	
     /*
      * Sets the Mailed status of all Un-Mailed GT Data to Mailed
      */
     public static function setMailedStatus(){
-        $data = array('mailed' => 1);
-     	$where['mailed = ?'] = 0;
-     	$this->update($data,$where);
+        //$data = array('mailed' => 1);
+     	//$where['mailed = ?'] = 0;
+     	//$this->update($data,$where);
     }
 
     /*
@@ -310,7 +309,6 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
 			}
 			$where = substr($where,0,strlen($where)-4);
         }
-        
         $stmt = $dbAdapter->query("SELECT COUNT(*) as count FROM gtdata " . $like . " " . $where . " " . $order);
         $countRow = $stmt->fetchAll();
         array($countRow);
@@ -395,6 +393,5 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
 //	 	$row = $this->fetchAll("gtid = " . $id . " AND type = '" . $type . "'");
 //		return count($row->toArray());
 //	 }
+	
 }
-
-?>

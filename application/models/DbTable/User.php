@@ -265,14 +265,9 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      */
     public static function getList($options = array())
     {
-        if (count($options['columns'])){
-        	$where = " WHERE ";
-			foreach($options['columns'] as $key => $value){
-				$where .= $key . " = '" . $value . "' AND ";
-			}
-			$where = substr($where,0,strlen($where)-4);
-        }
-
+        if (count($options))
+            $where = "WHERE id IN(SELECT id FROM userprofile WHERE plantId = " . $options['plantId'] . ")";
+		
         $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
         $stmt = $dbAdapter->query("SELECT * FROM users " . $where);
         $list = $stmt->fetchAll();        

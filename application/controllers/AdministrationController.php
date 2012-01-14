@@ -344,8 +344,7 @@ class AdministrationController extends Zend_Controller_Action {
 	{
 		
 		$this->_helper->getHelper('layout')->disableLayout();
-		//$pid = $this->getRequest()->getPost('plantid');
-		$pid = $this->_getParam('plantid',0);
+		$pid = $this->getRequest()->getPost('plantid');
 		$this->view->plantid = $pid;
 		$users = Model_DbTable_User::getList(array("plantId" => $pid));
 		
