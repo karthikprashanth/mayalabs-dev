@@ -2,11 +2,13 @@
 
 class Form_GTDataForm extends Zend_Form {
 
-    public function showform($gturbineid, $gtdataid, $gtdatatype) {
+    public function showform($gturbineid, $gtdataid, $gtdatatype) {        
         $this->setName('GTData');
-
-        $pObj = new Model_DbTable_Presentation();
-        $presentationValue = $pObj->fetchAll("GTId = " . $gturbineid);
+        
+//        $pObj = new Model_DbTable_Presentation();
+//        $presentationValue = $pObj->fetchAll("GTId = " . $gturbineid);
+        
+        $presentationValue = Model_DbTable_Presentation::getList($gturbineid);        
 
         $data = array();
         $data[''] = 'Select an Option';
@@ -14,14 +16,14 @@ class Form_GTDataForm extends Zend_Form {
             $doflabel = "Finding";
         } else {
             $doflabel = "Implementation";
-        }
+        }        
         if ($gtdataid == 0) {
             foreach ($presentationValue as $pl) {
                 $data[$pl->presentationId] = $pl->title;
-            }
+            }            
         } else {
-            $gtdatamodel = new Model_DbTable_Gtdata();
-            $gtdata = $gtdatamodel->getData($gtdataid);
+            $gtdatamodel = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(), $gtdataid);
+            $gtdata = $gtdatamodel->getData();            
 
             $presid = explode(",", substr($gtdata['presentationId'], 0, strlen($gtdata['presentationId']) - 1));
             foreach ($presentationValue as $pl) {
@@ -36,18 +38,22 @@ class Form_GTDataForm extends Zend_Form {
                 }
             }
         }
+        
+//        $system = $sysModel->fetchAll();
+        $system = Model_DbTable_Gtsystems::getList();
 
-        $sysModel = new Model_DbTable_Gtsystems();
-        $system = $sysModel->fetchAll();
-        $sysSubModel = new Model_DbTable_Gtsubsystems();
-        $subsystem = $sysSubModel->fetchAll();
+        
+//        $subsystem = $sysSubModel->fetchAll();
+        $subsystem = Model_DbTable_Gtsubsystems::getList();
+        
+        
         $sysNames = array();
         $sysNames[''] = 'Select an Option';
         $sysSubNames[''] = 'Select an Option';
-        foreach ($system as $list) {
+        foreach ($system as $list) {            
             $sysNames[$list['sysId']] = $list['sysName'];
         }
-        foreach ($subsystem as $slist) {
+        foreach ($subsystem as $slist) {            
             $sysSubNames[$slist['id']] = $slist['subSysName'];
         }
 

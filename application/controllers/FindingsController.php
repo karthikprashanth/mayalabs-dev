@@ -23,20 +23,24 @@ class FindingsController extends Zend_Controller_Action {
             $gtid['gtid'] = $this->getRequest()->getPost('gtid');
             $this->view->headTitle('Add New Finding', 'PREPEND');
             $form = new Form_GTDataForm();
-			$form->showform($gtid['gtid'],0,"finding");
+            
+			$form->showform($gtid['gtid'],0,"finding");            
             $form->submit->setLabel('Add');           	
             $this->view->form = $form;
-            $sysModel = new Model_DbTable_Gtsystems();
+            
+            $sysModel = new Model_DbTable_Gtsystems(Zend_Db_Table_Abstract::getDefaultAdapter(), 0);
             $this->view->subsystems = $sysModel->fetchAll();
+            
             $form->populate($gtid);
             if ($this->getRequest()->isPost()) {
                 $formData = $this->getRequest()->getPost();
                 if (isset($formData['title'])) {
                     if ($form->isValid($formData)) {
-                        $userp = new Model_DbTable_Finding();
+//                        $userp = new Model_DbTable_Finding();
+                        $userp = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(), 0);
                         $content = $form->getValues();
 						$type = "finding";
-						$grpdata = $userp->fetchAll("gtid = " . $gtid['gtid'] . " AND type = '" . $type . "'");
+						$grpdata = $userp->getList(array('columns' => array('type' => 'finding')));
 						foreach($grpdata as $data)
 						{
 							if($data['title'] == $content['title'])
@@ -56,7 +60,7 @@ class FindingsController extends Zend_Controller_Action {
 	                        }
 	                    }
 						
-						$pmodel = new Model_DbTable_Presentation();
+//						$pmodel = new Model_DbTable_Presentation(Zend_Db_Table_Abstract::getDefaultAdapter(), 0);
 						$funcs = new Model_Functions();
 						
 						$filenames = array(
@@ -103,7 +107,8 @@ class FindingsController extends Zend_Controller_Action {
 							);
 							
 							/* checking for presentation title conflcts */
-							$gtpres = $pmodel->fetchAll('GTId = '. $gtid['gtid']);
+//							$gtpres = $pmodel->fetchAll('GTId = '. $gtid['gtid']);
+                            $gtpres = Model_DbTable_Presentation::getList($gtid['gtid']);
 							$exists = false;
 							foreach($gtpres as $gtp)
 							{
@@ -153,7 +158,11 @@ class FindingsController extends Zend_Controller_Action {
 							'TOI' => $content['TOI']
 							
 						);
-                        $fid = $userp->add($inscontent);
+//                        $fid = $userp->add($inscontent);
+                        
+                        $userp->setGTData($inscontent);
+                        $fid = $userp->save();
+
                         $this->_redirect('/findings/view?id=' . $fid);
                     } else {
                     	$x = 1;
