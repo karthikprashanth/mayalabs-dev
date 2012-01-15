@@ -157,67 +157,63 @@ class PlantController extends Zend_Controller_Action {
         }
     }
 
-    public function adminAction() {
-        try {
-          	$plantList = Model_DbTable_Plant::getList(array('orderby' => 'plantName'));
-			
-            $plants = new Zend_Paginator(new Zend_Paginator_Adapter_Array($plantList));
-            $plants->setItemCountPerPage(5)
-                    ->setCurrentPageNumber($this->_getParam('page', 1));
-
-            $this->view->plants = $plants;
-        } catch (Exception $exc) {
-            echo $exc;
-        }
-    }
 
     public function listAction() 
     {
-    
- 		$plantModel = new Model_DbTable_Plant();
-		$plants = $plantModel::getList();
-		
-		$plantNames = array();
-		
-		$i=0;
-		foreach($plants as $plant){
-			if($plant['plantId'] != 1){
-				$plantNames[$i++] = $plant['plantName'];
-			}	
-		}
+    	try{
+	 		$plantModel = new Model_DbTable_Plant();
+			$plants = $plantModel::getList();
 			
-		$this->view->plantNames = $plantNames;
+			$plantNames = array();
+			
+			$i=0;
+			foreach($plants as $plant){
+				if($plant['plantId'] != 1){
+					$plantNames[$i++] = $plant['plantName'];
+				}	
+			}
+				
+			$this->view->plantNames = $plantNames;
+		}
+		catch(Exception $e){
+			echo $e;
+		}
     }
 
     public function resultsAction() 
     {
-        $this->_helper->getHelper('layout')->disableLayout();
-        
-		//Plant Name typed in the Auto Complete textbox
-        $term = $this->_getParam('term');
-		
-		//Lower Limit and Upper Limit for Pagination purpose
-        $ll = $this->_getParam('ll');
-        $ul = $this->_getParam('ul');
-		
-        $plantModel = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter());
-        $results = $plantModel::getList(array('likeColumn' => 'plantName','likeTerm' => $term,'orderby' => 'plantName'));
-        
-        if ($term == NULL) {
-            $results = $plantModel::getList(array('orderby' => 'plantName'));
-        }
-
-        foreach($results as $result)
-        {
-            $userlist[$result['plantId']] = Model_DbTable_Userprofile::getList(array('columns' => array('plantId' => $result['plantId'])));
-        }
-        
-		$this->view->results = $results;
-        $this->view->userlist = $userlist;
-        $this->view->resultcount = $plantModel::getCount();
-		$this->view->term = $term;
-        $this->view->ll = $ll;
-        $this->view->ul = $ul;
+    	try{
+	        $this->_helper->getHelper('layout')->disableLayout();
+	        
+			//Plant Name typed in the Auto Complete textbox
+	        $term = $this->_getParam('term');
+			
+			//Lower Limit and Upper Limit for Pagination purpose
+	        $ll = $this->_getParam('ll');
+	        $ul = $this->_getParam('ul');
+			
+	        $plantModel = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter());
+	        $results = $plantModel::getList(array('likeColumn' => 'plantName','likeTerm' => $term,'orderby' => 'plantName'));
+	        
+	        if ($term == NULL) {
+	            $results = $plantModel::getList(array('orderby' => 'plantName'));
+	        }
+	
+	        foreach($results as $result)
+	        {
+	            $userlist[$result['plantId']] = Model_DbTable_Userprofile::getList(array('columns' => array('plantId' => $result['plantId'])));
+	        }
+	        
+			$this->view->results = $results;
+	        $this->view->userlist = $userlist;
+	        $this->view->resultcount = $plantModel::getCount();
+			$this->view->term = $term;
+	        $this->view->ll = $ll;
+	        $this->view->ul = $ul;
+	  }
+      catch(Exception $e){
+      	echo $e;
+      }
     }
 
 }

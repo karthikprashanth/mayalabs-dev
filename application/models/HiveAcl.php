@@ -33,7 +33,6 @@ class Model_HiveAcl extends Zend_Acl {
 
 		$this->add(new Zend_Acl_Resource('plant'));
 		$this->add(new Zend_Acl_Resource('plant:index'), 'plant');
-		$this->add(new Zend_Acl_Resource('plant:admin'), 'plant');
 		$this->add(new Zend_Acl_Resource('plant:add'), 'plant');
 		$this->add(new Zend_Acl_Resource('plant:edit'), 'plant');
 		$this->add(new Zend_Acl_Resource('plant:view'), 'plant');

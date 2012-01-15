@@ -41,8 +41,8 @@
                 </add>
 				<admin>
 					<label>Admin</label>
-					<controller>plant</controller>
-					<action>admin</action>
+					<controller>administration</controller>
+					<action>users</action>
 					<resource>plant</resource>
 					<privilege>admin</privilege>
 				</admin>

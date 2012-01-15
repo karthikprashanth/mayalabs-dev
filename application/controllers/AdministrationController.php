@@ -258,6 +258,20 @@ class AdministrationController extends Zend_Controller_Action {
             echo $e;
         }
     }
+	
+	public function usersAction() {
+        try {
+          	$plantList = Model_DbTable_Plant::getList(array('orderby' => 'plantName'));
+			
+            $plants = new Zend_Paginator(new Zend_Paginator_Adapter_Array($plantList));
+            $plants->setItemCountPerPage(5)
+                    ->setCurrentPageNumber($this->_getParam('page', 1));
+
+            $this->view->plants = $plants;
+        } catch (Exception $exc) {
+            echo $exc;
+        }
+    }
 
     public function setccAction() {
         $id = $this->_getParam('id', 0);
