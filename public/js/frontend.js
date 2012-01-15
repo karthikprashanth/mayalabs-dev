@@ -14,7 +14,7 @@ $(document).ready( function(){
             change: function(event,ui) {
 				var index = jQuery(this).find("h3").index(ui.newHeader[0]);
 				var plantid = document.getElementById('plant'+index).value;			
-                $('.ui-accordion-content-active').load('../administration/adminlist/',{"plantid": plantid})
+                $('.ui-accordion-content-active').load('../administration/list/',{"plantid": plantid})
                                                                   .height(250);
             }
         });
