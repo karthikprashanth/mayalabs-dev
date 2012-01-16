@@ -5,53 +5,22 @@ class UserprofileController extends Zend_Controller_Action {
     public function init() {
         $contextSwitch = $this->_helper->getHelper('contextSwitch');
         $contextSwitch->addActionContext('changepassword', 'json')
-                ->initContext();
+                	  ->initContext();
     }
 
     public function indexAction() {
-        $this->view->headTitle('Edit User', 'PREPEND');
-        try {
-            $form = new Form_UserprofileForm();
-			
-            $form->submit->setLabel('Save');
-            if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
-                $form->submit->setLabel('Save & Continue');
-            }
-            $this->view->form = $form;
-            if ($this->getRequest()->isPost()) {
-                $formData = $this->getRequest()->getPost();
-                if ($form->isValid($formData)) {
-                    $userup = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(), Zend_Auth::getInstance()->getStorage()->read()->id);
-					
-                    $content = $form->getValues();
-					                   
-                    $userup->setUserprofileData($content);
-                    $userup->save();
-                    
-                    if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
-                            $this->_redirect('userprofile/view');
-                    }
-                    $this->_helper->redirector('view');
-                }
-                else {
-                    $form->populate($formData);
-                }
-            } else {
-                $user = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(), Zend_Auth::getInstance()->getStorage()->read()->id);
-				$pid = $user->getPlantId();
-                $form->populate($user->getUserprofileData());
-				$role = Zend_Registry::get("role");
-				if($role == 'sa')
-					$form->plantid->setValue($pid);
-            }
-        } catch (Exception $e) {
-            echo $e;
-        }
+    	try{
+	        $uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+			$this->_redirect("/userprofile/view?id=".$uid);
+		}
+		catch(Exception $e){
+			echo $e;
+		}
     }
 
     public function addAction() {
-        $this->view->headTitle('Add User', 'PREPEND');
         try {
+        	$this->view->headTitle('Add User', 'PREPEND');
             $form = new Form_UserprofileForm();
             $form->submit->setLabel('Add');
             $this->view->form = $form;
@@ -59,9 +28,9 @@ class UserprofileController extends Zend_Controller_Action {
                 $formData = $this->getRequest()->getPost();
                 if ($form->isValid($formData)) {
                     $id = $this->_getParam('id');
-                    $userp = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(), $id);
+                    $userProfile = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter());
                     $content = $form->getValues();
-                   	$users = $userp->getList();
+                   	$users = Model_DbTable_Userprofile::getList();
 					$exists = false;
 					foreach($users as $user)
 					{
@@ -75,8 +44,12 @@ class UserprofileController extends Zend_Controller_Action {
 						$this->view->message = "Email already belongs to another user";
 						return;
 					}
-					$userp->setUserprofileData($content);
-                    $userp->save();
+					$plant = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter(),$content['plantid']);
+					$content['id'] = $id;
+					$content['corporateName'] = $plant->getCorporateName();
+					$content['plantName'] = $plant->getPlantName();
+					$userProfile->setUserprofileData($content);
+                    $userProfile->save();
                     $this->_redirect('/userprofile/view?id='.$id);
                 } else {
                     $form->populate($formData);
@@ -88,37 +61,35 @@ class UserprofileController extends Zend_Controller_Action {
     }
 
     public function editAction() {
-        $this->view->headTitle('Edit User', 'PREPEND');
+        
         try {
             $form = new Form_UserprofileForm();
+				
             $form->submit->setLabel('Save');
             if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
                 $form->submit->setLabel('Save & Continue');
             }
             $this->view->form = $form;
+			$user = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(), Zend_Auth::getInstance()->getStorage()->read()->id);
+			$this->view->headTitle($user->getFullName() . ' - Edit User', 'PREPEND');
             if ($this->getRequest()->isPost()) {
                 $formData = $this->getRequest()->getPost();
-                if ($form->isValid($formData)) {                    
-                    $content = $form->getValues();                    
-                    $userup = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
-                    $userup->setUserprofileData($content);                    
-                    $userup->save();
-                    if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
-                        /*if (Zend_Auth::getInstance()->getStorage()->read()->role != 'us')
-                            $this->_redirect('plant/edit');*/
-                        $ses = new Zend_Session_Namespace('Zend_Auth');
-                        $ses->storage->lastlogin = $d = date('Y-m-d H:i:s');
-                        $this->_redirect('dashboard/index');
-                    }
-                    
-                    $this->_helper->redirector('view');
+                if ($form->isValid($formData)) {
+                    $content = $form->getValues();
+					$content['id'] = Zend_Auth::getInstance()->getStorage()->read()->id;
+                    $user->setUserprofileData($content);
+                    $user->save();
+                   	$this->_redirect('userprofile/view');
                 }
                 else {
                     $form->populate($formData);
                 }
             } else {
-                $userup = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
-                $form->populate($userup->getUserprofileData());
+				$pid = $user->getPlantId();
+                $form->populate($user->getUserprofileData());
+				$role = Zend_Registry::get("role");
+				if($role == 'sa')
+					$form->plantid->setValue($pid);
             }
         } catch (Exception $e) {
             echo $e;
@@ -150,8 +121,7 @@ class UserprofileController extends Zend_Controller_Action {
 			else {
 				$this->view->iscc = "";
 			}
-            $this->view->headTitle('View User - ' . $profileData['firstName'] . ' ' . $profileData['lastName'], 'PREPEND');
-
+            $this->view->headTitle('Profile - ' .$profileData['firstName'] . ' ' . $profileData['lastName'], 'PREPEND');
             $this->view->profileData = $profileData;
 			
         } catch (Exception $e) {
@@ -168,24 +138,22 @@ class UserprofileController extends Zend_Controller_Action {
             if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
                 $form->submit->setLabel('Save & Continue');
             }
-            $this->view->message = "Not yet posted";
             if ($this->getRequest()->isPost()) {
                 $formData = $this->getRequest()->getPost();
                 if ($form->isValid($formData)) {
                     $content = $form->getValues();
-                    $userPass = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$content['id'], "");
+                    $userPass = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id, "");
                     $oldPassword = $form->getValue('oldPassword');
                     $newPassword = $form->getValue('newPassword');
                     $reNewPassword = $form->getValue('reNewPassword');
                     if ($newPassword == $reNewPassword) {
                         $statusPass = $userPass->setPassword($newPassword);
-                        $userPass->save();
                         if ($statusPass == 1) {
                             $this->view->message = 'Password has been changed';
 							
 							//Send Mail
 							
-							$umodel = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),$content['id']);
+							/*$umodel = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),$content['id']);
 							$user = $umodel->getUserprofileData();
 							$mailbody = "<div style='width: 100%; '><div style='border-bottom: solid 1px #aaa; margin-bottom: 10px;'>";
 					        $mailbody = $mailbody . "<a href='http://www.hiveusers.com' style='text-decoration: none;'><span style='font-size: 34px; color: #2e4e68;'><b>hive</b></span>";
@@ -202,12 +170,11 @@ class UserprofileController extends Zend_Controller_Action {
 					        $mail->addTo($user['email'], $user['firstName']);
 					        $mail->setSubject('Password Changed Successfully');
 					        $mail->send();
-							$this->_redirect("userprofile/index");
+							$this->_redirect("userprofile/index");*/
 							
 							//----//
-							
                             if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '')
-                                $this->_redirect('userprofile/index');
+                                $this->_redirect('userprofile/edit');
                         } else
                             $this->view->message = 'Wrong Password';
                     }
@@ -218,52 +185,9 @@ class UserprofileController extends Zend_Controller_Action {
                     $form->populate($formData);
                 }
             }
-
-
             $this->view->form = $form;
         } catch (Exception $e) {
             echo $e;
         }
     }
-
-    public function editvalidateAction() {
-        try {
-            $this->_helper->viewRenderer->setNoRender();
-            $this->_helper->getHelper('layout')->disableLayout();
-
-            $form = new Form_UserprofileForm();
-            $formData = $this->getRequest()->getPost();
-            $form->isValid($formData);
-            $json = $form->getMessages();
-            echo Zend_Json::encode($json);
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-    public function addvalidateAction() {
-        try {
-            $this->_helper->viewRenderer->setNoRender();
-            $this->_helper->getHelper('layout')->disableLayout();
-            $form = new Form_UserprofileForm();
-            $formData = $this->getRequest()->getPost();
-            $form->isValid($formData);
-            $json = $form->getMessages();
-            echo Zend_Json::encode($json);
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-    public function displaynameAction() {
-        try {
-            if(!$this->_request->isXmlHttpRequest())
-                $this->_helper->viewRenderer->setResponseSegment('displayname');
-            $up = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);            
-            $this->view->name = $up->getFullName();
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
 }

@@ -68,7 +68,10 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
             	$userRow = $this->fetchRow("id = " . $userId);
 			else if($username != "")
 				$userRow = $this->fetchRow("username = '" . $username . "'");
-
+			if(!count($userRow)){
+				$this->userId = 0;
+				return;
+			}
             $this->userData = $userRow->toArray();
             $this->userId = $userRow['id'];
             $this->userName = $userRow['username'];
@@ -330,9 +333,10 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
     {
         //$forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
         //$forumUserModel->setPassword($password);
-		$data['password'] = $this->encryptPassword($password);
-        $where['id = ?'] = $this->userId;
-        return $this->update($data,$where);
+		$data['password'] = $this->encryptPassword($password);		
+        $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);
+        $rowsAffected =  $this->update($data,$where);
+		return $rowsAffected;
     }
 
     /**
@@ -342,7 +346,7 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
 	 * @param Integer - Whether the encryption is for forum (plain MD5) or for general purpose(MD5 + Salt)
      * @return String - The encrypted password
      */
-    protected function encryptPassword($password,$forForum = 0)
+    public function encryptPassword($password,$forForum = 0)
     {
         if(!$forForum)
             return md5($password . '{' . $this->userId . '}');

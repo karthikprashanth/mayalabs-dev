@@ -65,12 +65,10 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
         parent::__construct($config);
 
         $userData = array();
-		
         if ($userId) {
             $userprofileRow = $this->fetchRow("id = " . $userId);
 			
             $this->userprofileData = $userprofileRow->toArray();
-            
             $this->userId = $this->userprofileData['id'];
             $this->plantId = $this->userprofileData['plantId'];
             $this->firstName = $this->userprofileData['firstName'];
@@ -219,15 +217,13 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
      */
     public function setUserprofileData($userprofileData)
     {
-        if($userprofileData['id'] == 0 | $userprofileData['id'] == $this->userId){
-                $this->plantId = $userprofileData['plantId'];
-                $this->plantName = $userprofileData['plantName'];
-                $this->corporateName = $userprofileData['corporateName'];
-                $this->firstName = $userprofileData['firstName'];
-                $this->fullName = $userprofileData['firstName'] . " " . $userprofileData['lastName'];
-                $this->email = $userprofileData['email'];
-                $this->userprofileData = $userprofileData;
-        }
+	    $this->plantId = $userprofileData['plantId'];
+	    $this->plantName = $userprofileData['plantName'];
+	    $this->corporateName = $userprofileData['corporateName'];
+	    $this->firstName = $userprofileData['firstName'];
+	    $this->fullName = $userprofileData['firstName'] . " " . $userprofileData['lastName'];
+	    $this->email = $userprofileData['email'];
+	    $this->userprofileData = $userprofileData;
     }
 	
     /**
@@ -280,20 +276,18 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
      */
     public function save()
     {
-        if($userprofileData['id']){
-            $forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
-            $forumUserModel->setUserData($this->userprofileData);
-            $forumUserModel->save();
-            
+        if($this->userprofileData['id']){
+            //$forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
+            //$forumUserModel->setUserData($this->userprofileData);
+            //$forumUserModel->save();
             $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);    
             $this->update($this->userprofileData, $where);
         }
         else {
-            $forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
+            /*$forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
             $forumUserModel->setUserData($this->userprofileData);
-            $forumUserModel->save();
-			
-            $this->userId = $this->insert($this->userData);
+            $forumUserModel->save();*/
+            $this->userId = $this->insert($this->userprofileData);
 			
         }
         

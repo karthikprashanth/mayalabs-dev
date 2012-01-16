@@ -62,11 +62,11 @@ class ValidationController extends Zend_Controller_Action
 			{
 				$form = new Form_PresentationForm();
 			}
-			else if($formname = "schevent")
+			else if($formname == "schevent")
 			{
 				$form = new Form_ScheduleEventForm();
 			}
-			else if($formname = "schedule")
+			else if($formname == "schedule")
 			{
 				$form = new Form_ScheduleForm();
 			}
@@ -85,7 +85,6 @@ class ValidationController extends Zend_Controller_Action
 	            $json = $form->getMessages();
 			}
 			echo Zend_Json::encode($json);
-        
         } 
         catch (Exception $e) {
             echo $e;

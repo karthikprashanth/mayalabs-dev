@@ -10,45 +10,10 @@ class AuthenticationController extends Zend_Controller_Action {
 	public function indexAction() {
         
     }
-
-    public function getAuthAdapter() {
+	
+	public function loginAction() {
         try {
-            $authAdapter = new Zend_Auth_Adapter_DbTable(Zend_Db_Table::getDefaultAdapter());
-            $authAdapter->setTableName('users')
-                    ->setIdentityColumn('username')
-                    ->setCredentialColumn('password');
-            return $authAdapter;
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-    public static function isFirstTime() {
-        try {
-            $toRead = new Zend_Session_Namespace('Zend_Auth');
-            $restoreId = $toRead->ftl;
-            if ($restoreId == 'true') {
-                return true;
-            }
-            return false;
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-    public static function clearFirstTime() {
-        try {
-            $toRead = new Zend_Session_Namespace('Zend_Auth');
-            unset($toRead->ftl);
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-    
-
-    public function loginAction() {
-        try {
+            
             $this->_helper->getHelper('Layout')->disableLayout();
             $this->view->headTitle('Login', 'PREPEND');
             if (Zend_Auth::getInstance()->hasIdentity()) {
@@ -81,11 +46,11 @@ class AuthenticationController extends Zend_Controller_Action {
                     $authAdapter = $this->getAuthAdapter();
                     $username = $form->getValue('username');
 
-                    $umodel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),0,$username);
-//                    $user = $umodel->getUserData();
-                    $id = $umodel->getUserId();
+                    $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),0,$username);
+                    $id = $user->getUserId();
+					
                     $plain_password = $form->getValue('password');
-                    $password = md5($form->getValue('password') . '{' . $id . '}');
+                    $password = $user->encryptPassword($form->getValue('password'));
 
                     $authAdapter->setIdentity($username)
                                 ->setCredential($password);
@@ -136,11 +101,11 @@ class AuthenticationController extends Zend_Controller_Action {
                             //-----//
                             if ($lastlogin == null) {
                                 $toWrite = new Zend_Session_Namespace('Zend_Auth');
-                                $umodel->setLastLogin();
+                                $user->setLastLogin();
                                 echo "Entered 1st block, $t_url";
                                 $this->_redirect('userprofile/changepassword');
                             } else {
-                                $umodel->setLastLogin();
+                                $user->setLastLogin();
                                 echo "Entered 1st block, $t_url";
                                 $this->_redirect($form->getValue('t_url'));
                             }
@@ -160,7 +125,73 @@ class AuthenticationController extends Zend_Controller_Action {
         }
     }
 
-    public function extlogoutAction() {
+    
+
+    public function logoutAction() {
+        //logout from forum
+        try {
+            $uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+            /*global $phpbb_root_path, $phpEx, $user, $db, $config, $cache, $template;
+            define('IN_PHPBB', true);
+            $phpbb_root_path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+            $phpbb_root_path = substr($phpbb_root_path, 0, strlen($phpbb_root_path) - 24);
+            $phpbb_root_path = $phpbb_root_path . "public" . DIRECTORY_SEPARATOR . "forums" . DIRECTORY_SEPARATOR;
+            $phpEx = "php";
+            include($phpbb_root_path . 'common.' . $phpEx);
+            // Start session management
+            $user->session_kill();
+            $user->session_begin();
+            //Unset the third pary secure id
+            $ext = $this->getRequest()->getPost("ext");
+            $sid = $this->getRequest()->getPost("sid");*/
+
+            /*if ($ext == "yes" && $sid != "") {
+                $umodel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(), $uid, "");
+                $umodel->unSetSecureId($sid);
+            }*/ 
+            //logout from hive
+            Zend_Auth::getInstance()->clearIdentity();
+            $this->_redirect('');
+        } catch (Exception $e) {
+            echo $e;
+        }
+    }    
+	
+	public function getAuthAdapter() {
+        try {
+            $authAdapter = new Zend_Auth_Adapter_DbTable(Zend_Db_Table::getDefaultAdapter());
+            $authAdapter->setTableName('users')
+                    ->setIdentityColumn('username')
+                    ->setCredentialColumn('password');
+            return $authAdapter;
+        } catch (Exception $e) {
+            echo $e;
+        }
+    }
+
+    public static function isFirstTime() {
+        try {
+            $toRead = new Zend_Session_Namespace('Zend_Auth');
+            $restoreId = $toRead->ftl;
+            if ($restoreId == 'true') {
+                return true;
+            }
+            return false;
+        } catch (Exception $e) {
+            echo $e;
+        }
+    }
+
+    public static function clearFirstTime() {
+        try {
+            $toRead = new Zend_Session_Namespace('Zend_Auth');
+            unset($toRead->ftl);
+        } catch (Exception $e) {
+            echo $e;
+        }
+    }
+
+    /*public function extlogoutAction() {
         try{
         $this->_helper->getHelper('Layout')->disableLayout();
         $sid = $this->getRequest()->getPost('sid');
@@ -173,36 +204,5 @@ class AuthenticationController extends Zend_Controller_Action {
         }catch(Exception $e){
             echo $e;
         }
-    }
-
-    public function logoutAction() {
-        //logout from forum
-        try {
-            $uid = Zend_Auth::getInstance()->getStorage()->read()->id;
-            global $phpbb_root_path, $phpEx, $user, $db, $config, $cache, $template;
-            define('IN_PHPBB', true);
-            $phpbb_root_path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-            $phpbb_root_path = substr($phpbb_root_path, 0, strlen($phpbb_root_path) - 24);
-            $phpbb_root_path = $phpbb_root_path . "public" . DIRECTORY_SEPARATOR . "forums" . DIRECTORY_SEPARATOR;
-            $phpEx = "php";
-            include($phpbb_root_path . 'common.' . $phpEx);
-            // Start session management
-            $user->session_kill();
-            $user->session_begin();
-            //Unset the third pary secure id
-            $ext = $this->getRequest()->getPost("ext");
-            $sid = $this->getRequest()->getPost("sid");
-
-            if ($ext == "yes" && $sid != "") {
-                $umodel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(), $uid, "");
-                $umodel->unSetSecureId($sid);
-            }
-            //logout from hive
-            Zend_Auth::getInstance()->clearIdentity();
-            $this->_redirect('');
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
+    }*/
 }
