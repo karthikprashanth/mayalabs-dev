@@ -15,7 +15,7 @@
                 <add>
                     <label>Add</label>
                     <controller>administration</controller>
-                    <action>createacc</action>
+                    <action>createaccount</action>
                     <resource>administration</resource>
                     <privilege>createacc</privilege>
                 </add>

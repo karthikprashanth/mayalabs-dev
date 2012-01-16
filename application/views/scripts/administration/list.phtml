@@ -27,7 +27,7 @@
 <td><?php echo $this->escape($user['role']);?></td>
 <td>
 
-<form action="<?php echo $this->url(array('action'=>'deleteacc')); ?>" method="post">
+<form action="<?php echo $this->url(array('action'=>'deleteaccount')); ?>" method="post">
 <input type="hidden" name="id" value="<?php echo $this->escape($user['id']);?>" />
 <?php if($user['role'] == 'sa') : ?>
 <input type="submit" class = 'gt-delete' name="del" value="Delete"	/>
@@ -38,7 +38,7 @@
 
 </td>
 <td>
-<form action= "/administration/resetpassword?source=list" method="post">
+<form action= "/administration/resetpassword" method="post">
 <input type="hidden" name="id" value="<?php echo $this->escape($user['id']);?>" />
 <input type="submit" class="reset-button" name="resetpass" value="Reset Password" />
 </form>
@@ -51,17 +51,17 @@
 </td>
 
 <?php
-	if($this->validcc==0){
-		echo "<td><form action = '/administration/setcc' method='post'>";
+	if($this->confchair==0){
+		echo "<td><form action = '/administration/setconferencechairman' method='post'>";
 		echo "<input type='hidden' name = 'id' value = '" . $user['id'] . "'>";
 		echo "<input type='submit' class = 'gt-add' name='setcc' value = 'Set Conference Chairman'>";
 		echo "</form></td>";
 	}
 	else{
-		if($this->validcc==$user['id']){
-			echo "<td><form action = '/administration/unsetcc' method='post'>";
+		if($this->confchair==$user['id']){
+			echo "<td><form action = '/administration/unsetconferencechairman' method='post'>";
 			echo "<input type='hidden' name = 'id' value = '" . $user['id'] . "'>";
-			echo "<input type='submit' class = 'gt-add' name='setcc' value = 'Unset Conference Chairman'>";
+			echo "<input type='submit' class = 'gt-delete' name='setcc' value = 'Unset Conference Chairman'>";
 			echo "</form></td>";
 		}
 	}
