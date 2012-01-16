@@ -108,8 +108,11 @@ class FindingsController extends Zend_Controller_Action {
 							
 							/* checking for presentation title conflcts */
 //							$gtpres = $pmodel->fetchAll('GTId = '. $gtid['gtid']);
+                            $pmodel = new Model_DbTable_Presentation(Zend_Db_Table_Abstract::getDefaultAdapter(), 0);
+                            
                             $gtpres = Model_DbTable_Presentation::getList($gtid['gtid']);
-							$exists = false;
+
+                            $exists = false;
 							foreach($gtpres as $gtp)
 							{
 								if($gtp['title'] == $prestitles[$i])
@@ -117,6 +120,7 @@ class FindingsController extends Zend_Controller_Action {
 									$exists = true;
 								}
 							}
+                            
 							if($exists && !$checked[$i])
 							{
 								$this->view->message = "Presentation title already exists";
@@ -125,8 +129,12 @@ class FindingsController extends Zend_Controller_Action {
 							
 							if($prestitles[$i] != "" && $prestitles[$i] != NULL)
 							{
-								$p = $pmodel->insert($data);
-								$checked[$i] = true;
+//								$p = $pmodel->insert($data);
+
+                                $pmodel->setData($data);
+                                $p = $pmodel->save();
+
+                                $checked[$i] = true;
 								if($temp == "")
 								{
 									$temp = $p . ",";

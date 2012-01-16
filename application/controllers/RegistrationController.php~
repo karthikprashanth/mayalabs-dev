@@ -1,0 +1,58 @@
+<?php
+
+class RegistrationController extends Zend_Controller_Action
+{
+
+    public function init()
+    {
+        /* Initialize action controller here */
+    }
+
+    public function indexAction()
+    {
+        $register = new Model_Registration();
+                $this->view->register = $register->fetchAll();
+    }
+
+    public function createaccAction()
+    {
+        $form = new Form_RegistrationForm();
+                $form->submit->setLabel('Add');
+                $this->view->form = $form;
+                if ($this->getRequest()->isPost()) {
+                  $formData = $this->getRequest()->getPost();
+                  if ($form->isValid($formData)) {
+                    $username = $form->getValue('username');
+                    $role = $form->getValue('role');
+                    $register = new Model_Registration();
+                    $register->createAccount($username, $role);
+                    $this->_redirect('index');
+                  } else {
+                    $form->populate($formData);
+					}
+				}
+	}
+
+    public function deleteaccAction()
+    {
+       if ($this->getRequest()->isPost()) {
+    $del = $this->getRequest()->getPost('del');
+    if ($del == 'Delete') {
+         $id = $this->getRequest()->getPost('id');
+         $user = new Application_Model_Registration();
+         $user->deleteAccount($id);
+    }
+    $this->_helper->redirector('index');
+} else {
+    $id = $this->_getParam('id', 0);
+    $users = new Application_Model_Registration();
+    $this->view->register = $albums->getUser($id);
+
+	}
+}
+
+}
+
+
+
+
