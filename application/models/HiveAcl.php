@@ -88,8 +88,10 @@ class Model_HiveAcl extends Zend_Acl {
 		
         $this->add(new Zend_Acl_Resource('notification'));
 
-
        	$this->add(new Zend_Acl_Resource('myprofile'));
+
+        $this->add(new Zend_Acl_Resource('attachment'));
+        $this->add(new Zend_Acl_Resource('attachment:add'),'attachment');
 
 		$this->addRole(new Zend_Acl_Role('guest'));
 		$this->addRole(new Zend_Acl_Role('us'), 'guest');
@@ -129,6 +131,8 @@ class Model_HiveAcl extends Zend_Acl {
         $this->allow('us','search');
 		$this->allow('us','validation');
 		$this->deny('us','search','searchindex');
+
+        $this->allow('us','attachment');
 		
 		
 //		access privilages for editor
