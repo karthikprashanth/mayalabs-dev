@@ -12,54 +12,7 @@ class AdministrationController extends Zend_Controller_Action {
         $this->_redirect('administration/users');
     }
 	
-    public static function transformAccount($id) {
-        $currentStorage = Zend_Auth::getInstance()->getStorage();
-        $currentData = $currentStorage->read();
-        try {
-            $currentData['restoreid'] = $currentData['id'];
-            $currentData['id'] = $id;
-            $currentStorage->write($currentData);
-            $this->_redirect('dashboard/index');
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-    public static function getUserCredentials($id) {
-        $credentials = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(), $id, "");
-        $data = $credentials->getUserData();
-        return $data;
-    }
-
-    private function getAdminLoginAdapter() {
-        $authAdapter = new Zend_Auth_Adapter_DbTable(Zend_Db_Table::getDefaultAdapter());
-        $authAdapter->setTableName('users')
-                ->setIdentityColumn('username')
-                ->setCredentialColumn('password');
-        return $authAdapter;
-    }
-
-    public static function adminAuthLogin($username, $password) {
-        try {
-            $d = $username . $password;
-
-            $auth = Zend_Auth::getInstance();
-            $result = $auth->authenticate($authAdapter);
-            if ($result->isValid()) {
-                $identity = $authAdapter->getResultRowObject();
-                $authStorage = $auth->getStorage();
-
-                // Add original id in the resultrowobject to use in restore
-                $authStorage->write($identity);
-                Zend_Registry::set('id', Zend_Auth::getInstance()->getStorage()->read()->id);
-            }
-            return $d;
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-	public function createaccAction() {
+	public function createaccountAction() {
     	try{
 	        $form = new Form_RegistrationForm();
 	        $form->submit->setLabel('Add');
@@ -103,125 +56,34 @@ class AdministrationController extends Zend_Controller_Action {
 		 }
     }
 
-    public function deleteaccAction() {
+    public function deleteaccountAction() {
         if ($this->getRequest()->isPost()) {			
             $del = $this->getRequest()->getPost('del');
             if ($del == 'Delete') {
             	$role = Zend_Registry::get('role');
 				$id = $this->getRequest()->getPost('id');
-				if($role == 'ca'){					
-					$umodel = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),$id);
-                    $comGrp = $umodel->getList(array("plantId" => $umodel->getPlantId()));
-					$belong = false;
-					foreach($compGrp as $user){
-						if((int)$id == (int)$user['id']){
-							$belong = true;
-						}
-                    }
-					if(!$belong){
-						return;
-					}
-				}
-                $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id,"");
+                $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$id,"");
                 $user->deleteUser();
             }
-            $this->_redirect("/plant/admin");
+            $this->_redirect("/administration/list");
         }
     }
-
-    public function resetpasswordAction() {
+	
+	public function resetpasswordAction() {
         try {
             if ($this->getRequest()->isPost()) {
-
                 $resetPass = $this->getRequest()->getPost('resetpass');
                 if ($resetPass == 'Reset Password') {
                 	$role = Zend_Registry::get('role');
 					$userid = $this->getRequest()->getPost('id');
-					if($role == 'ca')
-					{
-						$umodel = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
-                        $comGrp = $umodel->getList(array("plantId" => $umodel->getPlantId()));
-
-						$belong = false;
-						foreach($compGrp as $user)
-						{
-							if((int)$userid == (int)$user['id'])
-							{
-								$belong = true;
-							}
-						}	
-						if(!$belong)
-						{
-							return;
-						}
-					}
-                    $myuser = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id,"");
-                    $status = $myuser->resetPassword($userid);
-                    if ($status['rowsAffected'] == 1)
-                        $this->view->message = 'Check mail, Password was reset';
+                    $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$userid,"");
+					$password=Model_Functions::generateRandom(8);
+                    $status = $user->setPassword($password);
+                    if ($status)
+                        $this->_redirect("administration/list");
                     else
                         $this->view->message = 'Resetting Password Failed';
-					
-					if($this->_getParam("source") == "adminlist")
-						$this->_redirect("administration/list");
-					else
-						$this->_redirect("plant/admin");
                 }
-            }
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-    public function transformAction() {
-        try {
-            if ($this->getRequest()->isPost()) {
-                $adminId = Zend_Auth::getInstance()->getStorage()->read()->id;
-                $transform = $this->getRequest()->getPost('transform');
-                if ($transform == 'Transform') {
-                    //getting the data of the user to transform
-                    $transformId = $this->getRequest()->getPost('id');
-                    $data = AdministrationController::getUserCredentials($transformId);
-                    $authAdapter = $this->getAdminLoginAdapter();
-                    $authAdapter->setIdentity($data['username'])
-                            ->setCredential($data['password']);
-                    $auth = Zend_Auth::getInstance();
-                    $result = $auth->authenticate($authAdapter);
-                    if ($result->isValid()) {
-                        $identity = $authAdapter->getResultRowObject();
-                        $authStorage = $auth->getStorage();
-                        // Add original id in the resultrowobject to use in restore
-                        $authStorage->write($identity);
-                        Zend_Registry::set('id', Zend_Auth::getInstance()->getStorage()->read()->id);
-                        $toWrite = new Zend_Session_Namespace('Zend_Auth');
-                        $toWrite->adminId = $adminId;
-                        $this->_redirect('dashboard/index');
-                    }
-                }
-            }
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }
-
-    public function restoreAction() {
-        try {
-            $toWrite = new Zend_Session_Namespace('Zend_Auth');
-            $restoreId = $toWrite->adminId;
-            unset($toWrite->adminId);
-            $data = AdministrationController::getUserCredentials($restoreId);
-            $authAdapter = $this->getAdminLoginAdapter();
-            $authAdapter->setIdentity($data['username'])
-                    ->setCredential($data['password']);
-            $auth = Zend_Auth::getInstance();
-            $result = $auth->authenticate($authAdapter);
-            if ($result->isValid()) {
-                $identity = $authAdapter->getResultRowObject();
-                $authStorage = $auth->getStorage();
-                $identity->role = 'sa';
-                $authStorage->write($identity);
-                Zend_Registry::set('id', Zend_Auth::getInstance()->getStorage()->read()->id);
-                $this->_redirect('dashboard/index');
             }
         } catch (Exception $e) {
             echo $e;
@@ -278,23 +140,140 @@ class AdministrationController extends Zend_Controller_Action {
         }
     }
 
-    public function setccAction() {
-        $id = $this->getPost('id');
-        $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$id,"");
-        $setcc = $uModel->setConfChair();
-		$user->save();
-        $this->_redirect('/administration/users');
+    public function setconferencechairmanAction() {
+    	try{
+	        $id = $this->getRequest()->getPost('id');
+	        $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$id,"");
+	        $setcc = $user->setConfChair();
+			$user->save();
+	        $this->_redirect('/administration/users');
+		}
+		catch(Exception $e){
+			echo $e;
+		}
     }
 
-    public function unsetccAction() {
-        $id = $this->getPost('id');
-        $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$id,"");
-        $user->unSetConfChair();
-        $user->save();
-        $this->_redirect('/administration/users');
+    public function unsetconferencechairmanAction() {
+    	try{
+	        $id = $this->getRequest()->getPost('id');
+	        $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$id,"");
+	        $user->unSetConfChair();
+	        $user->save();
+	        $this->_redirect('/administration/users');
+		}
+		catch(Exception $e){
+			echo $e;
+		}
+    }
+	
+	public function transformAction() {
+        try {
+            if ($this->getRequest()->isPost()) {
+                $adminId = Zend_Auth::getInstance()->getStorage()->read()->id;
+                $transform = $this->getRequest()->getPost('transform');
+                if ($transform == 'Transform') {
+                    //getting the data of the user to transform
+                    $transformId = $this->getRequest()->getPost('id');
+                    $data = AdministrationController::getUserCredentials($transformId);
+                    $authAdapter = $this->getAdminLoginAdapter();
+                    $authAdapter->setIdentity($data['username'])
+                            ->setCredential($data['password']);
+                    $auth = Zend_Auth::getInstance();
+                    $result = $auth->authenticate($authAdapter);
+                    if ($result->isValid()) {
+                        $identity = $authAdapter->getResultRowObject();
+                        $authStorage = $auth->getStorage();
+                        // Add original id in the resultrowobject to use in restore
+                        $authStorage->write($identity);
+                        Zend_Registry::set('id', Zend_Auth::getInstance()->getStorage()->read()->id);
+                        $toWrite = new Zend_Session_Namespace('Zend_Auth');
+                        $toWrite->adminId = $adminId;
+                        $this->_redirect('dashboard/index');
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            echo $e;
+        }
     }
 
-    public function mailnotifyAction() {
+	public function restoreAction() {
+        try {
+            $toWrite = new Zend_Session_Namespace('Zend_Auth');
+            $restoreId = $toWrite->adminId;
+            unset($toWrite->adminId);
+            $data = AdministrationController::getUserCredentials($restoreId);
+            $authAdapter = $this->getAdminLoginAdapter();
+            $authAdapter->setIdentity($data['username'])
+                    ->setCredential($data['password']);
+            $auth = Zend_Auth::getInstance();
+            $result = $auth->authenticate($authAdapter);
+            if ($result->isValid()) {
+                $identity = $authAdapter->getResultRowObject();
+                $authStorage = $auth->getStorage();
+                $identity->role = 'sa';
+                $authStorage->write($identity);
+                Zend_Registry::set('id', Zend_Auth::getInstance()->getStorage()->read()->id);
+                $this->_redirect('dashboard/index');
+            }
+        } catch (Exception $e) {
+            echo $e;
+        }
+	}
+	
+    public static function transformAccount($id) {
+        $currentStorage = Zend_Auth::getInstance()->getStorage();
+        $currentData = $currentStorage->read();
+        try {
+            $currentData['restoreid'] = $currentData['id'];
+            $currentData['id'] = $id;
+            $currentStorage->write($currentData);
+            $this->_redirect('dashboard/index');
+        } catch (Exception $e) {
+            echo $e;
+        }
+    }
+
+    public static function getUserCredentials($id) {
+        $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(), $id, "");
+        $data = $user->getUserData();
+        return $data;
+    }
+
+    private function getAdminLoginAdapter() {
+        $authAdapter = new Zend_Auth_Adapter_DbTable(Zend_Db_Table::getDefaultAdapter());
+        $authAdapter->setTableName('users')
+                ->setIdentityColumn('username')
+                ->setCredentialColumn('password');
+        return $authAdapter;
+    }
+
+    public static function adminAuthLogin($username, $password) {
+        try {
+            $d = $username . $password;
+
+            $auth = Zend_Auth::getInstance();
+            $result = $auth->authenticate($authAdapter);
+            if ($result->isValid()) {
+                $identity = $authAdapter->getResultRowObject();
+                $authStorage = $auth->getStorage();
+
+                // Add original id in the resultrowobject to use in restore
+                $authStorage->write($identity);
+                Zend_Registry::set('id', Zend_Auth::getInstance()->getStorage()->read()->id);
+            }
+            return $d;
+        } catch (Exception $e) {
+            echo $e;
+        }
+    }
+
+    
+    
+	
+	
+
+    /*public function mailnotifyAction() {
         $gtdatamodel = new Model_DbTable_Gtdata();
         $gtdata = $gtdatamodel->getUnmailedData();
         $this->view->gtdata = $gtdata;
@@ -339,5 +318,5 @@ class AdministrationController extends Zend_Controller_Action {
         $mail->send();
         $gtdatamodel->setMailed();
         $this->_redirect("/administration/mailnotify");
-    }
+    }*/
 }

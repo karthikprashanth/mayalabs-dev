@@ -158,6 +158,7 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
         $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);
         $this->update(array('sid' => $sid), array($where));
         $this->secureId = $sid;
+		$this->userData['sid'] = $sid;
     }
 
     /**
@@ -198,6 +199,7 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
         $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);
         $this->update(array('lastlogin' => $time), array($where));
 		$this->lastLogin = $time;
+		$this->userData['lastlogin'] = $time;
     }
 
     /**
@@ -216,6 +218,8 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
     public function setConfChair()
     {
 		$this->isConfChair = 1;
+		$this->userData['conf_chair'] = 1;
+		
     }
 
     /**
@@ -224,6 +228,7 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
     public function unSetConfChair()
     {
 		$this->isConfChair = 0;
+		$this->userData['conf_chair'] = 0;
     }
 
     /**
@@ -295,11 +300,10 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      */
     public static function getConferenceChairman(){
         $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $stmt = $dbAdapter->query("SELECT * FROM users WHERE `conf_chair` = '1';");
+        $stmt = $dbAdapter->query("SELECT * FROM users WHERE conf_chair = 1");
         $countRow = $stmt->fetchAll();
-        
-        if (count($rset) != 0) {
-            return $rSet['id'];
+        if (count($countRow) != 0) {
+            return $countRow[0]['id'];
         } else {
             return 0;
         }
@@ -324,10 +328,9 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      */
     public function setPassword($password)
     {
-        $forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
-        $forumUserModel->setPassword($password);
-		
-		$data['password'] = encryptPassword($password);
+        //$forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
+        //$forumUserModel->setPassword($password);
+		$data['password'] = $this->encryptPassword($password);
         $where['id = ?'] = $this->userId;
         return $this->update($data,$where);
     }
@@ -342,7 +345,7 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
     protected function encryptPassword($password,$forForum = 0)
     {
         if(!$forForum)
-            return md5($passworde . '{' . $this->userId . '}');
+            return md5($password . '{' . $this->userId . '}');
         else
             return md5($password);
     }
@@ -387,12 +390,12 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
     public function deleteUser()
     {
         $this->delete('id = ' . $this->userId);
-        
-        $userProfileModel = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
-        $userProfileModel->deleteUserprofile();
+     	   
+        //$userProfileModel = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
+        //$userProfileModel->deleteUserprofile();
 		
-        $forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
-        $forumUserModel->deleteUser();   
+        //$forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
+        //$forumUserModel->deleteUser();   
     }
 
     /*public function resetPassword()
