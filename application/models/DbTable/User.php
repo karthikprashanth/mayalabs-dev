@@ -215,8 +215,6 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      */
     public function setConfChair()
     {
-        $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);
-        $this->update(array('conf_chair' => 1), array($where));
 		$this->isConfChair = 1;
     }
 
@@ -225,8 +223,6 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      */
     public function unSetConfChair()
     {
-        $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);
-        $this->update(array('conf_chair' => 0), array($where));
 		$this->isConfChair = 0;
     }
 
@@ -346,7 +342,7 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
     protected function encryptPassword($password,$forForum = 0)
     {
         if(!$forForum)
-            return md5($password . "{" . $this->userId . "}");
+            return md5($passworde . '{' . $this->userId . '}');
         else
             return md5($password);
     }
