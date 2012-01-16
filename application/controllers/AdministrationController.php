@@ -92,6 +92,7 @@ class AdministrationController extends Zend_Controller_Action {
 	
 	public function listAction()
 	{
+		$this->view->headTitle('User Administration','PREPEND');
 		if($this->getRequest()->isPost()){
 			$this->_helper->getHelper('layout')->disableLayout();
 			$pid = $this->getRequest()->getPost('plantid');
@@ -128,6 +129,7 @@ class AdministrationController extends Zend_Controller_Action {
 	
 	public function usersAction() {
         try {
+        	$this->view->headTitle('User Administration','PREPEND');
           	$plantList = Model_DbTable_Plant::getList(array('orderby' => 'plantName'));
 			
             $plants = new Zend_Paginator(new Zend_Paginator_Adapter_Array($plantList));
@@ -268,11 +270,7 @@ class AdministrationController extends Zend_Controller_Action {
         }
     }
 
-    
-    
-	
-	
-
+   
     /*public function mailnotifyAction() {
         $gtdatamodel = new Model_DbTable_Gtdata();
         $gtdata = $gtdatamodel->getUnmailedData();

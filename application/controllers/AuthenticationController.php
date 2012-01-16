@@ -6,6 +6,10 @@ class AuthenticationController extends Zend_Controller_Action {
         Zend_Auth::getInstance()->setStorage(new Zend_Auth_Storage_Session());
         /* Initialize action controller here */
     }
+	
+	public function indexAction() {
+        
+    }
 
     public function getAuthAdapter() {
         try {
@@ -41,13 +45,10 @@ class AuthenticationController extends Zend_Controller_Action {
         }
     }
 
-    public function indexAction() {
-        
-    }
+    
 
     public function loginAction() {
         try {
-            
             $this->_helper->getHelper('Layout')->disableLayout();
             $this->view->headTitle('Login', 'PREPEND');
             if (Zend_Auth::getInstance()->hasIdentity()) {
@@ -84,7 +85,7 @@ class AuthenticationController extends Zend_Controller_Action {
 //                    $user = $umodel->getUserData();
                     $id = $umodel->getUserId();
                     $plain_password = $form->getValue('password');
-                    $password = md5($form->getValue('password') . "{" . $id . "}");
+                    $password = md5($form->getValue('password') . '{' . $id . '}');
 
                     $authAdapter->setIdentity($username)
                                 ->setCredential($password);
@@ -202,10 +203,6 @@ class AuthenticationController extends Zend_Controller_Action {
         } catch (Exception $e) {
             echo $e;
         }
-    }
-
-    public function forgotpasswordAction() {
-        $this->view->headTitle('Forgot Password', 'PREPEND');
     }
 
 }
