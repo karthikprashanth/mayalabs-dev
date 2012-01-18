@@ -61,7 +61,6 @@ class UserprofileController extends Zend_Controller_Action {
     }
 
     public function editAction() {
-        
         try {
             $form = new Form_UserprofileForm();
 				
@@ -130,9 +129,8 @@ class UserprofileController extends Zend_Controller_Action {
     }
 
     public function changepasswordAction() {
-
-        $this->view->headTitle('Change Password', 'PREPEND');
         try {
+        	$this->view->headTitle('Change Password', 'PREPEND');
             $form = new Form_ChangePasswordForm();
             $form->submit->setLabel('Change Password');
             if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
@@ -146,11 +144,12 @@ class UserprofileController extends Zend_Controller_Action {
                     $oldPassword = $form->getValue('oldPassword');
                     $newPassword = $form->getValue('newPassword');
                     $reNewPassword = $form->getValue('reNewPassword');
-                    if ($newPassword == $reNewPassword) {
-                        $statusPass = $userPass->setPassword($newPassword);
-                        if ($statusPass == 1) {
+					//echo $oldPassword . "<br>" . $newPassword . "<br>" . $reNewPassword;
+                    if ($newPassword == $reNewPassword && $newPassword != NULL && $oldPassword != NULL) {
+                        if ($userPass->isPassword($oldPassword)) {
+                        	$userPass->setPassword($newPassword);
+							$userPass->save();
                             $this->view->message = 'Password has been changed';
-							
 							//Send Mail
 							
 							/*$umodel = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(),$content['id']);
@@ -173,13 +172,19 @@ class UserprofileController extends Zend_Controller_Action {
 							$this->_redirect("userprofile/index");*/
 							
 							//----//
-                            if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '')
-                                $this->_redirect('userprofile/edit');
+                            
+                            //$this->_redirect('userprofile/edit');
+
                         } else
                             $this->view->message = 'Wrong Password';
                     }
                     else {
-                        $this->view->message = 'New password and Confirm Password do no match';
+                    	if($oldPassword == NULL || $newPassword == NULL){
+                    		$this->view->message = 'One or more fields empty';
+                    	}
+						else {
+							$this->view->message = 'New password and Confirm Password do no match';
+						}
                     }
                 } else {
                     $form->populate($formData);
@@ -190,4 +195,35 @@ class UserprofileController extends Zend_Controller_Action {
             echo $e;
         }
     }
+
+	public function showmenuAction(){
+		try {
+            if (!$this->_request->isXmlHttpRequest()) {
+                $this->view->role = Zend_Registry::get('role');
+                $this->_helper->viewRenderer->setResponseSegment('sidebar1');
+            }						
+            $up = new Model_DbTable_Userprofile(Zend_Db_Table::getDefaultAdapter(), Zend_Auth::getInstance()->getStorage()->read()->id);
+            $name = $up->getFullName();
+			$role = Zend_Registry::get("role");
+			if($role != 'sa')
+			{
+                $pid = $up->getPlantId();
+				$gtmodel = new Model_DbTable_Gasturbine(Zend_Db_Table::getDefaultAdapter());
+                $gt = $gtmodel->getList(array("plantId" => $pid));
+				
+				$plantmodel = new Model_DbTable_Plant(Zend_Db_Table::getDefaultAdapter(), $pid);
+				$plantname = $plantmodel->getPlantName();
+			}
+			$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+			$uModel = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(), Zend_Auth::getInstance()->getStorage()->read()->id, "");
+			$iscc = $uModel->isConfChair();
+    		$this->view->iscc = $iscc;
+            $this->view->name = $name;
+			$this->view->pid = $pid;
+			$this->view->pname = $plantname;
+			$this->view->gt = $gt;            
+        } catch (Exception $e) {
+            echo $e;
+		}
+	}
 }

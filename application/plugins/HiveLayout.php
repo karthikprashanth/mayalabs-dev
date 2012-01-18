@@ -31,12 +31,9 @@ class Plugin_HiveLayout extends Zend_Controller_Plugin_Abstract  {
 		if($sid == "")
 		{
 	        $myProfileAction = clone($request);
-	        $myProfileAction->setActionName('index')->setControllerName('myprofile');
+	        $myProfileAction->setActionName('showmenu')->setControllerName('userprofile');
 	        $actionStack->pushStack($myProfileAction);
 			
-			$nameAction = clone($request);
-	        $nameAction->setActionName('displayname')->setControllerName('userprofile');
-	        $actionStack->pushStack($nameAction);
 		}
         if($controller!='dashboard'){
 			Zend_Registry::set('sidebar2',true);	
@@ -47,7 +44,7 @@ class Plugin_HiveLayout extends Zend_Controller_Plugin_Abstract  {
             $_GET['keyword']='';
             unset($_GET['keyword']);
         }
-       	$advertAction = clone($request);
+       	/*$advertAction = clone($request);
         $advertAction->setActionName('randomad')
                 ->setControllerName('advertisement');
         $actionStack->pushStack($advertAction);
@@ -62,6 +59,6 @@ class Plugin_HiveLayout extends Zend_Controller_Plugin_Abstract  {
 
         $searchAction = clone($request);
         $searchAction->setActionName('index')->setControllerName('search');
-      	$actionStack->pushStack($searchAction);
+      	$actionStack->pushStack($searchAction);*/
     }
 }

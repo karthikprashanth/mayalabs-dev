@@ -27,7 +27,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
         $frontControl->registerPlugin(new Plugin_AccessCheck($this->_acl));
 
         if (Zend_Registry::get('role') != 'guest') {
-            //$frontControl->registerPlugin(new Plugin_HiveLayout());
+            $frontControl->registerPlugin(new Plugin_HiveLayout());
             $frontControl->registerPlugin(new Plugin_BookmarkLayout());
             //$frontControl->registerPlugin(new Plugin_EditPermission());
             //$frontControl->registerPlugin(new Plugin_Breadcrumbs());

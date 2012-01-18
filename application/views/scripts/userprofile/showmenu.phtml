@@ -1,0 +1,64 @@
+<ul id="sidemenu" class="sidemenu">
+    <li class = "ui-corner-top sidemenu-head">
+        <?php 
+        if($this->iscc)
+        	echo $this->name . " (Conference Chairman)";
+		else 
+			echo $this->name;
+	    
+        ?>
+    </li>    
+    <li class="sidemenu-profile" onmouseover="glow(this,'e5f1fa')" onmouseout="unglow(this)">
+        <a href="<?php echo $this->baseUrl(); ?>/userprofile/index">        
+        <img src="<?php echo $this->baseUrl(); ?>/images/<?php echo $this->role; ?>.png" alt="User Role"/>
+        <span>Edit Profile</span>
+        </a>
+    </li>
+    
+    <li class="sidemenu-item-gt sidemenu-item" onmouseover="glow(this,'e5f1fa')" onmouseout="unglow(this)">
+        <a href="<?php echo $this->baseUrl(); ?>/plant/view?id=<?php echo $this->pid; ?>"><?php echo $this->pname; ?></a>
+		<span><p>
+		<?php			
+			foreach($this->gt as $gt){
+				$id = $gt['GTId'];
+				$name = $gt['GTName'];
+                                $links = " <a href='/gasturbine/view?id=$id#ui-tabs-2' style='margin:0; padding:0; font-size:11px; color:#4b6a25;'>Findings</a>";
+                                $links = $links. " <a href='/gasturbine/view?id=$id#ui-tabs-3' style='margin:0; padding:0; font-size:11px; color:#2e4e68;'>Upgrades</a>";
+                                $links = $links. " <a href='/gasturbine/view?id=$id#ui-tabs-4' style='margin:0; padding:0; font-size:11px; color:#e5a440;'>LTE</a>";
+				echo "<br><a class='colorTipContainer' href= '/gasturbine/view?id=$id' title=\"$links\" style='margin:0; padding:0; font-size:11px; font-weight:normal;'>$name</a><br>";
+			}
+		?>
+        </p></span>
+    </li>
+    
+    <li class="sidemenu-item-forum sidemenu-item" onmouseover="glow(this,'e5f1fa')" onmouseout="unglow(this)">
+        <a href="/forums">
+        <span>Forums
+        <p>Forums for discussion on Gas Turbines</p></span>
+        </a>
+    </li>
+    <li class="sidemenu-item-hivematrix sidemenu-item" onmouseover="glow(this,'e5f1fa')" onmouseout="unglow(this)">
+        <a href="/search/searchmatrix">
+            <span>Hive Matrix
+            <p>Search the extensive Hive database.</p></span>
+        </a>
+    </li>
+    <li class="sidemenu-item-company sidemenu-item" onmouseover="glow(this,'e5f1fa')" onmouseout="unglow(this)">
+        <a href="/plant/clist">
+            <span>Plant Listing
+            <p>List of all the companies in our archive.</p></span>
+        </a>
+    </li>
+    <li class="sidemenu-item-conference sidemenu-item" onmouseover="glow(this,'e5f1fa')" onmouseout="unglow(this)">
+        <a href="/conference/index">
+        <span>Conference
+        <p>Details on User Group Conferences.</p></span></a>
+    </li>
+    <li class="sidemenu-item-bookmarks sidemenu-item" onmouseover="glow(this,'e5f1fa')" onmouseout="unglow(this)">
+        <a href="/bookmark/longlist">
+            <span>Bookmarks
+            <p>Your bookmarked pages across the site.</p></span>
+        </a>
+    </li>
+    
+</ul>

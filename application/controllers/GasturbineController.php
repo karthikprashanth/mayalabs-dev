@@ -206,11 +206,7 @@ class GasturbineController extends Zend_Controller_Action
 	                              
 	       	$user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
 			
-			if($user->getPlantId() == $pid)
-				$this->view->valid = true;
-			else
-				$this->view->valid = false;
-			
+			$this->view->userpid = $user->getPlantId();
 	    	$this->view->pid = $pid;		
 	    	$this->view->GTData = $GTdata;
 			

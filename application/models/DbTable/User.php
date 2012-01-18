@@ -320,7 +320,9 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      */
     public function isPassword($password)
     {
-        return strcmp($this->userData['password'],encryptPassword($password));
+    	//echo $this->userData['password'];
+		//echo "<br>" . $this->encryptPassword($password);
+        return !strcmp($this->userData['password'],$this->encryptPassword($password));
     }
     
     /**
@@ -333,10 +335,11 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
     {
         //$forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
         //$forumUserModel->setPassword($password);
-		$data['password'] = $this->encryptPassword($password);		
+		/*$data['password'] = $this->encryptPassword($password);		
         $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);
         $rowsAffected =  $this->update($data,$where);
-		return $rowsAffected;
+		return $rowsAffected;*/
+		$this->userData['password'] = $this->encryptPassword($password);
     }
 
     /**

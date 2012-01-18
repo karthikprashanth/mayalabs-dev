@@ -12,7 +12,7 @@
 		    $modelnum = Zend_Registry::get("gtgroupname");
 		    $list .=  "<span style='margin-right:10px;'>$modelnum</span>";
 		    
-		    if ($this->valid || $this->userRole == 'sa') {
+		    if ($this->userpid == $gasturbines['plantId'] || $this->userRole == 'sa') {
 		        $list .=  "<span class = 'gt-edit'><a href='/gasturbine/edit" . "?id=" . $this->escape($gasturbines['GTId']) . "' style='color: #719b3e;'>Edit</a></span>";
 		    }
 		    $list .=  "</div>";
