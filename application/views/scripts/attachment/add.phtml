@@ -12,5 +12,16 @@
 	}
 	window.onload=init;
 </script>-->
-
+<script type="text/javascript">
+    $(document).ready(function(){
+	    $("input").blur(function(){
+	    	if(this.value == "" || this.value == null)
+	    	{
+	    		return;
+	    	}
+	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+	        doValidationPlant($(this).attr('id'),'../validation/validate?form=attachment');
+	   });
+	});
+</script>
 <?php echo $this->form; ?>

@@ -270,7 +270,22 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
         $countRow = $stmt->fetchAll();
         return $countRow[0]["count"];
     }
-	
+
+    /**
+     * Maps user id to user's fullname. Defined as static function for quick access
+     *
+     * @param Integer - User Id
+     * @return String - User's fullname
+     */
+    public static function getUserName($userid){
+        
+        $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $stmt = $dbAdapter->query("SELECT CONCAT(firstName,CONCAT(' ',lastName)) as fullName from userprofile WHERE id = " . $userid);
+        
+        $user = $stmt->fetchObject();
+        return $user->fullName;
+    }
+
     /**
      * Updates details about user profile
      */
@@ -292,7 +307,7 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
         }
         
     }
-	
+    
     /**
      * Deletes the user's profile
      */

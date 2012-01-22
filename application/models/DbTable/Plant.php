@@ -189,6 +189,7 @@ class Model_DbTable_Plant extends Zend_Db_Table_Abstract {
             $this->update($this->plantData, $where);
         } else {
             $this->plantId = $this->insert($this->plantData);
+            $this->plantData['plantId'] = $this->plantId;
             $notificationData['edit'] = 1;
             //$notificationModel->setNotificationData($notificationData);
             //$notificationModel->save();

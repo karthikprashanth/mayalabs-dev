@@ -58,9 +58,9 @@ class ValidationController extends Zend_Controller_Action
 			{
 				$form = new Form_GalleryForm();
 			}
-			else if($formname == 'presentation')
+			else if($formname == 'attachment')
 			{
-				$form = new Form_PresentationForm();
+				$form = new Form_AttachmentForm();
 			}
 			else if($formname == "schevent")
 			{

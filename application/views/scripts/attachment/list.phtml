@@ -1,0 +1,45 @@
+<?php
+if (!count($this->attachments)) {
+    echo "<center>No Attachments Added</center>";
+} else {
+?>
+    <table cellspacing='0' cellpadding='0' onmouseover='tablecloth();'>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>File Type</th>
+                <th>User</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+<?php for ($i = 0; $i < count($this->attachments); $i++) : ?>
+                <tr>
+                    <td>
+                        <a href = "<?php echo $this->attachments[$i]->getId(); ?>"><?php echo $this->attachments[$i]->getTitle(); ?></a><br>
+        <?php
+        $attach_data = $this->attachments[$i]->getData();
+        ?></td>
+            <td><?php echo $this->attachments[$i]->getFiletype(); ?></td>
+                    <td><?php echo $this->attachments[$i]->getUsername(); ?></td>
+                    <td><?php echo $attach_data['updatedAt']; ?></td>
+                <?php if ($this->userBelongs) : ?>
+                <td>
+                    <form action = "/attachment/delete?id=" <?php echo $this->attachments[$i]->getId(); ?> method = "get">
+                        <input type = 'submit' class = 'gt-delete' name = 'delete' value = 'Delete'>
+                    </form>
+                </td>
+<?php endif; ?>
+            </tr>
+            <?php endfor; ?>
+            </tbody>
+        </table>
+<?php } ?>
+    <input type = 'hidden' name = 'id' value = '<?php echo $presentation['presentationId']; ?>'>
+<?php if ($this->userBelongs) : ?>
+        <form action="<?php echo $this->url(array('action' => 'add')); ?>" method="post">
+            <input type="hidden" name="gtid" value="<?php echo $this->escape($this->id); ?>" />
+            <input class='gt-add' type="submit" name="add" value="Add New Attachment" />
+<?php endif; ?>
+</form>

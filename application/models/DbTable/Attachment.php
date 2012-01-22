@@ -38,13 +38,6 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
     protected $content;
 
     /**
-     * File type
-     *
-     * @var String
-     */
-    protected $filetype;
-
-    /**
      * All the data of the Attachment
      *
      * @var Array
@@ -68,7 +61,6 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
             $this->title = $data['title'];
             $this->description = $data['description'];
             $this->content = $data['content'];
-            $this->filetype = $data['filetype'];
         }
     }
 
@@ -165,6 +157,40 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
     }
 
     /**
+     * Gets the type of the file
+     *
+     * @return String
+     */
+    public function getFiletype(){
+        
+        $prestype['pdf'] = "PDF File";
+		$prestype['jpeg'] = "Image";
+		$prestype['jpg'] = "Image";
+		$prestype['png'] = "Image";
+		$prestype['gif'] = "Image";
+		$prestype['doc'] = "Word Document";
+		$prestype['docx'] = "Word Document";
+		$prestype['xls'] = "Excel Sheet";
+		$prestype['xlsx'] = "Excel Sheet";
+		$prestype['ppt'] = "Powerpoint Presentation";
+		$prestype['pptx'] = "Powerpoint Presentation";
+        return $prestype[$this->data['filetype']];
+        
+    }
+
+    
+    /**
+     * Gets the name of the user who added/updated this attachment
+     *
+     * @return String
+     */
+    public function getUsername(){
+        $uid = $this->data['updatedBy'];
+        
+        return Model_DbTable_Userprofile::getUserName($uid);
+    }
+    
+    /**
      * Updates the database based on the local values
      */
     public function save(){
@@ -181,7 +207,7 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
     /**
      * Deletes the presentation
      */
-    public function delete(){
+    public function deleteAttachment(){
     	$this->delete('id = ' . $this->id);
     }
 }
