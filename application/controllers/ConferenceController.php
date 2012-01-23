@@ -14,15 +14,13 @@ class ConferenceController extends Zend_Controller_Action
     	$this->_redirect("conference/list");	    
     }
 	
-	
-    public function addAction()
+	public function addAction()
     {
     	try{
 	        $form = new Form_ConferenceForm();
 			$this->view->form = $form;
 			$form->submit->setLabel('Add Conference');
 			$this->view->headTitle('Add New Conference','PREPEND');
-			return;
 			if($this->getRequest()->isPost())
 			{
 				$formData = $this->getRequest()->getPost();

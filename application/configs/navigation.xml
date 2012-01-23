@@ -144,7 +144,7 @@
 		<conference>
 			<label>Conference</label>
 			<controller>conference</controller>
-			<action>index</action>
+			<action>list</action>
 			<resource>conference</resource>
 			<codename>conf</codename>
 		</conference>
@@ -215,7 +215,7 @@
 		<conference>
 			<label>Conference</label>
 			<controller>conference</controller>
-			<action>index</action>
+			<action>list</action>
 			<resource>conference</resource>
 			<codename>conf</codename>
 		</conference>
@@ -243,7 +243,7 @@
 					<label>Conferences</label>
 					<codename>confmain</codename>
 					<controller>conference</controller>
-					<action>index</action>
+					<action>list</action>
 					<resource>conference</resource>
 				</conference>
 				<users>
