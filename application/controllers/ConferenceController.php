@@ -11,14 +11,150 @@ class ConferenceController extends Zend_Controller_Action
     public function indexAction()
     {
     	
-    	$this->view->headTitle('Conference','PREPEND');
-        $conf_table = new Model_DbTable_Conference();
-	    $yearList = $conf_table->getConfList();
-	    $this->view->yrList = $yearList;
-	    $bUrl = Zend_Controller_Front::getInstance()->getBaseUrl();
-	    $this->view->baseUrl = $bUrl;
-	    
+    	$this->_redirect("conference/list");	    
     }
+	
+	
+    public function addAction()
+    {
+    	try{
+	        $form = new Form_ConferenceForm();
+			$this->view->form = $form;
+			$form->submit->setLabel('Add Conference');
+			$this->view->headTitle('Add New Conference','PREPEND');
+			return;
+			if($this->getRequest()->isPost())
+			{
+				$formData = $this->getRequest()->getPost();
+				if($form->isValid($formData))
+				{
+					$conf = new Model_DbTable_Conference(Zend_Db_Table_Abstract::getDefaultAdapter());
+					$content = array();
+					$content['host'] = $formData['host'];
+					$content['year'] = $formData['year'];
+					$content['place'] = $formData['place'];
+					$content['abstract'] = $formData['abstract'];
+					$conf->setConferenceData($content);
+					$conf->save();
+					$this->_redirect("conference/view?id=".$conf->getConferenceId());
+				}
+				else
+				{
+					$form->populate($formData);
+				}
+			}
+		}
+		catch(Exception $e){
+			echo $e;
+		}
+    }
+	
+	public function editAction()
+	{
+		try{
+			$cid = $this->_getParam('id',0);
+			if(!$cid){
+				$this->_redirect("conference/list");
+			}
+			$conf = new Model_DbTable_Conference(Zend_Db_Table_Abstract::getDefaultAdapter(),$cid);
+			$form = new Form_ConferenceForm();
+			$this->view->form = $form;
+			$form->submit->setLabel("Save");
+			$this->view->headTitle("Edit - " . $conf->getPlace() . " (" . $conf->getYear() . ")","PREPEND");
+			if($this->getRequest()->isPost())
+			{
+				$formData = $this->getRequest()->getPost();
+				if($form->isValid($formData))
+				{
+					$content = array();
+					$content['cId'] = $cid;
+					$content['host'] = $formData['host'];
+					$content['year'] = $formData['year'];
+					$content['place'] = $formData['place'];
+					$content['abstract'] = $formData['abstract'];
+					$conf->setConferenceData($content);
+					$conf->save($content);
+					$this->_redirect("/conference/view?id=".$cid);
+				}
+			}
+			else {
+				$confData = $conf->getConferenceData();				
+				$form->populate($confData);
+			}
+		}
+		catch(Exception $e){
+			echo $e;
+		}
+	}
+
+	public function viewAction()
+	{
+		try{
+			
+			$cid = $this->_getParam('id',0);
+			if(!$cid){
+				$this->_redirect("conference/list");
+			}
+			$conf = new Model_DbTable_Conference(Zend_Db_Table_Abstract::getDefaultAdapter(),$cid);
+			$this->view->headTitle($conf->getPlace() . " (" . $conf->getYear() . ")",'PREPEND');
+			$this->view->conf = $conf;
+		}
+		catch(Exception $e){
+			echo $e;
+		}
+	}
+	
+	public function listAction()
+    {
+        try{
+        	$this->view->headTitle("Conferences",'PREPEND');
+			$conferenceList = Model_DbTable_Conference::getList(array('orderby' => 'year'));
+			$this->view->conferences = $conferenceList;
+			
+			$role = Zend_Registry::get('role');
+			$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+			$user = new Model_DbTable_User(Zend_Db_Table_Abstract::getDefaultAdapter(),$uid);
+			if($role == 'sa' || $user->isConferenceChairman()){
+				$this->view->allowed = true;
+			}
+			else{
+				$this->view->allowed  = false;
+			}
+        }
+		catch(Exception $e){
+			echo $e;
+		}
+	}
+		
+	public function deleteAction()
+	{
+		try{
+			$cid = $this->_getParam('id',0);
+			$conf = new Model_DbTable_Conference(Zend_Db_Table_Abstract::getDefaultAdapter(),$cid);
+			$conf->deleteConference();
+			$this->_redirect("conference/list");
+			/*Delete schedules also*/
+		}
+		catch(Exception $e){
+			echo $e;
+		}
+	}
+	
+	/*public function viewAction()
+    {
+    	$this->_helper->getHelper('Layout')->disableLayout();
+    	$this->view->headTitle('View Presentation','PREPEND');
+        $presModel = new Model_DbTable_ConfPresentation();
+        $id = $this->_getParam('id',0);
+        $presDet = $presModel->getPres($id);
+        $data = $presDet['content'];
+		$filename = $presDet['title'] . "_".rand(0,999999).".".$presDet['filetype'];
+		$appath = substr(APPLICATION_PATH,0,strlen(APPLICATION_PATH)-12);
+		$appath = $appath . "/public/uploads/";
+		$file = file_put_contents($appath.$filename,$data);
+		$this->view->browserfilename = $filename;
+		$this->view->origfilepath = $appath . $filename;
+	}
 	
 	public function galleryAction()
 	{
@@ -143,133 +279,7 @@ class ConferenceController extends Zend_Controller_Action
 		$confgal->delete("photoId = " . $id);
 		$this->_redirect("/conference/list?id=" . $cid . "#confdata-frag-4");
 		
-	}
-    public function addAction()
-    {
-    	
-        $form = new Form_ConferenceForm();
-		$this->view->form = $form;
-		$form->submit->setLabel('Add Conference');
-		if($this->getRequest()->isPost())
-		{
-			$formData = $this->getRequest()->getPost();
-			if($form->isValid($formData))
-			{
-				
-				$conf = new Model_DbTable_Conference();
-				$content = array();
-				$content['host'] = $formData['host'];
-				$content['year'] = $formData['year'];
-				$content['place'] = $formData['place'];
-				$content['abstract'] = $formData['abstract'];
-				$newcid = $conf->insert($content);
-				$this->_redirect("conference/list?id=".$newcid);
-			}
-			else
-			{
-				$form->populate($formData);
-			}
-		}
-    }
-	
-	public function editAction()
-	{
-		
-		$cid = $this->_getParam('id',0);
-		$confmodel = new Model_DbTable_Conference();
-		$form = new Form_ConferenceForm();
-		$this->view->form = $form;
-		$form->submit->setLabel("Save");
-		if($this->getRequest()->isPost())
-		{
-			$formData = $this->getRequest()->getPost();
-			if($form->isValid($formData))
-			{
-				$content = array();
-				$content['host'] = $formData['host'];
-				$content['year'] = $formData['year'];
-				$content['place'] = $formData['place'];
-				$content['abstract'] = $formData['abstract'];
-				$confmodel->updateConf($cid,$content);
-				$this->_redirect("/conference/list?id=".$cid);
-			}
-		}
-		else {
-			$conf = $confmodel->getConfDetail($cid);
-			$form->populate($conf);
-		}
-	}
-	
-	public function deleteAction()
-	{
-		$cid = $this->_getParam('id',0);
-		$confmodel = new Model_DbTable_Conference();
-		$noteModel = new Model_DbTable_Notification();
-		$confmodel->delete('cId = ' . (int)$cid);
-		$schmodel = new Model_DbTable_Schedule();
-		$sch = $schmodel->getSchId($cid);
-		$schid = $sch['sch_id'];
-		echo $schid;
-		$schmodel->delete('cId = ' . (int)$cid);
-		$nf = new Model_DbTable_Notification();
-		$nf->delete('catId = ' . (int)$cid);
-		$scheventmodel = new Model_DbTable_ScheduleEvent();
-		$scheventmodel->delete('sch_id = ' . (int)$schid);
-		$noteModel->delete("category = 'schedule' AND catid = " . $cid);
-		$this->_redirect("/conference/index");
-	}
-	
-	
-   	public function listAction()
-    {
-        try {
-        	$this->view->headTitle('View Conference','PREPEND');
-	        $id = $this->_getParam('id',0);
-	        $this->view->id = $id;
-	
-	        $confModel = new Model_DbTable_Conference();
-	        $confRow = $confModel->getConfDetail($id);
-	        $this->view->confDet = $confRow;
-	
-	        $bUrl = Zend_Controller_Front::getInstance()->getBaseUrl();
-	        $this->view->baseUrl = $bUrl;
-	
-	        $galModel = new Model_DbTable_Gallery();
-	        $galList = $galModel->getGallery($id);
-	        $this->view->confGallery = $galList;
-	
-	        $presModel = new Model_DbTable_ConfPresentation();
-	        $presList = $presModel->getPresDetail($id);
-	        $this->view->presList = $presList;
-	
-	        $plantDet = new Model_DbTable_Plant();
-	        $this->view->plantDet = $plantDet;
-			
-			$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
-			$uModel = new Model_DbTable_User();
-			$iscc = $uModel->is_confchair($uid);
-    		$this->view->iscc = $iscc;
-        }
-        catch(Exception $e){
-            echo $e;
-        }
-	}	
-	
-    public function viewAction()
-    {
-    	$this->_helper->getHelper('Layout')->disableLayout();
-    	$this->view->headTitle('View Presentation','PREPEND');
-        $presModel = new Model_DbTable_ConfPresentation();
-        $id = $this->_getParam('id',0);
-        $presDet = $presModel->getPres($id);
-        $data = $presDet['content'];
-		$filename = $presDet['title'] . "_".rand(0,999999).".".$presDet['filetype'];
-		$appath = substr(APPLICATION_PATH,0,strlen(APPLICATION_PATH)-12);
-		$appath = $appath . "/public/uploads/";
-		$file = file_put_contents($appath.$filename,$data);
-		$this->view->browserfilename = $filename;
-		$this->view->origfilepath = $appath . $filename;
-	}
+	}*/
 	
 	
 }

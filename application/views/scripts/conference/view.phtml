@@ -1,4 +1,19 @@
+<link href="/js/tablecloth/tablecloth.css" rel="stylesheet" type="text/css"/>
+<script type='text/javascript' src='/js/tablecloth/tablecloth.js'></script> 
 <?php
-header("Content-Disposition: attachment; filename=\"$this->browserfilename\"");
-readfile($this->origfilepath);
+	
+	echo $this->headScript()->prependFile($this->baseUrl() . '/js/frontend.js');
+	
+	echo "<center><h3>Conference " . $this->conf->getPlace() . " held in " . 
+		  $this->conf->getYear() . " hosted by " . $this->conf->getHostName() . "</h3></center>";
+	
+	$synopsis = "<center>" . $this->conf->getAbstract() . "</center>";
+	
+	
+	$this->tabPane("confdata", $synopsis, array('title' => 'Synopsis'));
+	$this->tabPane("confdata", "", array('title' => 'Schedule', 'contentUrl' => "/schedule/view?id=$this->id"));
+	$this->tabPane("confdata", $pres, array('title' => 'Attachments'));
+	$this->tabPane("confdata", $gallery, array('title' => 'Gallery'));
+	
+	echo $this->tabContainer("confdata", array());
 ?>

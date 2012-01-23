@@ -72,13 +72,12 @@ class Model_DbTable_Conference extends Zend_Db_Table_Abstract {
             $conferenceRow = $this->fetchRow("cId = " . $conferenceId);
 
             $this->conferenceData = $conferenceRow->toArray();
-			
-            $this->conferenceId = $conferenceData['conferenceId'];
-            $this->host = $conferenceData['host'];
-            $this->abstract = $conferenceData['abstract'];
-            $this->year = $conferenceData['year'];
-            $this->place = $conferenceData['place'];
-            $this->timeupdate = $conferenceData['timeupdate'];
+            $this->conferenceId = $this->conferenceData['cId'];
+            $this->host = $this->conferenceData['host'];
+            $this->abstract = $this->conferenceData['abstract'];
+            $this->year = $this->conferenceData['year'];
+            $this->place = $this->conferenceData['place'];
+            $this->timeupdate = $this->conferenceData['timeupdate'];
 				
         }
     }
@@ -112,6 +111,16 @@ class Model_DbTable_Conference extends Zend_Db_Table_Abstract {
 	{
 		$this->host = $host;
 		$this->conferenceData['host'] = $host;
+	}
+	
+	/**
+	 * Gets the Plant Name of the host
+	 * 
+	 * @return String - Name of the host plant
+	 */
+	public function getHostName(){
+		$plant = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->host);
+		return $plant->getPlantName();
 	}
 	
 	/**
@@ -250,7 +259,7 @@ class Model_DbTable_Conference extends Zend_Db_Table_Abstract {
 			}
         }
 		$dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();		
-        $stmt = $dbAdapter->query("SELECT * FROM conference " . $where . " " . $order);
+        $stmt = $dbAdapter->query("SELECT * FROM conference " . $where . " " . $order . " " . $limit);
         $list = $stmt->fetchAll();
         array($list);
         return $list;
