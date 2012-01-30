@@ -66,7 +66,7 @@ class Model_DbTable_Conference extends Zend_Db_Table_Abstract {
     {
         parent::__construct($config);
 		
-        $conferenceData = array();
+        $this->conferenceData = array();
 
         if($conferenceId){
             $conferenceRow = $this->fetchRow("cId = " . $conferenceId);
@@ -243,7 +243,6 @@ class Model_DbTable_Conference extends Zend_Db_Table_Abstract {
 	 */
 	public static function getList($options = array())
 	{
-		
         if(count($options)){
             if($options['orderby'] != ""){
                     $order = " ORDER BY " . $options['orderby'] . " DESC";
@@ -254,9 +253,10 @@ class Model_DbTable_Conference extends Zend_Db_Table_Abstract {
                     $where = " WHERE host = " . $options['host'];
             }
 			
-			if($options['ll']){
+			if($options['ul']){	
 				$limit = " LIMIT " . $options['ll'] . " , " . $options['ul']; 
 			}
+			
         }
 		$dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();		
         $stmt = $dbAdapter->query("SELECT * FROM conference " . $where . " " . $order . " " . $limit);
@@ -297,7 +297,6 @@ class Model_DbTable_Conference extends Zend_Db_Table_Abstract {
 		}
 		else{
 			$this->conferenceId = $this->insert($this->conferenceData);
-			$this->conferenceId;
 		}
 	}
 	

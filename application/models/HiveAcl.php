@@ -17,7 +17,6 @@ class Model_HiveAcl extends Zend_Acl {
 		$this->add(new Zend_Acl_Resource('dashboard:showmenu'), 'dashboard');
 		
 		$this->add(new Zend_Acl_Resource('reports'));
-		$this->add(new Zend_Acl_Resource('attachments'));
 		
 		$this->add(new Zend_Acl_Resource('gasturbine'));
 		$this->add(new Zend_Acl_Resource('gasturbine:add'), 'gasturbine');
@@ -57,9 +56,7 @@ class Model_HiveAcl extends Zend_Acl {
         $this->add(new Zend_Acl_Resource('upgrades'));
         
         $this->add(new Zend_Acl_Resource('lte'));
-        
 
-        $this->add(new Zend_Acl_Resource('presentation'));
 
         $this->add(new Zend_Acl_Resource('advertisement'));
         $this->add(new Zend_Acl_Resource('advertisement:add'),'advertisement');
@@ -79,13 +76,12 @@ class Model_HiveAcl extends Zend_Acl {
 		
         $this->add(new Zend_Acl_Resource('schedule'));
 		$this->add(new Zend_Acl_Resource('schedule:add'),'schedule');
-		$this->add(new Zend_Acl_Resource('schedule:add-event-list'),'schedule');
-		$this->add(new Zend_Acl_Resource('schedule:view'),'schedule');
+		$this->add(new Zend_Acl_Resource('schedule:save'),'schedule');		
 		$this->add(new Zend_Acl_Resource('schedule:edit'),'schedule');
 		$this->add(new Zend_Acl_Resource('schedule:delete'),'schedule');
-		$this->add(new Zend_Acl_Resource('schedule:delevent'),'schedule');
-		$this->add(new Zend_Acl_Resource('schedule:delsch'),'schedule');
 		
+		
+		$this->add(new Zend_Acl_Resource('schedule-event'));
         $this->add(new Zend_Acl_Resource('notification'));
 
        	$this->add(new Zend_Acl_Resource('myprofile'));
@@ -121,17 +117,16 @@ class Model_HiveAcl extends Zend_Acl {
         $this->allow('us','findings');
         $this->allow('us','upgrades');
         $this->allow('us','lte');
-        $this->allow('us','presentation');
         $this->allow('us','advertisement',array('view','randomad','list'));
         $this->allow('us','bookmark');
         $this->allow('us','conference');
-        $this->allow('us','schedule',array('delevent','edit','view','add','add-event-list','delete','delsch'));
+        $this->allow('us','schedule',array('add','save','edit','view','delete'));
         $this->allow('us','notification');
-		$this->allow('us','attachments');
         $this->allow('us','search');
 		$this->allow('us','validation');
+		$this->allow('us','schedule-event');
 		$this->deny('us','search','searchindex');
-
+	
         $this->allow('us','attachment');
 		
 		

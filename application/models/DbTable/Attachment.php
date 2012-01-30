@@ -49,9 +49,9 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
 	 * @param Zend_Db_Table_Adapter_Abstract - Default parameter as defined in the parent function
 	 * @param Integer - Primary Key of the table
 	 */
-    public function  __construct($config = array(), $id = 0 ) {
+    public function __construct($config = array(), $id = 0 ) {
         parent::__construct($config);
-
+		
         $data = array();
         if($id){
             $data = $this->fetchRow("id = " . $id);
@@ -155,6 +155,15 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
             $this->filetype = $data['filetype'];
         }
     }
+	
+	/**
+	 * Gets the type of the attachment file
+	 * 
+	 * @return String
+	 */
+	public function getFileExtension(){
+		return $this->data['filetype'];
+	}
 
     /**
      * Gets the type of the file
@@ -163,22 +172,22 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
      */
     public function getFiletype(){
         
-        $prestype['pdf'] = "PDF File";
-		$prestype['jpeg'] = "Image";
-		$prestype['jpg'] = "Image";
-		$prestype['png'] = "Image";
-		$prestype['gif'] = "Image";
-		$prestype['doc'] = "Word Document";
-		$prestype['docx'] = "Word Document";
-		$prestype['xls'] = "Excel Sheet";
-		$prestype['xlsx'] = "Excel Sheet";
-		$prestype['ppt'] = "Powerpoint Presentation";
-		$prestype['pptx'] = "Powerpoint Presentation";
+        $prestype['pdf']  =  "PDF File";
+		$prestype['jpeg'] =  "Image";
+		$prestype['jpg']  =  "Image";
+		$prestype['png']  =  "Image";
+		$prestype['gif']  =  "Image";
+		$prestype['doc']  =  "Word Document";
+		$prestype['docx'] =  "Word Document";
+		$prestype['xls']  =  "Excel Sheet";
+		$prestype['xlsx'] =  "Excel Sheet";
+		$prestype['ppt']  =  "Powerpoint Presentation";
+		$prestype['pptx'] =  "Powerpoint Presentation";
+        
         return $prestype[$this->data['filetype']];
         
     }
 
-    
     /**
      * Gets the name of the user who added/updated this attachment
      *
@@ -191,7 +200,7 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
     }
     
     /**
-     * Updates the database based on the local values
+     * Updates the database with the local values
      */
     public function save(){
         if($this->id){
@@ -200,7 +209,7 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
             $this->update($data,$where);
         } else{
             $data = $this->data;
-            $this->insert($data);
+            $this->id = $this->insert($data);
         }
     }
 
@@ -211,4 +220,3 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
     	$this->delete('id = ' . $this->id);
     }
 }
-?>

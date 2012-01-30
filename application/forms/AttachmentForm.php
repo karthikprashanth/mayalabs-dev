@@ -11,6 +11,9 @@ class Form_AttachmentForm extends Zend_Form {
                 ->addValidator('NotEmpty')
                 ->addFilter('StripTags')
                 ->addFilter('StringTrim');
+				
+		$gtid = new Zend_Form_Element_Hidden('gtdataid');
+		$cid = new Zend_Form_Element_Hidden('cid');
 
         $description = new Zend_Form_Element_Text('description');
         $description->setLabel('Description')
@@ -23,12 +26,13 @@ class Form_AttachmentForm extends Zend_Form {
         $appath = substr(APPLICATION_PATH, 0, strlen(APPLICATION_PATH) - 12);
         $content = new Zend_Form_Element_File('content');
         $content->setLabel('Upload the Attachment')                
-                ->setDestination($appath . '/public/uploads');
+                ->setDestination($appath . '/public/uploads')
+				->setAttrib('class','content');
 
         $submit = new Zend_Form_Element_Submit('submit');
         $submit->setLabel("Upload");
 
-        $this->addElements(array($title, $description, $content, $submit));
+        $this->addElements(array($title, $description, $content, $submit,$gtid,$cid));
     }
 
 }

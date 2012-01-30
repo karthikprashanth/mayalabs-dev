@@ -1,9 +1,238 @@
+<script type="text/javascript">
+	function moveUp(eid){
+		var event_ids = document.getElementById("event-ids").innerHTML;
+		$.ajax({
+            type: "POST",
+            data: "event_ids="+event_ids+"&id="+eid,
+           	dataType: 'json',
+            url: "/schedule-event/reorder",
+            success: function(msg){
+                if (msg != ''){
+					event_ids = event_ids.substring(0,event_ids.length-1);
+					var eventArray = event_ids.split(",");
+					var n = eventArray.length;
+					var table_content = "<tr><th>No.</th><th>Date</th><th>Timings</th><th>Description</th><th></th><th></th><th></th></tr>";
+					var i=0;
+					for(i=0;i<n;i++)
+					{
+						table_content += createRow(msg[i]);
+					}                	
+					document.getElementById("events-table").innerHTML = table_content;
+                }
+            }
+       });
+	}
+	
+	function editEvent(eid){
+		$.ajax({
+            type: "GET",
+            data: "id="+eid,
+           	dataType: 'json',
+            url: "/schedule-event/view",
+            success: function(msg){
+                if (msg != ''){
+                	document.getElementById("event-id").value = msg.id;
+                    document.getElementById("event_day").value = msg.event_date;
+					document.getElementById("timing").value = msg.timings;
+					document.getElementById("desc").value = msg.description;
+					$("#add-event-button").css("display","none");
+					$("#edit-event-button").css("display","inline");		
+                    $("#event-form").dialog({title:'Edit Event',height:300,width:350});
+                }
+            }
+       });
+	}
+	
+	function deleteEvent(eid){
+		var event_ids;
+		var eventArray; 
+		var n;
+		var table_content = "<tr><th>No.</th><th>Date</th><th>Timings</th><th>Description</th><th></th><th></th><th></th></tr>";
+		var i=0;
+		$.ajax({
+            type: "POST",
+            data: "id="+eid+"&event_ids="+document.getElementById("event-ids").innerHTML,
+            dataType: 'json',
+            url: "/schedule-event/delete",
+            success: function(msg){
+            	event_ids = msg.event_ids;
+            	document.getElementById("event-ids").innerHTML = event_ids;
+            	if(event_ids == ""){
+            		document.getElementById("events-table").innerHTML = table_content;
+            		$("#main-content").css("display","none");
+            		return;
+            	} 
+                event_ids = event_ids.substring(0,event_ids.length-1);
+                eventArray = event_ids.split(",");
+                n = eventArray.length;
+				for(i=0;i<n;i++)
+				{
+					table_content += createRow(msg.eventsList[i]);
+				}                	
+				document.getElementById("events-table").innerHTML = table_content;
+            }
+       });
+	}
+	
+	$(document).ready(function(){
+		$("#edit-event-button").click(function(){
+			var eid = document.getElementById("event-id").value;
+			var event_date = document.getElementById("event_day").value;
+	    	var timings = document.getElementById("timing").value;
+	    	var description = document.getElementById("desc").value;
+			$.ajax({
+	            type: "POST",
+	            data: "id="+eid+"&event_date="+event_date+"&timings="+timings+"&description="+description,
+	           	dataType: 'json',
+	            url: "/schedule-event/edit",
+	            success: function(rmsg){
+	                if (rmsg != ''){	
+	                    document.getElementById("event-"+rmsg.id).innerHTML = createRow(rmsg);
+		               $("#event-form").dialog('close');
+	                }
+	            }
+	       });
+		});
+		
+		$(".sch-form").blur(function(){
+			if(this.value == "" || this.value == null)
+			{
+			return;
+			}
+			var formElementId = ($(this).parent().prev().find('label').attr('for'));
+			doValidationPlant(formElementId,'../validation/validate?form=schedule');
+		});
+		
+		$(".event-form").blur(function(){
+			if(this.value == "" || this.value == null)
+			{
+			return;
+			}
+			var formElementId = ($(this).parent().prev().find('label').attr('for'));
+			doValidationPlant(formElementId,'../validation/validate?form=schevent');
+		});
+	
+		$("#new-event").click(function(){
+			$("#add-event-button").css("display","inline");
+			$("#edit-event-button").css("display","none");
+			document.getElementById("event_day").value = "";
+			document.getElementById("timing").value = "";
+			document.getElementById("desc").value = "";
+			$("#event-form").dialog({title:'Add New Event',height:300,width:350});
+			
+		});
+		
+		$("#add-event-button").click(function(){
+			var event_date = document.getElementById("event_day").value;
+			var timings = document.getElementById("timing").value;
+			var description = document.getElementById("desc").value;
+			var event_ids = document.getElementById("event-ids").innerHTML;
+			var event_no;
+			if(event_date == "" || timings == "" || description == ""){
+				alert("One or more fields empty");
+				return;
+			}
+	    	event_ids = event_ids.substring(0,event_ids.length-1);
+	    	var event_array = event_ids.split(",");
+	    	if(event_array[0] == null || event_array[0] == "") {
+	    		event_no = 1;
+	    	}
+		   	else {
+		   		event_no = event_array.length + 1;
+		   	}
+			$.ajax({
+	            type: "POST",
+	            data: "event_no=" + event_no + "&event_date=" + event_date + 
+	            	  "&timings=" + timings + "&description=" + description,
+	           	dataType: 'json',
+	            url: "/schedule-event/add",
+	            success: function(msg){
+	                if (msg != ''){	                    	                   	 
+	                   	$('#events-table').append(createRow(msg));
+	                    $('#event-list').css('display','inline');
+	                    $('#event-ids').append(msg.id + ",");	
+	                    document.getElementById("event_day").value = "";
+						document.getElementById("timing").value = "";
+						document.getElementById("desc").value = "";
+	                    $("#event-form").dialog('close');
+	                    $("#main-content").css("display","inline");
+	                }
+	            }
+	       });
+		});
+		
+		$("#save-schedule").click(function(){
+			var first_day = document.getElementById("first_day").value;
+			var last_day = document.getElementById("last_day").value;
+			var event_ids = document.getElementById("event-ids").innerHTML;
+			var cid = document.getElementById("cId").value;
+			if(first_day == "" || last_day == ""){
+				alert("One or more fields empty");
+				return;
+			}
+			$.ajax({
+	            type: "POST",
+	            data: "first_day="+first_day+"&last_day="+last_day+"&event_ids="+event_ids+"&cid="+cid,
+	            url: "/schedule/save",
+	            success: function(msg){
+	            	if(msg == 'date error'){
+	            		alert("First day cannot be later than the last day");
+	            		return;
+	            	}
+	            	window.onbeforeunload = null;		                    	                   	 
+	            	window.location = "/schedule-event/list?id="+cid;
+	            }
+	       });
+		});
+	});
+	
+	function createRow(msg){
+		var row = "<tr id='event-" + msg.id + "'><td>" + msg.event_no + "</td><td>" + msg.event_date + 
+               "</td><td>" + msg.timings + "</td><td>" + msg.description + 
+               "</td><td><a href ='#' onClick='editEvent(" + msg.id + ")'>Edit</a></td>" +
+               "<td><a href = '#' onClick = 'deleteEvent(" + msg.id + ")'>Delete</a></td>";
+        if(msg.event_no != 1) {      
+        	row += "<td><a href = '#' onClick = 'moveUp(" + msg.id + ")'>Move Up</a></td>";
+        }
+        else{
+        	row += "<td></td>";
+        }
+        return row;
+	}
+	
+	function unloadPage(){
+       return "Leaving this page will lead to loss of data";
+   }   
+   window.onbeforeunload = unloadPage;
+</script>
+
 <?php
+	echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+	
 	$data = $this->form;
+	$data .=
+	"<div id 'schedule-events'>
+		<br><button class = 'gt-add' id='new-event'>Add a new event</button>
+	</div>
+	<div id = 'event-list' style='display:none'>
+		<div id = 'main-content'><br><br>Events Added :<br><br>
+		<table border=1 id='events-table'>
+			<tr><th>No.</th><th>Date</th><th>Timings</th><th>Description</th><th></th><th></th><th></th></tr>
+		</table></div>
+	</div>
+	<div id = 'event-form' style = 'display:none'>
+		<input type = 'hidden' id = 'event-id'>
+		$this->eventForm
+		<button class = 'user-save' style = 'display:none' id='edit-event-button'>Save</button>
+	</div>
+	<br><button id = 'save-schedule' class = 'user-save'>Save</button>
+	<div id = 'event-ids' style='display:none'></div>";
+	
 	if ($this->message == "")
 	    $data.= $this->message;
 	else
 	    $data.= "<div class = 'errors'>" . $this->message . "</div>";
+	
 	$this->tabPane("SchAdd", $data, array('title' => 'Add Schedule'));
 	echo $this->tabContainer("SchAdd", array());
 ?>

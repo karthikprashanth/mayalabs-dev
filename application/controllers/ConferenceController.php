@@ -96,6 +96,15 @@ class ConferenceController extends Zend_Controller_Action
 			$conf = new Model_DbTable_Conference(Zend_Db_Table_Abstract::getDefaultAdapter(),$cid);
 			$this->view->headTitle($conf->getPlace() . " (" . $conf->getYear() . ")",'PREPEND');
 			$this->view->conf = $conf;
+			
+			$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+			
+			$user = new Model_DbTable_User(Zend_Db_Table_Abstract::getDefaultAdapter(),$uid);
+			$role = Zend_Registry::get('role');
+			
+			if($role == 'sa' || $user->isConferenceChairman()){
+				$this->view->editAllowed = true;
+			}
 		}
 		catch(Exception $e){
 			echo $e;
@@ -105,6 +114,9 @@ class ConferenceController extends Zend_Controller_Action
 	public function listAction()
     {
         try{
+        	if($this->getRequest()->isXmlHttpRequest())
+	        	$this->_helper->getHelper('Layout')->disableLayout();
+			
         	$this->view->headTitle("Conferences",'PREPEND');
 			$conferenceList = Model_DbTable_Conference::getList(array('orderby' => 'year'));
 			$this->view->conferences = $conferenceList;

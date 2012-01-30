@@ -1,7 +1,7 @@
 <?php
 
 class Model_DbTable_Notification extends Zend_Db_Table_Abstract {
-
+	
     protected $_name = 'notification';
 
     public function add($id, $controller, $edit) {
@@ -32,7 +32,10 @@ class Model_DbTable_Notification extends Zend_Db_Table_Abstract {
             echo $e;
         }
     }
-
+	
+	/**
+	 * Deleting f/u/l plant , gasturbine etc. etc. should also delete notifications. Don't forget!!!
+	 */
 }
 
 ?>

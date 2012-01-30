@@ -3,16 +3,19 @@
 <?php
 	
 	echo $this->headScript()->prependFile($this->baseUrl() . '/js/frontend.js');
-	
+	$this->jQuery()->enable();
 	echo "<center><h3>Conference " . $this->conf->getPlace() . " held in " . 
 		  $this->conf->getYear() . " hosted by " . $this->conf->getHostName() . "</h3></center>";
 	
 	$synopsis = "<center>" . $this->conf->getAbstract() . "</center>";
-	
+	$cid = $this->conf->getConferenceId();
+	if($this->editAllowed){
+		$synopsis .= "<a href='/conference/edit?id=$cid' class = 'a-edit ui-corner-all'>Edit</a>";
+	}
 	
 	$this->tabPane("confdata", $synopsis, array('title' => 'Synopsis'));
-	$this->tabPane("confdata", "", array('title' => 'Schedule', 'contentUrl' => "/schedule/view?id=$this->id"));
-	$this->tabPane("confdata", $pres, array('title' => 'Attachments'));
+	$this->tabPane("confdata", $sch, array('title' => 'Schedule','contentUrl' => "/schedule-event/list?id=$cid"));
+	$this->tabPane("confdata", $pres, array('title' => 'Attachments','contentUrl' => "/attachment/list?id=$cid&mode=conf"));
 	$this->tabPane("confdata", $gallery, array('title' => 'Gallery'));
 	
 	echo $this->tabContainer("confdata", array());

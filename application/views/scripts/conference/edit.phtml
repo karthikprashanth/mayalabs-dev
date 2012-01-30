@@ -1,4 +1,17 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+	    $("input").blur(function(){
+	    	if(this.value == "" || this.value == null)
+	    	{
+	    		return;
+	    	}
+	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+	        doValidationPlant($(this).attr('id'),'../validation/validate?form=conference');
+	   });
+	});
+</script>
 <?php
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
 echo $this->headScript()->prependFile($this->baseUrl() . '/js/tiny_mce/tiny_mce.js');
 $data = $this->form;
 if ($this->message == "")

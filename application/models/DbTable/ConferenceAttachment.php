@@ -1,27 +1,26 @@
 <?php
-
-class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
-
-    /**
+class Model_DbTable_ConferenceAttachment extends Zend_Db_Table_Abstract {
+		
+	/**
     * Overrides the $_name of the parent class to indicate the name of the table it maps to
     *
     * @var String
     */
-    protected $_name = 'gtdata_attachment';
+    protected $_name = 'conference_attachment';
 
     /**
-     * Unique Id for the Gtdata Attachment
+     * Unique Id for the Conference Attachment
      *
      * @var Integer
      */
     protected $id;
 
     /**
-     * Id of the Gtdata to which the attachment belongs
+     * Id of the Conference to which the attachment belongs
      *
      * @var Integer
      */
-    protected $gtdataId;
+    protected $conferenceId;
 
     /**
      * Id of the Attachment in the attachment table
@@ -31,7 +30,7 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
     protected $attachmentId;
 
     /**
-     * Entire data about the Gtdata attachment
+     * Entire data about the Conference attachment
      *
      * @var Array
      */
@@ -52,7 +51,7 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
             $this->data = $data->toArray();
 
             $this->id = $this->data['id'];
-            $this->gtdataId = $this->data['gtdataId'];
+            $this->conferenceId = $this->data['conferenceId'];
             $this->attachmentid = $this->data['attachmentId'];
 
         }
@@ -68,22 +67,22 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
     }
 
     /**
-     * Gets the Id of the Gtdata to which the attachment belongs to
+     * Gets the Id of the Conference to which the attachment belongs to
      *
      * @return Integer
      */
-    public function getGtdataId(){
-        return $this->gtdataId;
+    public function getConferenceId(){
+        return $this->conferenceId;
     }
 
     /**
-     * Sets the Id of the Gtdata to which the attachment belongs
+     * Sets the Id of the Conference to which the attachment belongs
      *
-     * @param Integer $gtdataId
+     * @param Integer
      */
-    public function setGtdataId($gtdataId){
-        $this->gtdataId = $gtdataId;
-        $this->data['gtdataId'] = $gtdataId;
+    public function setConferenceId($conferenceId){
+        $this->conferenceId = $conferenceId;
+        $this->data['conferenceId'] = $conferenceId;
     }
 
     /**
@@ -106,7 +105,7 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
     }
 
     /**
-     * Gets all data about the gtdata attachment
+     * Gets all data about the conference attachment
      * 
      * @return Array
      */
@@ -123,13 +122,13 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
         if($data['id'] == 0 || $this->id == $data['id']){
             $this->data = $data;
 
-            $this->gtdataId = $data['gtdataId'];
+            $this->conferenceId = $data['conferenceId'];
             $this->attachmentId = $data['attachmentId'];
         }
     }
 
     /**
-     * Gets the list of gtdata attachments
+     * Gets the list of conference attachments
      *
      * @param Array $options - Extra option to filter the contents of the list
      * @return Array
@@ -148,26 +147,18 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
                 }
                 $where = substr($where,0,strlen($where)-4);
             }
-
-            if($options['columns']['gtid']){
-                $query = "SELECT * FROM gtdata_attachment WHERE gtdataId IN(SELECT id FROM gtdata WHERE gtid = " .
-                          $options['columns']['gtid'] . ")";
-            }
-            else{
-                $query = "SELECT * FROM gtdata_attachment " . $where . " " . $order;
-            }
         }
+		$query = "SELECT * FROM conference_attachment " . $where . " " . $order;
         
         $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
         $stmt = $dbAdapter->query($query);
         $list = $stmt->fetchAll();
         array($list);
-            
         return $list;
     }
 
     /**
-     * Gets the number of gtdata attachments based on extra options
+     * Gets the number of conference attachments based on extra options
      *
      * @param Array $options - Extra options to filter the contents
      * @return Array
@@ -181,7 +172,7 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
 			$where = substr($where,0,strlen($where)-4);
         }
 
-        $stmt = $dbAdapter->query("SELECT COUNT(*) as count FROM gtdata_attachment " . $where);
+        $stmt = $dbAdapter->query("SELECT COUNT(*) as count FROM conference_attachment " . $where);
         $countRow = $stmt->fetchAll();
         return $countRow[0]["count"];
     }
@@ -201,19 +192,17 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
     }
 
     /**
-     * Deletes the gtdata attachment from the database
+     * Deletes the conference attachment from the database
      *
-     * @param Integer $gtdataid - Optional parameter to delete the attachments belonging to a particular gtdata
+     * @param Integer $conferenceId - Optional parameter to delete the attachments belonging to a particular conference
      */
-    public function deleteGTdataAttachment($gtdataid){
-        if(!$gtdataid){
+    public function deleteConferenceAttachment($conferenceid){
+        if(!$conferenceid){
             $this->delete('id = '.$this->id);
         }
         else{
-            $this->delete('gtdataId = '.$this->gtdataId);
+            $this->delete('conferenceId = '.$this->conferenceId);
         }
-
-    }
-
+	
+	}
 }
-?>
