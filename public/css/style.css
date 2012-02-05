@@ -8,6 +8,7 @@ body {
     height:100%;
 }
 
+/* Login Page */
 #login-bg{
     background: #e5f1fa;
     width: 100%;
@@ -50,6 +51,8 @@ body {
 #submitbutton{
     margin-left: 20px;
 }
+
+/* End Login Page*/
 
 /* Dashoard */
 
@@ -105,6 +108,8 @@ body {
     padding-right: 5px;
 }
 
+/* End Header */
+
 /* Body */
 
 #container
@@ -135,6 +140,8 @@ body {
     padding-left: 10px;
     padding-top: 10px;
 }
+
+/* Profile Menu */
 
 #sidebar1
 {
@@ -241,16 +248,14 @@ body {
     margin-left: 10px;
 }
 
+/* End Profile Menu */
+
 #content-container{
     width: 800px;
-    float: left;
-    /*    margin-bottom: 10px;*/
+    float: left;    
 }
 
-#content-container form
-{
-    /*    padding: 20px;*/
-}
+/* Right Side Bar (ADs & Bookmarks) */
 
 #sidebar2
 {
@@ -258,12 +263,16 @@ body {
     float:right;
 }
 
+/* End Right Side Bar */
+
 p
 {
     padding-left:20px;
     padding-right:20px;
     margin-top:0px;
 }
+
+/* Footer */
 
 #footer
 {
@@ -277,6 +286,8 @@ p
     text-align:center;
     background-color:#2e4e68;
 }
+
+/* End Footer */
 
 /* Notification Elements*/
 
@@ -294,6 +305,16 @@ p
     font-size: 14px;    
     min-height: 48px;
     background-color: #f4f7fa;
+}
+
+.note-link{
+    margin-left: 15px;
+    padding: 10px;
+    font-style: italic;
+    font-weight: bold;
+    color: #2e4e68;
+    font-size: 16px;
+    cursor: pointer;
 }
 
 .note_element img{
@@ -320,8 +341,9 @@ p
 .element_lte{
     background-color: #dddddd;
 }
-/* Breadcrumbs */
+/* End Notification */
 
+/* Breadcrumbs */
 #breadcrumbs a{
     margin-left: 10px;
     padding: 2px;
@@ -343,9 +365,9 @@ p
     text-decoration: none;
     font-weight: normal;
 }
+/* End Breadcrumbs */
 
 /* Bookmarks */
-
 #bookmark{
     margin-left: 10px;
     margin-top: 10px;    
@@ -382,9 +404,9 @@ p
     color: #759848;
     font-size: 14px;
 }
+/* End Bookmarks */
 
 /* Advertisements */
-
 #advert{
     margin-left: 5px;
     min-height: 150px;
@@ -393,57 +415,10 @@ p
 #advert img{
     border: none;
 }
+/* End Advertisements */
 
 
-/* 4 States */
-
-/*.errors{
-    background-color: #edcaca;
-    border: solid 1px #ab5454;
-    color: #943838;
-    padding: 8px;
-    margin: 5px;
-    font-weight: bold;
-    font-size: 14px;
-    max-width: 540px;
-display: inline;
-}*/
-
-.success{
-    background-color: #d9ecc1;
-    border: solid 1px #83ab50;
-    color: #51722a;
-    padding: 8px;
-    margin: 5px;
-    font-weight: bold;
-    font-size: 14px;
-    max-width: 540px;
-}
-
-.info{
-    background-color: #e5f1fa;
-    border: solid 1px #5886a9;
-    color: #2e4e68;
-    padding: 8px;
-    margin: 5px;
-    font-weight: bold;
-    font-size: 14px;
-    max-width: 540px;
-}
-
-.notice{
-    background-color: #f7f6c3;
-    border: solid 1px #cac963;
-    color: #47460b;
-    padding: 8px;
-    margin: 5px;
-    font-weight: bold;
-    font-size: 14px;
-    max-width: 540px;
-}
-
-/* CList */
-
+/* Company Listing */
 .hide_view{
     color: #2e4e68;
     font-style: italic;
@@ -457,7 +432,7 @@ display: inline;
     margin-left: 25px;
 }
 
-
+/* Company Listing Search Bar */
 .clist-search{
     margin-top: 20px;
     margin-left: 25px;
@@ -477,6 +452,7 @@ display: inline;
     height: 25px;    
 }
 
+/* Company Listing Results */
 .clist-result{
     padding: 10px;
     font-size: 14px;
@@ -508,9 +484,9 @@ table.clist-table tbody td {
     padding: 4px;
     vertical-align: top;
 }
+/* End Company Listing */
 
 /* Hive Matrix */
-
 .hm-search{
     margin-top: 20px;
     margin-left: 25px;
@@ -544,11 +520,9 @@ table.clist-table tbody td {
     cursor: pointer;
     float: left;
 }
+/* End Hive Matrix */
 
-.hm-search
-
-/* Search Bar */
-
+/* Search Bar on Top*/
 #search-box-menu{
     float: left;
     margin-left: 20px;
@@ -586,23 +560,15 @@ input.search-go {
     background: url(../images/search-icon.png) no-repeat top left;
     cursor: pointer;
 }
+/* End Top Search Bar */
 
+/* Hidden Class for javascript hiding */
 .hidden{
     display: none;
 }
 
-.note-link{
-    margin-left: 15px;
-    padding: 10px;
-    font-style: italic;
-    font-weight: bold;
-    color: #2e4e68;
-    font-size: 16px;
-    cursor: pointer;
-}
 
 /* Search-Results */
-
 #search-results{
     margin: 0 0 0 0;
 }
@@ -666,9 +632,9 @@ input.search-go {
     margin-left: 10px;
     color: #116686;
 }
+/* End Search Results */
 
-/* Button */
-
+/* Buttons Global Style */
 input[type="submit"], button{
     padding: 3px;
     padding-left: 20px;
@@ -681,6 +647,7 @@ input[type="submit"], button{
     -border-radius: 5px 5px 5px 5px;
 }
 
+/* Add & Remove Bookmark Buttons */
 #add-bookmark, #remove-bookmark{
     background: #477396 url('../images/bookmarks-mini.png') left no-repeat;
     color: #fff;
@@ -690,7 +657,9 @@ input[type="submit"], button{
 #add-bookmark:hover, #remove-bookmark:hover, .gt-report:hover, .user-save:hover{
     background-color: #789dbb;
 }
+/* End Ad & Remove Bookmark Buttons */
 
+/* Buttons for Configure, Report, Add, Edit, Delete */
 .gt-configure{
     background: #719b3e url('../images/gt-configure.png') left no-repeat;
     color: #fff;
@@ -735,9 +704,9 @@ input[type="submit"], button{
     margin: 3px;
     background: url('../images/gt-edit.png') left no-repeat;
 }
+/* End Buttons for Configure, Report, Add, Edit, Delete */
 
 /* Global a */
-
 a{
     text-decoration: none;
     color: #2e4e68;
@@ -747,9 +716,9 @@ a{
 a:hover{
     text-decoration: underline;
 }
+/* End Global a*/
 
 /* GT Data */
-
 .gtdata-title{
     font-size: 22px;
     color: #3D3D3D;
@@ -783,11 +752,9 @@ a:hover{
     color: #1A4C80;
     background-color : #c1e199;
 }
+/* End GT Data */
 
-/*
-Conference
-*/
-
+/* Conference */
 .a-add{
     background: #ecf1e4 url('../images/gt-add.png') -5px no-repeat;
     color: #68873a;
@@ -820,11 +787,9 @@ Conference
     background-color: #e08c74;
     color: #fff;
 }
+/* End Conference */
 
-/*
-Administration
-*/
-
+/* Administration */
 .user-save{
     background: #477396 url('../images/user-save.png') left no-repeat;
     color: #fff;
@@ -842,11 +807,9 @@ Administration
     color: #fff;
     border: solid 1px #273c0e;
 }
+/* End Administration */
 
-/*
-Report Configure
-*/
-
+/* Report Configure */
 .rep-toggle{
     color: #ec2d19;
     cursor: pointer;
@@ -866,4 +829,4 @@ Report Configure
 .rep-form td{
     padding: 5px;
 }
-
+/* End Report Configure */
