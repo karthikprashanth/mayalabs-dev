@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+    <gasturbines GTId="NULL" GTName="GTData Test" GTModelNum="v93.4C" plantId="115" EOHDate="2011-12-08" EOH="50"
+     numStarts="60" numTrips="70" minorInspInter="3" HGPIInspInter="3" EHGPIInspInter="3" nextMinor="2012-02-05"
+     nextMajor="2011-10-25" timeupdate="2012-01-14 01:10:39" />
+</dataset>

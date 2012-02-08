@@ -213,7 +213,7 @@ class Model_DbTable_Gasturbine extends Zend_Db_Table_Abstract {
     /**
      *  Deletes the GT
      */
-    public function delete()
+    public function del()
     {
         $this->delete("GTId = " . $this->gtId);
     }
