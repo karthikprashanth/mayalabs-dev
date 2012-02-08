@@ -1,16 +1,2 @@
-<?php
-$i = 1;
-$data = "<br><br><br>";
-foreach ($this->schlist as $sch) {
-    $data .= $i . "&nbsp;&nbsp;&nbsp;" . $sch['event_date'] . "&nbsp;&nbsp;&nbsp;" .
-            $sch['description'] . "<a href = '/schedule/delevent?id=" . $sch['event_id'] .
-            "&schid=" . $sch['sch_id'] . "'>Delete Event</a><br><br>";
-    $i++;
-}
-	$data .= "<form action = '/schedule/delsch?id=" . $this->schid . "' method = 'post'>
-		<input class = 'gt-delete' type = 'submit' value = 'Delete Full Schedule'></form>";
 
-$this->tabPane("DelSch", $data, array('title' => 'Delete Schedule'));
-echo $this->tabContainer("DelSch", array());
-?>
 

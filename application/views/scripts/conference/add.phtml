@@ -1,15 +1,3 @@
-<?php
-echo $this->headScript()->prependFile($this->baseUrl() . '/js/tiny_mce/tiny_mce.js');
-echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
-$data = $this->form;
-if ($this->message == "")
-    $data.= $this->message;
-else
-    $data.= "<div class = 'errors'>" . $this->message . "</div>";
-$this->tabPane("ConfAdd", $data, array('title' => 'Add Conference'));
-echo $this->tabContainer("ConfAdd", array());
-?>
-<!-- TinyMCE --><script type="text/javascript" src='/js/tinyMCEinit.js'></script><!-- /TinyMCE -->
 <script type="text/javascript">
     $(document).ready(function(){
 	    $("input").blur(function(){
@@ -22,3 +10,15 @@ echo $this->tabContainer("ConfAdd", array());
 	   });
 	});
 </script>
+<?php
+echo $this->headScript()->prependFile($this->baseUrl() . '/js/tiny_mce/tiny_mce.js');
+echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+$data = $this->form;
+if ($this->message == "")
+    $data.= $this->message;
+else
+    $data.= "<div class = 'errors'>" . $this->message . "</div>";
+$this->tabPane("ConfAdd", $data, array('title' => 'Add Conference'));
+echo $this->tabContainer("ConfAdd", array());
+?>
+<!-- TinyMCE --><script type="text/javascript" src='/js/tinyMCEinit.js'></script><!-- /TinyMCE -->

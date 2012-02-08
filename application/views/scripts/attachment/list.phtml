@@ -17,14 +17,14 @@ if (!count($this->attachments)) {
 <?php for ($i = 0; $i < count($this->attachments); $i++) : ?>
                 <tr>
                     <td>
-                        <a href = "<?php echo $this->attachments[$i]->getId(); ?>"><?php echo $this->attachments[$i]->getTitle(); ?></a><br>
+                        <a href = "/attachment/view?id=<?php echo $this->attachments[$i]->getId(); ?>"><?php echo $this->attachments[$i]->getTitle(); ?></a><br>
         <?php
         $attach_data = $this->attachments[$i]->getData();
         ?></td>
             <td><?php echo $this->attachments[$i]->getFiletype(); ?></td>
                     <td><?php echo $this->attachments[$i]->getUsername(); ?></td>
                     <td><?php echo $attach_data['updatedAt']; ?></td>
-                <?php if ($this->userBelongs) : ?>
+                <?php if ($this->allowed) : ?>
                 <td>
                     <form action = "/attachment/delete?id=" <?php echo $this->attachments[$i]->getId(); ?> method = "get">
                         <input type = 'submit' class = 'gt-delete' name = 'delete' value = 'Delete'>
@@ -36,10 +36,14 @@ if (!count($this->attachments)) {
             </tbody>
         </table>
 <?php } ?>
-    <input type = 'hidden' name = 'id' value = '<?php echo $presentation['presentationId']; ?>'>
-<?php if ($this->userBelongs) : ?>
-        <form action="<?php echo $this->url(array('action' => 'add')); ?>" method="post">
-            <input type="hidden" name="gtid" value="<?php echo $this->escape($this->id); ?>" />
-            <input class='gt-add' type="submit" name="add" value="Add New Attachment" />
-<?php endif; ?>
-</form>
+
+<?php 
+	if($this->allowed){
+		echo "<form action = '/attachment/add' method = 'post'>";
+		echo "<input type = 'submit' class = 'gt-add' value = 'Add New Attachment'>";
+		if($this->mode == 'conf'){
+			echo "<input type = 'hidden' name = 'cid' value = '$this->id'>";
+		}
+		echo "</form>";
+	}
+?>

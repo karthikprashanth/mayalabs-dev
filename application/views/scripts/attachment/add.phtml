@@ -12,6 +12,7 @@
 	}
 	window.onload=init;
 </script>-->
+<script type = "text/javascript" src = "/js/file_ext_check.js"></script>
 <script type="text/javascript">
     $(document).ready(function(){
 	    $("input").blur(function(){
@@ -24,4 +25,7 @@
 	   });
 	});
 </script>
-<?php echo $this->form; ?>
+<?php 
+	echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+	echo $this->form; 
+?>

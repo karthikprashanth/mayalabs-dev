@@ -73,7 +73,7 @@
 							$page = array(
 								'label' => $conf['year'] . " (" . $conf['place'] . ")",
 								'controller' => 'conference',
-								'action' => 'list',
+								'action' => 'view',
 								'params' => array('id' => $conf['cId'])
 							);
 							$navContainer->findOneBy('codename','conf')->addPage($page);

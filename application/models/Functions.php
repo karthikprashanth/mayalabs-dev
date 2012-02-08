@@ -1,6 +1,8 @@
 <?php
 	class Model_Functions {
 		
+		protected $column;
+		
 		public static function generateRandom($size) 
 	    {
 	        $arr = '';
@@ -158,5 +160,4 @@
 			}
 			return false;
 		}
-		
 	}

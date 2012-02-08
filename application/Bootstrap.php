@@ -28,7 +28,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 
         if (Zend_Registry::get('role') != 'guest') {
             $frontControl->registerPlugin(new Plugin_HiveLayout());
-            $frontControl->registerPlugin(new Plugin_BookmarkLayout());
+            //$frontControl->registerPlugin(new Plugin_BookmarkLayout());
+            // Bookmark layout is commented out because it is getting rendered even during xmlHttpRequest
             //$frontControl->registerPlugin(new Plugin_EditPermission());
             //$frontControl->registerPlugin(new Plugin_Breadcrumbs());
 			$frontControl->registerPlugin(new Plugin_ForumSearchIndex());

@@ -1,7 +1,23 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+    $("input").blur(function(){
+    	if(this.value == "" || this.value == null)
+    	{
+    		return;
+    	}
+        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+        doValidationPlant(formElementId,'../validation/validate?form=schedule');
+   });
+});
+</script>
 <?php
-	echo $this->form;
+	echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+	$content = $this->form;
 	if($this->message == "")
-		echo $this->message;
+		$content .= $this->message;
 	else 
-		echo "<div class = 'errors'>" . $this->message . "</div>";
+		$content .= "<div class = 'errors'>" . $this->message . "</div>";
+	
+	$this->tabPane("EditSch", $content, array('title' => 'Edit Schedule'));
+	echo $this->tabContainer("EditSch", array());
 ?>
