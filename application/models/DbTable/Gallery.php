@@ -173,12 +173,14 @@ class Model_DbTable_Gallery extends Zend_Db_Table_Abstract {
 	 */
 	public static function getList($options = array())
 	{
+		$dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
 		if(count($options)){
 			if($options['cId']){
 				$where = " WHERE cId = " . $options['cId'];
 			}
 		}
-		$stmt = $dbAdapter->query("SELECT * FROM confgallery " . $where);
+		$query = "SELECT * FROM confgallery" . $where;		
+		$stmt = $dbAdapter->query($query);
         $list = $stmt->fetchAll();
         array($list);
         return $list;

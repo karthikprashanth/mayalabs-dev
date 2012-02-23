@@ -73,9 +73,26 @@ class AttachmentController extends Zend_Controller_Action {
 
     public function deleteAction() {
         try{
-            $id = $this->_getParam('id',0);
-            $attachment = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$id);
-            $attachment->deleteAttachment();
+            $id = $this->getRequest()->getPost("attachmentId");
+            if($this->getRequest()->getPost("cid")){            	
+            	$redirect = "/conference/view?id=".$this->getRequest()->getPost("cid")."#ui-tabs-2";
+            	$confAttachments = Model_DbTable_ConferenceAttachment::getList(array("columns" => array("attachmentId" => $id)));				
+				foreach($confAttachments as $ca){
+					$cAttach = new Model_DbTable_ConferenceAttachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$ca['id']);
+					$cAttach->deleteConferenceAttachment();
+				}
+            }
+			else {
+				$redirect = "/gasturbine/view?id=".$this->getRequest()->getPost("gtid")."#ui-tabs-4";
+				$gdAttachments = Model_DbTable_GtdataAttachment::getList(array("columns" => array("attachmentId" => $id)));
+				foreach($gdAttachments as $gda){
+					$gAttach = new Model_DbTable_GtdataAttachment(Model_Db_Table_Abstract::getDefaultAdapter(),$gda['id']);
+					$gAttach->deleteGTdataAttachment();
+				}
+			}
+			$attachment = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$id);
+			$attachment->deleteAttachment();
+			$this->_redirect($redirect);
         }
         catch(Exception $e){
             echo $e;
@@ -107,11 +124,11 @@ class AttachmentController extends Zend_Controller_Action {
 					$this->view->allowed = true;
 				}
 			}
-            
             $attachmentList = array();
             foreach($attachments as $list){
                 $attachmentList[] = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$list['attachmentId']);                
             }
+			
             $this->view->attachments = $attachmentList;
             $this->view->mode = $mode;
 			$this->view->id = $id;

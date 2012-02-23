@@ -24,8 +24,6 @@ class Model_HiveAcl extends Zend_Acl {
 		$this->add(new Zend_Acl_Resource('gasturbine:view'), 'gasturbine');
 		$this->add(new Zend_Acl_Resource('gasturbine:list'), 'gasturbine');
         $this->add(new Zend_Acl_Resource('gasturbine:index'), 'gasturbine');
-        $this->add(new Zend_Acl_Resource('gasturbine:editvalidate'), 'gasturbine');
-        $this->add(new Zend_Acl_Resource('gasturbine:addvalidate'), 'gasturbine');
         $this->add(new Zend_Acl_Resource('gasturbine:details'), 'gasturbine');
                 
 		$this->add(new Zend_Acl_Resource('validation'));
@@ -37,8 +35,6 @@ class Model_HiveAcl extends Zend_Acl {
 		$this->add(new Zend_Acl_Resource('plant:view'), 'plant');
 		$this->add(new Zend_Acl_Resource('plant:list'),'plant');
 		$this->add(new Zend_Acl_Resource('plant:results'),'plant');
-        $this->add(new Zend_Acl_Resource('plant:editvalidate'), 'plant');
-        $this->add(new Zend_Acl_Resource('plant:addvalidate'), 'plant');
 		
 		$this->add(new Zend_Acl_Resource('search'));
 		$this->add(new Zend_Acl_Resource('search:searchindex'), 'search');
@@ -73,6 +69,7 @@ class Model_HiveAcl extends Zend_Acl {
         $this->add(new Zend_Acl_Resource('bookmark:longlist'),'bookmark');
 
         $this->add(new Zend_Acl_Resource('conference'));
+		$this->add(new Zend_Acl_Resource('gallery'));
 		
         $this->add(new Zend_Acl_Resource('schedule'));
 		$this->add(new Zend_Acl_Resource('schedule:add'),'schedule');
@@ -120,6 +117,7 @@ class Model_HiveAcl extends Zend_Acl {
         $this->allow('us','advertisement',array('view','randomad','list'));
         $this->allow('us','bookmark');
         $this->allow('us','conference');
+		$this->allow('us','gallery');
         $this->allow('us','schedule',array('add','save','edit','view','delete'));
         $this->allow('us','notification');
         $this->allow('us','search');
@@ -132,18 +130,18 @@ class Model_HiveAcl extends Zend_Acl {
 		
 //		access privilages for editor
 //
-		$this->allow('us','gasturbine',array('edit','editvalidate'));
-		$this->allow('us','plant',array('edit','editvalidate'));
+		$this->allow('us','gasturbine',array('edit'));
+		$this->allow('us','plant',array('edit'));
 		
-		$this->allow('ed','gasturbine',array('edit','editvalidate'));
-		$this->allow('ed','plant',array('edit','editvalidate'));
+		$this->allow('ed','gasturbine',array('edit',));
+		$this->allow('ed','plant',array('edit'));
 //              access privilages for ad
 
         $this->allow('ad','advertisement',array('add','edit','list'));
 
 //		access privilages for ca
 		
-		$this->allow('ca','gasturbine',array('add','addvalidate'));
+		$this->allow('ca','gasturbine',array('add'));
 		$this->allow('sa','userprofile');
 		$this->allow('ca','administration',array('list','deleteacc','resetpassword'));
         $this->allow('sa','plant');

@@ -26,7 +26,15 @@ if (!count($this->attachments)) {
                     <td><?php echo $attach_data['updatedAt']; ?></td>
                 <?php if ($this->allowed) : ?>
                 <td>
-                    <form action = "/attachment/delete?id=" <?php echo $this->attachments[$i]->getId(); ?> method = "get">
+                    <form action = "/attachment/delete" method = "post">
+                    	<input type = "hidden" name = "attachmentId" value = "<?php echo $this->attachments[$i]->getId();?>">
+                    	<?php
+                    		if($this->mode == "conf")
+                    			$name = 'cid';
+							else 
+								$name = 'gtid';
+                    	?>
+                    	<input type = 'hidden' name = '<?php echo $name;?>' value = <?php echo $this->id;?>>
                         <input type = 'submit' class = 'gt-delete' name = 'delete' value = 'Delete'>
                     </form>
                 </td>
@@ -43,6 +51,9 @@ if (!count($this->attachments)) {
 		echo "<input type = 'submit' class = 'gt-add' value = 'Add New Attachment'>";
 		if($this->mode == 'conf'){
 			echo "<input type = 'hidden' name = 'cid' value = '$this->id'>";
+		}
+		else {
+			echo "<input type = 'hidden' name = 'gtid' value = '$this->id'>";
 		}
 		echo "</form>";
 	}

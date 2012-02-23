@@ -1,0 +1,80 @@
+<script type = "text/javascript" src = "/js/ajaxupload.3.6.js"></script>
+<script type = "text/javascript">
+	var imageNo = 0;
+	
+	$(document).ready(function(){
+		new AjaxUpload("#image",{
+			action: '/gallery/upload',
+			name : 'image',
+			onSubmit : function(file,ext){
+				this.disable();
+			},
+			onComplete: function(file, response){
+	            this.enable();
+	            var data = response.split("<");
+	            var json = eval("(" + data[0] + ")");
+	            var content = "";
+	            var colNo;
+	            var rowNo;
+	            $.ajax({
+	            	type:"POST",
+	            	data:"cid=" + $("#cid").val() + "&tag=" + $("#tag").val() + 
+	            	     "&imgPath="+encodeURI(json.imgPath)+"&thumbPath="+encodeURI(json.thumbPath),
+	            	     
+	            	dataType:"json",
+	            	url:"/gallery/add",
+	            	success:function(msg){
+	            		if(msg != ''){	            			
+							rowNo = Math.floor(imageNo/4);
+							if(imageNo == 0 || imageNo%4 == 0){
+								content = "<tr><td id = 'img" + rowNo + "-0'><img src = '" + msg.thumbPath + "'></td>" +
+								               "<td id = 'img" + rowNo + "-1'></td>" +
+								               "<td id = 'img" + rowNo + "-2'></td>" +
+								               "<td id = 'img" + rowNo + "-3'></td></tr>";								
+								$("#image").append(content);
+							}		
+							else {
+								colNo = imageNo - (rowNo*4);
+								alert(colNo + "-" + rowNo);
+								$("#img"+rowNo+"-"+colNo).html("<img src = '" + msg.thumbPath + "' alt = '" + msg.imgPath + "'>");
+							}
+							imageNo++;
+	            		}
+	            	}
+	            });
+	        }
+		});
+		
+		$("#add-photo").click(function(){
+			$("#gallery-form").dialog({title:"Add a new Photo",width:430});
+		});
+	});
+</script>
+<div id = "gallery-form" style="display:none">
+	<?php echo $this->galleryForm; ?>
+	<input type = 'hidden' id = 'cid' value = '<?php echo $this->cid;?>'>
+</div>
+
+<table id="image">
+	<?php
+		$imageNo = 0;
+		foreach($this->photos as $photo){
+			$thumbPath = "uploads/".$imageNo.".jpg";
+			file_put_contents($thumbPath,$photo['data']);
+			$row = floor($imageNo/4);
+			if($imageNo == 0 || $imageNo%4 == 0){
+				echo "<tr>";
+			}
+			echo "<td id = 'img$row-0'><img src = '" . $thumbPath . "' alt = '" . $photo['photoId'] . "'></td>";
+			if($imageNo%3==0){
+				echo "</tr>";
+			}
+			$imageNo++;
+		}
+	?>	
+</table>
+<?php
+	if($this->allowed){
+		echo "<button id='add-photo' class = 'gt-add'>Add Photo</button>";
+	}
+?>

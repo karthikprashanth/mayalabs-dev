@@ -16,7 +16,7 @@
 	$this->tabPane("confdata", $synopsis, array('title' => 'Synopsis'));
 	$this->tabPane("confdata", $sch, array('title' => 'Schedule','contentUrl' => "/schedule-event/list?id=$cid"));
 	$this->tabPane("confdata", $pres, array('title' => 'Attachments','contentUrl' => "/attachment/list?id=$cid&mode=conf"));
-	$this->tabPane("confdata", $gallery, array('title' => 'Gallery'));
+	$this->tabPane("confdata", $gallery, array('title' => 'Gallery','contentUrl' => "/gallery/list?id=$cid"));
 	
 	echo $this->tabContainer("confdata", array());
 ?>
