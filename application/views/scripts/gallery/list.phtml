@@ -1,8 +1,13 @@
 <script type = "text/javascript" src = "/js/ajaxupload.3.6.js"></script>
 <script type = "text/javascript">
 	var imageNo = 0;
-	
+	function showImg(id){
+            document.getElementById("large-img").src = "/uploads/gallery/photo_" + id + ".jpg";
+            $("#photo-box").dialog({height:'auto',width:'auto',title:$("#img-"+id).attr("alt")});
+        }
+        
 	$(document).ready(function(){
+            
 		new AjaxUpload("#image",{
 			action: '/gallery/upload',
 			name : 'image',
@@ -25,27 +30,27 @@
 	            	url:"/gallery/add",
 	            	success:function(msg){
 	            		if(msg != ''){	            			
-							rowNo = Math.floor(imageNo/4);
-							if(imageNo == 0 || imageNo%4 == 0){
-								content = "<tr><td id = 'img" + rowNo + "-0'><img src = '" + msg.thumbPath + "'></td>" +
+							rowNo = Math.floor(imageNo/3);
+							if(imageNo == 0 || imageNo%3 == 0){
+								content = "<tr><td id = 'img" + rowNo + "-0'><img src = '" + msg.thumbPath + "' alt = '" + msg.tag + "' onclick='showImg(" + msg.imgId + ")'></td>" +
 								               "<td id = 'img" + rowNo + "-1'></td>" +
-								               "<td id = 'img" + rowNo + "-2'></td>" +
-								               "<td id = 'img" + rowNo + "-3'></td></tr>";								
+								               "<td id = 'img" + rowNo + "-2'></td>";								
 								$("#image").append(content);
 							}		
 							else {
-								colNo = imageNo - (rowNo*4);
-								alert(colNo + "-" + rowNo);
-								$("#img"+rowNo+"-"+colNo).html("<img src = '" + msg.thumbPath + "' alt = '" + msg.imgPath + "'>");
+								colNo = imageNo - (rowNo*3);								
+								$("#img"+rowNo+"-"+colNo).html("<img src = '" + msg.thumbPath + "' alt = '" + msg.tag + "' id = 'img-" + msg.imgId + "' onclick='showImg(" + msg.imgId + ")'>");
 							}
 							imageNo++;
 	            		}
+                                $("#gallery-form").dialog('close');
 	            	}
 	            });
 	        }
 		});
 		
 		$("#add-photo").click(function(){
+                        $("#tag").val("");
 			$("#gallery-form").dialog({title:"Add a new Photo",width:430});
 		});
 	});
@@ -54,11 +59,12 @@
 	<?php echo $this->galleryForm; ?>
 	<input type = 'hidden' id = 'cid' value = '<?php echo $this->cid;?>'>
 </div>
-
+<div id ="photo-box"style="display:none"><img id='large-img'></div>
 <table id="image">
 	<?php
 		$imageNo = 0;
 		foreach($this->photos as $photo){
+                        continue;
 			$thumbPath = "uploads/".$imageNo.".jpg";
 			file_put_contents($thumbPath,$photo['data']);
 			$row = floor($imageNo/4);

@@ -21,17 +21,29 @@ class GalleryController extends Zend_Controller_Action
 			$data = file_get_contents($thumbPath);
 			$tag = $this->getRequest()->getPost("tag");
 			$cid = $this->getRequest()->getPost("cid");
+                        $ext = Model_Functions::getFileExt($thumbPath);
 			
 			$photo = new Model_DbTable_Gallery(Zend_Db_Table_Abstract::getDefaultAdapter());
-			$photo->setPhotoData(array("tag" => $tag,"cid" => $cid,"data"=>$data));
+			$photo->setPhotoData(array("tag" => $tag,"cid" => $cid,"data"=>$data,"ext" => $ext));
 			$photo->save();
 			$photoId = $photo->getPhotoId();
 			
-			$origData = file_get_contents($this->getRequest()->getPost("imgPath"));
-			$origPath = "uploads/gallery/photo_$photoId.jpg";
-			file_put_contents($origPath,$origData);
-			unlink($this->getRequest()->getPost("imgPath"));
-			echo json_encode(array("imgPath"=>"/" . $origPath,"thumbPath"=>"/" .$thumbPath));
+                        $filename = $this->getRequest()->getPost("imgPath");
+                        list($width, $height, $type, $attr) = getimagesize($filename);
+                        
+                        if($width > 1024 && $height > 768){
+                            include("../library/phmagick/phmagick.php");
+                            $p = new phmagick($filename,"uploads/gallery/photo_$photoId.$ext");
+                            $p->resize(1024,768);
+                        }
+                        else{
+                            $origData = file_get_contents($this->getRequest()->getPost("imgPath"));
+                            $origPath = "uploads/gallery/photo_$photoId".".".$ext;
+                            file_put_contents($origPath,$origData);
+                        }
+                        
+			unlink($this->getRequest()->getPost("imgPath"));                       
+			echo json_encode(array("imgId"=>$photoId,"tag" => $tag,"ext" => $ext,"thumbPath"=>"/" .$thumbPath));
 		}
 		
 	}
@@ -42,8 +54,13 @@ class GalleryController extends Zend_Controller_Action
 		    $file = file_get_contents($_FILES['image']['tmp_name']);
 			$filename = "uploads/" . rand(0,999999) . $_FILES['image']['name'];
 			file_put_contents($filename,$file);
-			$thumbPath = "uploads/th_" . $_FILES['image']['name'];
-			Model_Functions::createThumb($filename,$thumbPath,150);
+			$thumbPath = "uploads/th_" . $_FILES['image']['name'];                        
+                        
+                        include("../library/phmagick/phmagick.php");
+                        
+                        $p = new phmagick($filename,$thumbPath);
+                        $p->resize(200);
+                        
 			echo json_encode(array("imgPath"=>$filename,"thumbPath"=>$thumbPath));
 		}
 	}

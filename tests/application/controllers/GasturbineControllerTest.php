@@ -2,7 +2,23 @@
 
 class GastrubineControllerTest extends Zend_Test_PHPUnit_ControllerTestCase
 {
+		
 	protected $application;
+	
+	/* logs in as System Administrator */
+	
+	protected function logIn()
+	{
+    	
+		 $this->request->setMethod('POST')
+    	 			   ->setPost(array(
+        	 			'username' => 'admin',
+        	 			'password' => 'reason',
+        	 			't_url' => '',
+    	 ));
+		$this->dispatch('/authentication/login');
+		$this->assertTrue(Zend_Auth::getInstance()->hasIdentity());
+	}
 	
 	public function setUp()
 	{
@@ -20,10 +36,9 @@ class GastrubineControllerTest extends Zend_Test_PHPUnit_ControllerTestCase
 		$this->application->bootstrap();
 	}
 	
-	protected function logIn()
+	public function testIndexAction()
 	{
-    	
-		 $this->request->setMethod('POST')
+		$this->request->setMethod('POST')
     	 			   ->setPost(array(
         	 			'username' => 'admin',
         	 			'password' => 'reason',
@@ -31,12 +46,17 @@ class GastrubineControllerTest extends Zend_Test_PHPUnit_ControllerTestCase
     	 ));
 		$this->dispatch('/authentication/login');
 		$this->assertTrue(Zend_Auth::getInstance()->hasIdentity());
-	}
-	
-	public function testIndexAction()
-	{
-		$this->dispatch('/gasturbine/index');
-		
+		$userId = Zend_Auth::getInstance()->getStorage()->read()->id;
+       	$this->assertEquals(2,$userId);
+		Zend_Registry::set('id', Zend_Auth::getInstance()->getStorage()->read()->id);
+		$session = new Zend_Session_Namespace('Zend_auth');
+		$session->setExpirationSeconds(5);
+//		session_write_close();
+		//sleep(3);
+			 
+		$this->dispatch('/dashboard/index');
+		$this->assertController('dashboard');
+
 	}
 	
 }
