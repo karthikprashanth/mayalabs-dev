@@ -77,7 +77,8 @@
        });
 	}
 	
-	$(document).ready(function(){
+	$(document).ready(function(){		
+		$("#event_day").datepicker({dateFormat:'yy-mm-dd'});
 		$("#edit-event-button").click(function(){
 			var eid = document.getElementById("event-id").value;
 			var event_date = document.getElementById("event_day").value;
@@ -122,6 +123,7 @@
 			var timings = document.getElementById("timing").value;
 			var description = document.getElementById("desc").value;
 			var event_ids = document.getElementById("event-ids").innerHTML;
+			var sid = document.getElementById("sid").innerHTML;
 			var event_no;
 			if(event_date == "" || timings == "" || description == ""){
 				alert("One or more fields empty");
@@ -138,7 +140,7 @@
 			$.ajax({
 	            type: "POST",
 	            data: "event_no=" + event_no + "&event_date=" + event_date + 
-	            	  "&timings=" + timings + "&description=" + description,
+	            	  "&timings=" + timings + "&description=" + description + "&scheduleId=" + sid,
 	           	dataType: 'json',
 	            url: "/schedule-event/add",
 	            success: function(msg){
@@ -178,6 +180,15 @@
 	            }
 	       });
 		});
+		
+		$(".event-form").blur(function(){
+			if(this.value == "" || this.value == null)
+			{
+				return;
+			}
+			var formElementId = ($(this).parent().prev().find('label').attr('for'));
+			doValidationPlant(formElementId,'/validation/validate?form=schevent');
+		});
 	});
 	
 	function createRow(msg){
@@ -197,6 +208,7 @@
 	}
 </script>
 <?php
+	
 	echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
 	$this->jQuery()->enable();
 	if(count($this->events))
@@ -206,7 +218,7 @@
 		echo "<h4><center>Conference held from " . $first_day . 
 		     " to " . $last_day . "</h4></center>";
 		echo "<div id = 'main-content'>";
-		echo "<table id='events-table' onmouseover='tablecloth();'>";
+		echo "<table id='events-table'>";
 		echo "<thead><tr>";
 		echo "<th>No.</th>";
 		echo "<th style='min-width: 90px;'>Date</th>";
@@ -251,12 +263,13 @@
 				  ";
 		}
 	}
-	
 	echo "<div id = 'event-form' style = 'display:none'>
 		<input type = 'hidden' id = 'event-id'>
 		$this->eventForm
 		<button class = 'user-save' style = 'display:none' id='edit-event-button'>Save</button>
+		<span id = 'sid' style='display:none'>$this->scheduleId</span>
 	</div>	
 	<div id = 'event-ids' style='display:none'>$event_ids</div>";
+?>
 	
 	

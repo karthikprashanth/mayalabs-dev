@@ -37,6 +37,13 @@ class Model_DbTable_Gallery extends Zend_Db_Table_Abstract {
 	protected $conferenceId;
 	
 	/**
+	 * Extension of the image file
+	 * 
+	 * @var String
+	 */
+	protected $extension;
+	
+	/**
 	 * All details of the photo
 	 * 
 	 * @var Array
@@ -63,6 +70,7 @@ class Model_DbTable_Gallery extends Zend_Db_Table_Abstract {
             $this->tag = $photoRow['tag'];
             $this->binaryData = $photoRow['data'];
 			$this->conferenceId = $photoRow['cId'];
+			$this->extension = $photoRow['ext'];
         }
     }
 	
@@ -137,6 +145,25 @@ class Model_DbTable_Gallery extends Zend_Db_Table_Abstract {
 	{
 		$this->conferenceId = $conferenceId;
 		$this->photoData['cId'] = $conferenceId;
+	}
+	
+	/**
+	 * Gets the extension of the image file
+	 * 
+	 * @return String - Extension of the image
+	 */
+	public function getExtension(){
+		return $this->extension;
+	}
+	
+	/**
+	 * Sets the file extension of the image
+	 * 
+	 * @param String - Extension of the image
+	 */
+	public function setExtension($extension){
+		$this->photoData['ext'] = $extension;
+		$this->extension = $extension;
 	}
 	
 	/**

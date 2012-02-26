@@ -14,14 +14,14 @@ class Form_ScheduleEventForm extends Zend_Form {
                 ->addValidator(Model_Validators::dateval())
                 ->addFilter('StripTags')
                 ->addFilter('StringTrim');
-        /*$event_date->setDecorators(array(
+        $event_date->setDecorators(array(
         array('UiWidgetElement', array('tag' => '')),
         array('Errors'),
         array('Description', array('tag' => 'span')),
         array('HtmlTag', array('tag' => 'td')),
         array('Label', array('tag' => 'td', 'class' =>'element')),
         array(array('row' => 'HtmlTag'), array('tag' => 'tr')),
-        ));*/
+        ));
 
             $timings = new Zend_Form_Element_Text('timing');
             $timings->setLabel('Event Timings')
@@ -30,12 +30,12 @@ class Form_ScheduleEventForm extends Zend_Form {
 					->setAttrib('class','event-form')
                     ->addFilter('StripTags')
                     ->addValidator(Model_Validators::regex('/[^a-zA-Z0-9 :-]+/'))
-                    ->addFilter('StringTrim');
-                    /*->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
+                    ->addFilter('StringTrim')
+                    ->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
             'Errors', array(array('data' => 'HtmlTag'), array('tag' => 'td')),
             array('Label', array('tag' => 'td')),
             array(array('row' => 'HtmlTag'), array('tag' => 'tr'))
-        ));*/
+        ));
 
             $description = new Zend_Form_Element_Textarea('desc');
             $description->setLabel('Description')
@@ -44,12 +44,12 @@ class Form_ScheduleEventForm extends Zend_Form {
 					->setAttrib('class','event-form')
                     ->addDecorator('Htmltag', array('tag' => 'br'))
                     ->addValidator('NotEmpty')
-                    ->addFilter('StripTags');
-                    /*->addFilter('StringTrim')->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
+                    ->addFilter('StripTags')
+                    ->addFilter('StringTrim')->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
             'Errors', array(array('data' => 'HtmlTag'), array('tag' => 'td')),
             array('Label', array('tag' => 'td')),
             array(array('row' => 'HtmlTag'), array('tag' => 'tr'))
-        ));*/
+        ));
 
         
 
@@ -64,7 +64,7 @@ class Form_ScheduleEventForm extends Zend_Form {
         ));
 
         $this->addElements(array($timings ,$event_date,$description,$submit));
-        /*$this->setDecorators(array('FormElements', array(array('data' => 'HtmlTag'), array('tag' => 'table')), 'Form'));*/
+        $this->setDecorators(array('FormElements', array(array('data' => 'HtmlTag'), array('tag' => 'table')), 'Form'));
     }
 
 }

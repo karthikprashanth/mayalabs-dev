@@ -14,36 +14,45 @@ class GalleryController extends Zend_Controller_Action
     }
 	
 	public function addAction(){
-		if($this->getRequest()->isPost()){
-			$this->_helper->getHelper('Layout')->disableLayout();
-			$thumbPath = urldecode($this->getRequest()->getPost("thumbPath"));
-			
-			$data = file_get_contents($thumbPath);
-			$tag = $this->getRequest()->getPost("tag");
-			$cid = $this->getRequest()->getPost("cid");
-                        $ext = Model_Functions::getFileExt($thumbPath);
-			
-			$photo = new Model_DbTable_Gallery(Zend_Db_Table_Abstract::getDefaultAdapter());
-			$photo->setPhotoData(array("tag" => $tag,"cid" => $cid,"data"=>$data,"ext" => $ext));
-			$photo->save();
-			$photoId = $photo->getPhotoId();
-			
-                        $filename = $this->getRequest()->getPost("imgPath");
-                        list($width, $height, $type, $attr) = getimagesize($filename);
-                        
-                        if($width > 1024 && $height > 768){
-                            include("../library/phmagick/phmagick.php");
-                            $p = new phmagick($filename,"uploads/gallery/photo_$photoId.$ext");
-                            $p->resize(1024,768);
-                        }
-                        else{
-                            $origData = file_get_contents($this->getRequest()->getPost("imgPath"));
-                            $origPath = "uploads/gallery/photo_$photoId".".".$ext;
-                            file_put_contents($origPath,$origData);
-                        }
-                        
-			unlink($this->getRequest()->getPost("imgPath"));                       
-			echo json_encode(array("imgId"=>$photoId,"tag" => $tag,"ext" => $ext,"thumbPath"=>"/" .$thumbPath));
+		try{
+			if($this->getRequest()->isPost()){
+				$this->_helper->getHelper('Layout')->disableLayout();
+				$thumbPath = urldecode($this->getRequest()->getPost("thumbPath"));
+				
+				$data = file_get_contents($thumbPath);
+				$tag = $this->getRequest()->getPost("tag");
+				$cid = $this->getRequest()->getPost("cid");
+	                        $ext = Model_Functions::getFileExt($thumbPath);
+				
+				$photo = new Model_DbTable_Gallery(Zend_Db_Table_Abstract::getDefaultAdapter());
+				$photo->setPhotoData(array("tag" => $tag,"cid" => $cid,"data"=>$data,"ext" => $ext));
+				$photo->save();
+				$photoId = $photo->getPhotoId();
+				
+	            $filename = $this->getRequest()->getPost("imgPath");
+	            list($width, $height, $type, $attr) = getimagesize($filename);
+	            
+	            if($width > 1024 && $height > 768){
+	                include("../library/phMagick/phMagick.php");
+					$phMagick = new \phMagick\Core\Runner();
+		
+					$resizeAction = new \phMagick\Action\Resize\Proportional($filename,"uploads/gallery/photo_$photoId.$ext");
+					$resizeAction->setWidth(1024);
+					$resizeAction->setHeight(768);
+					$phMagick->run($resizeAction);                
+	            }
+	            else{
+	                $origData = file_get_contents($this->getRequest()->getPost("imgPath"));
+	                $origPath = "uploads/gallery/photo_$photoId".".".$ext;
+	                file_put_contents($origPath,$origData);
+	            }
+	                        
+				unlink($this->getRequest()->getPost("imgPath"));
+				echo json_encode(array("imgId"=>$photoId,"tag" => $tag,"ext" => $ext,"thumbPath"=>"/" .$thumbPath));
+			}
+		}
+		catch(Exception $e){
+			echo $e;	
 		}
 		
 	}
@@ -54,14 +63,22 @@ class GalleryController extends Zend_Controller_Action
 		    $file = file_get_contents($_FILES['image']['tmp_name']);
 			$filename = "uploads/" . rand(0,999999) . $_FILES['image']['name'];
 			file_put_contents($filename,$file);
-			$thumbPath = "uploads/th_" . $_FILES['image']['name'];                        
-                        
-                        include("../library/phmagick/phmagick.php");
-                        
-                        $p = new phmagick($filename,$thumbPath);
-                        $p->resize(200);
-                        
-			echo json_encode(array("imgPath"=>$filename,"thumbPath"=>$thumbPath));
+			$thumbPath = "uploads/th_" . $_FILES['image']['name'];
+            include("../library/phMagick/phMagick.php");
+            
+            $phMagick = new \phMagick\Core\Runner();
+	
+			$resizeAction = new \phMagick\Action\Resize\Proportional($filename,$thumbPath);
+			$resizeAction->setWidth(200);
+			
+			$phMagick->run($resizeAction);
+            if(!file_exists($thumbPath)){
+            	echo json_encode(array("error" => "1"));
+				unlink($filename);
+            }
+			else {
+				echo json_encode(array("imgPath"=>$filename,"thumbPath"=>$thumbPath,"error" => "0"));
+			}
 		}
 	}
 	
@@ -87,7 +104,18 @@ class GalleryController extends Zend_Controller_Action
 	}
 	
 	public function deleteAction(){
-		
+		try{
+			$photoId = $this->getRequest()->getPost('photoId');
+			$photo = new Model_DbTable_Gallery(Zend_Db_Table_Abstract::getDefaultAdapter(),$photoId);
+			$ext = $photo->getExtension();
+			unlink("/uploads/gallery/photo_".$photo->getPhotoId().".".$ext);
+			$cid = $photo->getConferenceId();
+			$photo->deletePhoto();
+			$this->_redirect("/conference/view?id=".$cid."#ui-tabs-3");
+		}
+		catch(Exception $e){
+			echo $e;
+		}
 	}
 
 }

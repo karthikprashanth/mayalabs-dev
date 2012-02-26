@@ -94,7 +94,7 @@
 				}
 			}
 			$ext = substr($filename,$pos+1,strlen($filename)-$pos); 
-			return $ext;
+			return strtolower($ext);
 			
 		}
 		

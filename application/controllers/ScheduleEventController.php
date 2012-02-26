@@ -111,6 +111,7 @@ class ScheduleEventController extends Zend_Controller_Action
 			$schedule = Model_DbTable_Schedule::getList(array('columns' => array('cId' => $cid)));
 			$this->view->schExists = true;
 			$this->view->cid = $cid;
+			$this->view->scheduleId = $schedule[0]['id'];
 			if(!count($schedule)){
 				$this->view->schExists = false;
 				return;

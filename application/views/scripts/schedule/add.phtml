@@ -180,7 +180,7 @@
 	            		return;
 	            	}
 	            	window.onbeforeunload = null;		                    	                   	 
-	            	window.location = "/schedule-event/list?id="+cid;
+	            	window.location = "/conference/view?id="+cid+"#ui-tabs-1";
 	            }
 	       });
 		});
@@ -208,7 +208,6 @@
 
 <?php
 	echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
-	
 	$data = $this->form;
 	$data .=
 	"<div id 'schedule-events'>
