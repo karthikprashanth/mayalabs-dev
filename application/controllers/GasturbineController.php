@@ -123,29 +123,6 @@ class GasturbineController extends Zend_Controller_Action
         }
     }
 
-    /*public function listAction() {
-        try {
-            $this->view->headTitle('List GT', 'PREPEND');
-            $resultSet = new Model_DbTable_Gasturbine();
-            $resultSet = $resultSet->listGT();
-
-            $up = new Model_DbTable_Userprofile();
-            $up = $up->getUser(Zend_Auth::getInstance()->getStorage()->read()->id);
-            $pid = $up['plantId'];
-            $gt = new Model_DbTable_Gasturbine();
-            $gt = $gt->getGTP($pid);
-
-            $GTdata = new Zend_Paginator(new Zend_Paginator_Adapter_DbSelect($resultSet));
-            $GTdata->setItemCountPerPage(5)
-                    ->setCurrentPageNumber($this->_getParam('page', 1));
-
-            $this->view->GTdata = $GTdata;
-            $this->view->gt = $gt;
-        } catch (Exception $e) {
-            echo $e;
-        }
-    }*/
-
     public function detailsAction()
     {
         try {
@@ -195,9 +172,9 @@ class GasturbineController extends Zend_Controller_Action
 			}
 	    	
 			for($i=0;$i<count($gts);$i++){			
-				$gts[$i]['fcount'] = Model_DbTable_Gtdata::getCount(array('columns' => array('type' => 'finding','GTId' => $gts[$i]['GTId'])));
-				$gts[$i]['ucount'] = Model_DbTable_Gtdata::getCount(array('columns' => array('type' => 'upgrade','GTId' => $gts[$i]['GTId'])));
-				$gts[$i]['lcount'] = Model_DbTable_Gtdata::getCount(array('columns' => array('type' => 'lte','GTId' => $gts[$i]['GTId'])));
+				$gts[$i]['fcount'] = Model_DbTable_Gtdata::getCount(array('columns' => array('type' => 'finding','gtid' => $gts[$i]['GTId'])));
+				$gts[$i]['ucount'] = Model_DbTable_Gtdata::getCount(array('columns' => array('type' => 'upgrade','gtid' => $gts[$i]['GTId'])));
+				$gts[$i]['lcount'] = Model_DbTable_Gtdata::getCount(array('columns' => array('type' => 'lte','gtid' => $gts[$i]['GTId'])));
 				
 			}
 	    	$GTdata = new Zend_Paginator(new Zend_Paginator_Adapter_Array($gts));

@@ -149,7 +149,19 @@ class Model_DbTable_Gasturbine extends Zend_Db_Table_Abstract {
         array($list);
         return $list;
     }
-
+	
+	/**
+	 * Gets the name of the Gasturbine given as argument
+	 * 
+	 * @param GT Id
+	 */
+	public static function getGTurbineName($gtid){
+		$dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
+		$stmt = $dbAdapter->query("SELECT * FROM gasturbines WHERE GTId = " . $gtid);
+        $list = $stmt->fetchAll();
+		array($list);
+		return $list[0]['GTName'];
+	}
     
     /**
      * Sets the GT Name

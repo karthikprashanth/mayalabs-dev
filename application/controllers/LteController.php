@@ -7,154 +7,87 @@ class LteController extends Zend_Controller_Action {
         $contextSwitch->addActionContext('list', 'json')
                 ->initContext();
     }
-
-    public function indexAction() {
+            
+    public function indexAction() 
+    {
     	
-	}
+    }
 
     public function addAction() {
         try {
+            $type = "lte";
             $gtid['gtid'] = $this->getRequest()->getPost('gtid');
             $this->view->headTitle('Add New LTE', 'PREPEND');
             $form = new Form_GTDataForm();
-			$form->showform($gtid['gtid'],0,"lte");
+            	
+			$form->showForm($gtid['gtid'],0,"lte");            
             $form->submit->setLabel('Add');           	
             $this->view->form = $form;
-            $sysModel = new Model_DbTable_Gtsystems();
-            $this->view->subsystems = $sysModel->fetchAll();
             $form->populate($gtid);
+			$this->view->attachForm = new Form_AttachmentForm();
+			$this->view->attachForm->populate(array("mode" => "gtdata","modeId" => $gtid['gtid'],"src" => "add"));
+			$this->view->gtid = $gtid['gtid'];
             if ($this->getRequest()->isPost()) {
                 $formData = $this->getRequest()->getPost();
                 if (isset($formData['title'])) {
                     if ($form->isValid($formData)) {
-                        $userp = new Model_DbTable_LTE();
+                        $userp = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter());
                         $content = $form->getValues();
-						$type = "lte";
-						$grpdata = $userp->fetchAll("gtid = " . $gtid['gtid'] . " AND type = '" . $type . "'");
+						
+						$grpdata = Model_DbTable_Gtdata::getList(array('columns' => array('type' => 'lte','gtid' => $gtid['gtid'])));
 						foreach($grpdata as $data)
 						{
 							if($data['title'] == $content['title'])
 							{
-								$this->view->message = strtoupper($type). " title already exists";
+								$this->view->message = ucfirst($type). " title already exists";
 								return;
 							}
 						}
-						if($content['presentationId'] != "")
-						{
-	                        $temp = '';
-	                        foreach ($content['presentationId'] as $pId) {
-	                        	if($pId != "")
-								{
-	                            	$temp = $temp . $pId . ',';
-								}
-	                        }
-	                    }
-						$pmodel = new Model_DbTable_Presentation();
-						$funcs = new Model_Functions();
-						
-						$filenames = array(
-							1 => $form->content1->getFileName(),
-							2 => $form->content2->getFileName(),
-							3 => $form->content3->getFileName(),
-							4 => $form->content4->getFileName(),
-							5 => $form->content5->getFileName()
-						);
-						
-						$prestitles = array(
-							1 => $content['prestitle1'],
-							2 => $content['prestitle2'],
-							3 => $content['prestitle3'],
-							4 => $content['prestitle4'],
-							5 => $content['prestitle5']
-						);
-						$checked = array(1 => false,2 => false,3 => false,4 => false,5 => false);
-						/*-----
-						checks for allowed file extensions
-						*/
-						
-						$i=1;
-						for($i=1;$i<=5;$i++)
-						{
-							$pres=file_get_contents($filenames[$i]);
-							$filename = $filenames[$i]; 
-							$fileext = $funcs->getFileExt($filename);
-							if($filename != NULL)
-							{
-								if(!in_array(strtolower($fileext),array('pdf','doc','ppt','docx','pptx','xls','xlsx','jpeg','jpg','png','gif')))
-								{
-									$this->view->message = "File Type Not Allowed";
-									return;
-								}
-							}
-							/*creating the data array to be inserted into the db */
-							$data = array(
-								'title' => $prestitles[$i],
-								'GTId' => $gtid['gtid'],
-								'content' => $pres,
-								'filetype' => $fileext,
-								'userupdate' => Zend_Auth::getInstance()->getStorage()->read()->id
-							);
-							
-							/* checking for presentation title conflcts */
-							
-							$gtpres = $pmodel->fetchAll('GTId = '. $gtid['gtid']);
-							$exists = false;
-							foreach($gtpres as $gtp)
-							{
-								if($gtp['title'] == $prestitles[$i])
-								{
-									$exists = true;
-								}
-							}
-							if($exists && !$checked[$i])
-							{
-								$this->view->message = "Presentation title already exists";
-								return;
-							}
-							
-							if($prestitles[$i] != "" && $prestitles[$i] != NULL)
-							{
-								$p = $pmodel->insert($data);
-								$checked[$i] = true;
-								if($temp == "")
-								{
-									$temp = $p . ",";
-								}
-								else {
-									$temp = $temp . $p . ",";
-								}
-							}
-						}
-						
-						//----
-						
-						$content['presentationId'] = $temp;
 						if($content['subSysId'] == 0 || $content['subSysId'] == "")
 						{
 							$content['subSysId'] = 34;
 						}
 						$inscontent = array(
 							'gtid' => $gtid['gtid'],
-							'type' => 'lte',
+							'type' => $type,
 							'data' => $content['data'],
 							'userupdate' => Zend_Auth::getInstance()->getStorage()->read()->id,
 							'title' => $content['title'],
-							'presentationId' => $temp,
 							'sysId' => $content['sysId'],
 							'subSysId' => $content['subSysId'],
 							'EOH' => $content['EOH'],
 							'DOF' => $content['DOF'],
-							'TOI' => $content['TOI']
-							
+							'TOI' => $content['TOI']	
 						);
-                        $fid = $userp->add($inscontent);
+                        $userp->setGTData($inscontent);
+                        $userp->save();
+						$fid = $userp->getId();
+						
+						$addedPres = $content['attach_ids'];
+						
+						if($addedPres != "")
+						{
+							$addedPres = explode(",",$addedPres);
+							foreach($addedPres as $pres){
+								if($pres == "" or $pres == 0) continue;
+								$attach = new Model_DbTable_GtdataAttachment(Zend_Db_Table_Abstract::getDefaultAdapter());
+								$attach->setData(array("attachmentId" => $pres,"gtdataId" => $fid));
+								$attach->save();
+							}
+						}
+						
+						$chosenPres = $content['presentationId'];
+						if(count($chosenPres)){
+							foreach($chosenPres as $pres){
+								if($pres == "" or $pres == 0) continue;
+								$attach = new Model_DbTable_GtdataAttachment(Zend_Db_Table_Abstract::getDefaultAdapter());
+								$attach->setData(array("attachmentId" => $pres,"gtdataId" => $fid));
+								$attach->save();
+							}
+						}
+						//add notifications
                         $this->_redirect('/lte/view?id=' . $fid);
                     } else {
-                    	$x = 1;
-						for($x=1;$x<=5;$x++)
-						{
-							$formData['prestitle' . $x] = "";
-						}
                         $form->populate($formData);
                     }
                 }
@@ -164,283 +97,184 @@ class LteController extends Zend_Controller_Action {
         }
     }
 
-    public function listAction() {
-        try {
-            if ($this->_request->isXmlHttpRequest()) {
-                $this->_helper->getHelper('Layout')->disableLayout();
-            }
-            $this->view->headTitle("LTE List", 'PREPEND');
-
-            $id = $this->_getParam('id', 0);
-            $resultSet = new Model_DbTable_LTE();
-            $resultSet = $resultSet->listLTE($id);
-            
-            $uModel = new Model_DbTable_User();
-			$this->view->usermodel = $uModel;
+    public function editAction() {
+    	try{
+    		$id = $this->_getParam("id",0);
+			$gtdata = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(),$id);
+			$gtdataArray = $gtdata->getData();
 			
-			$userModel = new Model_DbTable_Userprofile();
-			$this->view->umodel = $userModel;
+			$gtdAttach = Model_DbTable_GtdataAttachment::getList(array("columns" => array("gtdataId" => $id)));
 			
-			$sModel = new Model_DbTable_Gtsystems();
-			$this->view->sysModel = $sModel;
+			foreach($gtdAttach as $gtd){
+				$attach_ids .= $gtd['attachmentId'] . ",";
+				$gtda[] = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtd['attachmentId']);
+			}
 			
-			$ssModel = new Model_DbTable_Gtsubsystems();
-			$this->view->subSysModel = $ssModel;
-        
-            $up = new Model_DbTable_Userprofile();
-	        $up = $up->getUser(Zend_Auth::getInstance()->getStorage()->read()->id);
-	        $pid = $up['plantId'];
-	        $gtmodel = new Model_DbTable_Gasturbine();
-	        $gt = $gtmodel->getGTP($pid);
-	        $this->view->gt = $gt;
-	        
-			$gast = $gtmodel->getGT($id);
-			$role = Zend_Registry::get("role");
-			if((int)$gast['plantId'] == (int)$pid || $role == 'sa')
-			{
-				$this->view->ubool = true;
+			$form = new Form_GTDataForm();
+			
+			$form->showForm($gtdata->getGTId(),$id,$gtdata->getType(),explode(",",$attach_ids));
+			$form->submit->setLabel("Save & Continue");
+			$form->submit->setAttrib("class","user-save");
+			
+			$this->view->gtid = $gtdata->getGTId();
+			$this->view->id = $id;
+			$this->view->addedAttachments = $gtda;
+			
+			$this->view->form = $form;
+			$this->view->headTitle("Edit " . $gtdata->getTypeTitle() . " - " . $gtdata->getTitle(),'PREPEND');
+			$this->view->userupdate = $gtdata->getUserUpdate();
+			$this->view->updatetime = $gtdata->getUpdateTime();
+			$this->view->typeTitle  = $gtdata->getTypeTitle();
+			$this->view->attachForm = new Form_AttachmentForm();
+			$this->view->attachForm->populate(array("mode" => "gtdata","modeId" => $gtdata->getGTId(),"src" => "edit"));
+			
+			if($this->getRequest()->isPost()){
+				
+				$existing = Model_DbTable_Gtdata::getList(array("columns" => array("type" => $gtdata->getType(),"gtid" => $gtdata->getGTId())));
+				
+				foreach($existing as $e){
+					if($e['id'] != $id){
+						$ed = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(),$e['id']);
+						if($ed->getTitle() == $this->getRequest()->getPost('title')){
+							$this->view->message =  $gtdata->getTypeTitle() . " with the same title already exists";
+							$form->populate($this->getRequest()->getPost());
+							return;
+						}
+					}
+				}
+				
+				
+				$content = $this->getRequest()->getPost();
+				$chosenPres = $content['presentationId'];
+				
+				if(count($chosenPres)){
+					foreach($chosenPres as $pres){
+						if($pres == "" or $pres == 0) continue;
+						$attach = new Model_DbTable_GtdataAttachment(Zend_Db_Table_Abstract::getDefaultAdapter());
+						$attach->setData(array("attachmentId" => $pres,"gtdataId" => $id));
+						$attach->save();
+					}
+				}
+				
+				$addedPres = explode(",",$content['attach_ids']);
+				if(count($addedPres)){
+					foreach($addedPres as $pres){
+						if($pres == "" or $pres == 0) continue;
+						$attach = new Model_DbTable_GtdataAttachment(Zend_Db_Table_Abstract::getDefaultAdapter());
+						$attach->setData(array("attachmentId" => $pres,"gtdataId" => $id));
+						$attach->save();
+					}
+				}
+					
+				unset($content['submit']);
+				unset($content['attach_ids']);		
+				unset($content['presentationId']);
+				if($content['subSysId'] == ""){
+					$content['subSysId'] = 34;
+				}
+				$content['userupdate'] = Zend_Auth::getInstance()->getStorage()->read()->id;
+				$content['updatedate'] = date("Y-m-d H:i:s");		
+				$gtdata->setGTData($content);
+				$gtdata->save();
+				
+				//add notifications here
+				
+				$this->_redirect("/lte/view?id=".$id);
+				
 			}
 			else {
-				$this->view->ubool = false;
+				$formData = $gtdata->getData();
+				$formData['attach_ids'] = "";
+				$form->populate($formData);
 			}
-
-            $this->view->ltes = $resultSet;
-            $this->view->id = $id;
-        } catch (Exception $e) {
+    	}
+		catch(Exception $e){
+			echo $e;
+		}
+    }
+	public function listAction(){
+		try{
+			$this->_helper->getHelper('Layout')->disableLayout();
+			$gtid = $this->_getParam('id',0);
+			
+			$lte = Model_DbTable_Gtdata::getList(array("columns" => array("gtid" => $gtid,"type" => "lte")));			
+			$lteList = array();
+			foreach($lte as $f){
+				$lteList[] = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(),$f['id']);					
+			}
+			$this->view->lteList = $lteList;
+			
+			$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+			$user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$uid);
+			
+			$gt = new Model_DbTable_Gasturbine(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtid);
+			
+			$role = Zend_Registry::get('role');
+			if($user->getPlantId() == $gt->getPlantId() || $role == 'sa'){
+				$this->view->allowed = true;
+			}
+			$this->view->gtid = $gtid;
+		}
+		catch(Exception $e){
+			
+		}
+	}
+	
+	public function viewAction() {
+        try {
+        	$id = $this->_getParam("id",0);
+			$lte = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(),$id);
+			$this->view->headTitle("View LTE - " . $lte->getTitle(),'PREPEND');
+			$this->view->lte = $lte;
+			
+			$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
+			$user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$uid);
+			
+			$gt = new Model_DbTable_Gasturbine(Zend_Db_Table_Abstract::getDefaultAdapter(),$lte->getGTId());
+			$role = Zend_Registry::get('role');
+			if($user->getPlantId() == $gt->getPlantId() || $role == 'sa'){
+				$this->view->allowed = true;
+			}
+			
+			$attachments = Model_DbTable_GtdataAttachment::getList(array('columns' => array('gtdataid' => $id)));
+			foreach($attachments as $a){
+				$attachs[] = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$a['attachmentId']);
+			}
+			foreach($attachs as $a){
+				$updateAt = $a['updatedAt'];
+			}
+			
+			$this->view->attachmentList = $attachs;
+			
+        } 
+        catch (Exception $e) {
             echo $e;
         }
     }
 
     public function deleteAction() {
-        if ($this->getRequest()->isPost()) {
-            $del = $this->getRequest()->getPost('del');
-            if ($del == 'Delete') {
-                $id = $this->getRequest()->getPost('id');
-                $user = new Model_DbTable_LTE();
-				$gtdatamodel = new Model_DbTable_Gtdata();
-				$data = $gtdatamodel->getData($id);
-				$gtid = $data['gtid'];
-                $user->deleteLTE($id);
-				$this->_redirect("/gasturbine/view?id=" .$gtid . "#ui-tabs-4");
-            }
-        }
-    }
-
-    public function editAction() {
-        $this->view->headTitle('Edit LTE', 'PREPEND');
-        try {
-        	$id = $this->_getParam('id', 0);
-			$gtdatamodel = new Model_DbTable_Gtdata();
-			$gtdata = $gtdatamodel->getData($id);
-			$gtid = $gtdata['gtid'];
-            $form = new Form_GTDataForm();
-			$form->showForm($gtid,$id,"lte");
-            $form->submit->setLabel('Save');
-			
-            if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
-                $form->submit->setLabel('Save & Continue');
-			}           
-            $this->view->form = $form;
-            if ($this->getRequest()->isPost()) {
-                $formData = $this->getRequest()->getPost();
-                if ($form->isValid($formData)) {
-                    $finding = new Model_DbTable_LTE();
-                    $gtdatamodel = new Model_DbTable_Gtdata();
-                    $gtdata = $gtdatamodel->getData($id);
-                    $content = $form->getValues();
-                    foreach ($content['presentationId'] as $presentations) {
-                        $presid = $presid . $presentations . ",";
-                    }
-					if ($presid == ',')
-					{
-						$presid = "";
-					}
-                    $content['presentationId'] = $presid;
-							
-						$filenames = array(
-							1 => $form->content1->getFileName(),
-							2 => $form->content2->getFileName(),
-							3 => $form->content3->getFileName(),
-							4 => $form->content4->getFileName(),
-							5 => $form->content5->getFileName()
-						);
-						$prestitles = array(
-							1 => $content['prestitle1'],
-							2 => $content['prestitle2'],
-							3 => $content['prestitle3'],
-							4 => $content['prestitle4'],
-							5 => $content['prestitle5']
-						);
-						$checked = array(1 => false,2 => false,3 => false,4 => false,5 => false);
-						$pmodel = new Model_DbTable_Presentation();
-						$funcs = new Model_Functions();
-						$i=1;
-						$noPresAdded = 0;
-						for($i=1;$i<=5;$i++)
-						{
-							$pres=file_get_contents($filenames[$i]);
-							$filename = $filenames[$i];
-							$fileext = $funcs->getFileExt($filename);
-							
-							if($filename != NULL)
-							{
-								if(!in_array(strtolower($fileext),array('pdf','doc','ppt','docx','pptx','xls','xlsx','jpeg','jpg','png','gif')))
-								{
-									$this->view->message = "File Type Not Allowed";
-									return;
-								}
-							}
-							
-							$p=0;
-							if($prestitles[$i] != "")
-							{
-								$data = array(
-									'title' => $prestitles[$i],
-									'GTId' => $gtdata['gtid'],
-									'content' => $pres,
-									'filetype' => $fileext,
-									'userupdate' => Zend_Auth::getInstance()->getStorage()->read()->id
-								);
-								$gtpres = $pmodel->fetchAll('GTId = '. $gtdata['gtid']);
-								$exists = false;
-								foreach($gtpres as $gtp)
-								{
-									if($gtp['title'] == $prestitles[$i])
-									{
-										$exists = true;
-									}
-								}
-								if($exists && !$checked[$i])
-								{
-									$this->view->message = "Presentation title already exists";
-									return;
-								}
-								$p = $pmodel->insert($data);
-								$noPresAdded++;
-								$checked[$i] = true;
-									
-							}
-							if($p != 0)
-							{
-								$temp_p .= $p . ",";
-							}
-							
-						}
-						if($presid != "")
-						{
-							$temp = $presid . $temp_p;
-						}
-						else {
-							$temp = $temp_p;
-						}
-						$gtdatamodel = new Model_DbTable_Gtdata();
-						$gtdata = $gtdatamodel->getData($id);
-						$temp = $temp . $gtdata['presentationId'];
-						$content['presentationId'] = $temp;
-						if($content['subSysId'] == 0 || $content['subSysId'] == "")
-						{
-							$content['subSysId'] = 34;
-						}
-						$content = array(
-							'id'   => $id,
-							'gtid' => $gtdata['gtid'],
-							'type' => 'lte',
-							'data' => $content['data'],
-							'userupdate' => Zend_Auth::getInstance()->getStorage()->read()->id,
-							'title' => $content['title'],
-							'presentationId' => $temp,
-							'sysId' => $content['sysId'],
-							'subSysId' => $content['subSysId'],
-							'EOH' => $content['EOH'],
-							'DOF' => $content['DOF'],
-							'TOI' => $content['TOI']
-						);
-                    	$affRows = $finding->updateLTE($content);
-						if($affRows + $noPresAdded > 0)
-						{
-	                    	$nf = new Model_DbTable_Notification();
-	                        $formD = $this->_getParam('id', 0);
-	                        $nf->add($formD, 'lte', 0);
-						}
-                    $this->_redirect('/lte/view?id=' . $id);
-                    if (Zend_Auth::getInstance()->getStorage()->read()->lastlogin == '') {
-                        $this->_redirect('lte/list');
-                    }
-                } else {
-                	if($formData['DOF'] == "0000-00-00")
-					{
-						$formData['DOF'] = "";
-					}
-					if($formData['EOH'] == 0)
-					{
-						$formData['EOH'] == "";
-					}
-					$x = 1;
-					for($x=1;$x<=5;$x++)
-					{
-						$formData['prestitle' . $x] = "";
-					}
-                    $form->populate($formData);
-                }
-            } else {
-                $id = $this->_getParam('id', 0);
-                $fin = new Model_DbTable_LTE();
-				$fdata = $fin->getLTE($id);
-				if($fdata['DOF'] == "0000-00-00")
-				{
-					$fdata['DOF'] = "";
+        try{
+        	if($this->getRequest()->isPost()){
+        		$id = $this->getRequest()->getPost("id");
+				
+				$gtdataAttachments = Model_DbTable_GtdataAttachment::getList(array("columns" => array("gtdataId" => $id)));
+				
+				foreach($gtdataAttachments as $gta){
+					$gtdAttach = new Model_DbTable_GtdataAttachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$gta['id']);
+					$gtdAttach->deleteGTdataAttachment();
 				}
-				if($fdata['EOH'] == 0)
-				{
-					$fdata['EOH'] = "";	
-				}
-               	$form->populate($fdata);
-				$form->subSysId->setValue($fdata['subSysId']);
-				$this->view->gtdata = $fin->getLTE($id);
-            }
-        } catch (exception $e) {
-            echo $e;
+				
+				$gtdata = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(),$id);
+				$gtid = $gtdata->getGTId();
+				$gtdata->deleteGtdata();
+				
+				$this->_redirect("/gasturbine/view?id=".$gtid."#ui-tabs-4");
+				//delete notifications
+        	}
         }
-    }
-
-    public function viewAction() {
-        try {
-            $id = $this->_getParam('id', 0);
-            $result = new Model_DbTable_LTE();
-            $result = $result->getLTE($id);
-
-            $this->view->headTitle("View LTE - " . $result['title'], 'PREPEND');
-
-            $presentations = new Model_DbTable_Presentation();
-			$this->view->presmodel = $presentations;
-            $plist = explode(',', $result['presentationId']);
-            array_pop(&$plist);
-
-            $ptitle = array();
-            foreach ($plist as $pid) {
-                $res = $presentations->getPresentation($pid);
-                $temp = array();
-                $temp[] = array_combine(array($res['presentationId']), array($res['title']));
-                ;
-
-                $ptitle = array_merge($ptitle, $temp); //array($res['presentationId'] => $res['title']));
-            }
-
-            $gt = new Model_DbTable_Gasturbine();
-            $gt = $gt->getGT($result['gtid']);
-            
-			$sModel = new Model_DbTable_Gtsystems();
-			$this->view->sysModel = $sModel;
+		catch(Exception $e){
 			
-			$ssModel = new Model_DbTable_Gtsubsystems();
-			$this->view->subSysModel = $ssModel;
-            
-            $this->view->gt = $gt;
-            $this->view->lte = $result;
-            $this->view->plist = $ptitle;
-        } catch (Exception $e) {
-            echo $e;
-        }
+		}
     }
 
 }

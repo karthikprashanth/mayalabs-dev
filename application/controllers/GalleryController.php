@@ -16,39 +16,52 @@ class GalleryController extends Zend_Controller_Action
 	public function addAction(){
 		try{
 			if($this->getRequest()->isPost()){
-				$this->_helper->getHelper('Layout')->disableLayout();
+				//$this->_helper->getHelper('Layout')->disableLayout();
 				$thumbPath = urldecode($this->getRequest()->getPost("thumbPath"));
+				
+				$file = file_get_contents($_FILES['img']['tmp_name']);
+				$filename = "uploads/" . rand(0,999999) . $_FILES['img']['name'];
+				file_put_contents($filename,$file);
+				$thumbPath = "uploads/th_" . $_FILES['img']['name'];
+	            include("../library/phMagick/phMagick.php");
+	            
+	            $phMagick = new \phMagick\Core\Runner();
+		
+				$resizeAction = new \phMagick\Action\Resize\Proportional($filename,$thumbPath);
+				$resizeAction->setWidth(200);
+				
+				$phMagick->run($resizeAction);
 				
 				$data = file_get_contents($thumbPath);
 				$tag = $this->getRequest()->getPost("tag");
 				$cid = $this->getRequest()->getPost("cid");
-	                        $ext = Model_Functions::getFileExt($thumbPath);
+				
+	           	$ext = strtolower(substr($thumbPath,strpos($thumbPath,".")+1));
 				
 				$photo = new Model_DbTable_Gallery(Zend_Db_Table_Abstract::getDefaultAdapter());
 				$photo->setPhotoData(array("tag" => $tag,"cid" => $cid,"data"=>$data,"ext" => $ext));
 				$photo->save();
 				$photoId = $photo->getPhotoId();
 				
-	            $filename = $this->getRequest()->getPost("imgPath");
 	            list($width, $height, $type, $attr) = getimagesize($filename);
 	            
 	            if($width > 1024 && $height > 768){
-	                include("../library/phMagick/phMagick.php");
 					$phMagick = new \phMagick\Core\Runner();
-		
 					$resizeAction = new \phMagick\Action\Resize\Proportional($filename,"uploads/gallery/photo_$photoId.$ext");
 					$resizeAction->setWidth(1024);
 					$resizeAction->setHeight(768);
 					$phMagick->run($resizeAction);                
 	            }
 	            else{
-	                $origData = file_get_contents($this->getRequest()->getPost("imgPath"));
+	                $origData = file_get_contents($filename);
 	                $origPath = "uploads/gallery/photo_$photoId".".".$ext;
 	                file_put_contents($origPath,$origData);
 	            }
-	                        
-				unlink($this->getRequest()->getPost("imgPath"));
-				echo json_encode(array("imgId"=>$photoId,"tag" => $tag,"ext" => $ext,"thumbPath"=>"/" .$thumbPath));
+	            $this->view->thumbPath = $thumbPath;
+				$this->view->id = $photoId;
+				$this->view->tag = $tag;
+				unlink($filename);
+				
 			}
 		}
 		catch(Exception $e){
@@ -57,7 +70,7 @@ class GalleryController extends Zend_Controller_Action
 		
 	}
 	
-	public function uploadAction(){
+	/*public function uploadAction(){
 		if ($this->getRequest()->isPost()) {
 			$this->_helper->getHelper('Layout')->disableLayout();
 		    $file = file_get_contents($_FILES['image']['tmp_name']);
@@ -77,10 +90,10 @@ class GalleryController extends Zend_Controller_Action
 				unlink($filename);
             }
 			else {
-				echo json_encode(array("imgPath"=>$filename,"thumbPath"=>$thumbPath,"error" => "0"));
+				echo json_encode(array("imgPath"=>$filename,"thumbPath"=>$thumbPath,"error" => "0","filename" => $_FILES['image']['name']));
 			}
 		}
-	}
+	}*/
 	
 	public function listAction(){
 		try{
@@ -96,7 +109,10 @@ class GalleryController extends Zend_Controller_Action
 			$this->view->cid = $cid;
 			$photos = Model_DbTable_Gallery::getList(array('cId' => $cid));
 			$this->view->photos = $photos;
-			$this->view->galleryForm = new Form_GalleryForm();
+			
+			$galForm = new Form_GalleryForm();
+			$galForm->populate(array("cid" => $cid));
+			$this->view->galleryForm = $galForm;
 		}
 		catch(Exception $e){
 			echo $e;
@@ -108,7 +124,7 @@ class GalleryController extends Zend_Controller_Action
 			$photoId = $this->getRequest()->getPost('photoId');
 			$photo = new Model_DbTable_Gallery(Zend_Db_Table_Abstract::getDefaultAdapter(),$photoId);
 			$ext = $photo->getExtension();
-			unlink("/uploads/gallery/photo_".$photo->getPhotoId().".".$ext);
+			unlink("uploads/gallery/photo_".$photo->getPhotoId().".".$ext);
 			$cid = $photo->getConferenceId();
 			$photo->deletePhoto();
 			$this->_redirect("/conference/view?id=".$cid."#ui-tabs-3");

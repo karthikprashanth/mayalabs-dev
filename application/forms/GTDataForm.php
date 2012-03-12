@@ -2,14 +2,9 @@
 
 class Form_GTDataForm extends Zend_Form {
 
-    public function showform($gturbineid, $gtdataid, $gtdatatype) {        
+    public function showform($gtid, $gtdataid = 0, $gtdatatype,$attach_ids = array()) {        
         $this->setName('GTData');
-        
-//        $pObj = new Model_DbTable_Presentation();
-//        $presentationValue = $pObj->fetchAll("GTId = " . $gturbineid);
-        
-        $presentationValue = Model_DbTable_Presentation::getList($gturbineid);        
-
+		       
         $data = array();
         $data[''] = 'Select an Option';
         if ($gtdatatype == 'finding') {
@@ -17,50 +12,33 @@ class Form_GTDataForm extends Zend_Form {
         } else {
             $doflabel = "Implementation";
         }        
-        if ($gtdataid == 0) {
-            foreach ($presentationValue as $pl) {
-                $data[$pl->presentationId] = $pl->title;
-            }            
-        } else {
-            $gtdatamodel = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(), $gtdataid);
-            $gtdata = $gtdatamodel->getData();            
-
-            $presid = explode(",", substr($gtdata['presentationId'], 0, strlen($gtdata['presentationId']) - 1));
-            foreach ($presentationValue as $pl) {
-                $add = true;
-                for ($i = 0; $i < count($presid); $i++) {
-                    if ($presid[$i] == $pl['presentationId']) {
-                        $add = false;
-                    }
-                }
-                if ($add) {
-                    $data[$pl->presentationId] = $pl->title;
-                }
-            }
-        }
         
-//        $system = $sysModel->fetchAll();
         $system = Model_DbTable_Gtsystems::getList();
-
-        
-//        $subsystem = $sysSubModel->fetchAll();
-        $subsystem = Model_DbTable_Gtsubsystems::getList();
-        
-        
-        $sysNames = array();
-        $sysNames[''] = 'Select an Option';
-        $sysSubNames[''] = 'Select an Option';
-        foreach ($system as $list) {            
+		$sysNames[''] = 'Select an Option';
+		foreach ($system as $list) {            
             $sysNames[$list['sysId']] = $list['sysName'];
         }
-        foreach ($subsystem as $slist) {            
+        
+		if(!$gtdataid){
+        	$subsystem = Model_DbTable_Gtsubsystems::getList();
+		}
+		else{
+			$gtdata = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtdataid);
+			$gtdArray = $gtdata->getData();
+			$sysid = $gtdArray['sysId']; 
+			$subsystem = Model_DbTable_Gtsubsystems::getList($sysid);
+			
+		}
+		
+        $sysSubNames[''] = 'Select an Option';
+        foreach ($subsystem as $slist) {
+        	if($slist['subSysName'] == '-') continue;            
             $sysSubNames[$slist['id']] = $slist['subSysName'];
         }
 
         $sys = new Zend_Form_Element_Select('sysId');
         $sys->setLabel('System Name')
                 ->addMultiOptions($sysNames)
-                
                 ->setRequired(true)
                 ->addFilter('StripTags')
                 ->addFilter('StringTrim')
@@ -74,7 +52,6 @@ class Form_GTDataForm extends Zend_Form {
         $subsys = new Zend_Form_Element_Select('subSysId');
         $subsys->setLabel('Sub System Name')
                 ->addMultiOptions($sysSubNames)
-                
                 ->addFilter('StripTags')
                 ->addFilter('StringTrim')
                 ->addValidator('NotEmpty');
@@ -88,7 +65,6 @@ class Form_GTDataForm extends Zend_Form {
 
         $eoh = new Zend_Form_Element_Text('EOH');
         $eoh->setLabel('EOH at Occurence')
-                
                 ->addFilter('StripTags')
                 ->addFilter('StringTrim')
                 ->addValidator(Model_Validators::int());
@@ -129,133 +105,41 @@ class Form_GTDataForm extends Zend_Form {
             array(array('row' => 'HtmlTag'), array('tag' => 'tr'))
         ));
 
-        $prestitle1 = new Zend_Form_Element_Text('prestitle1');
-        $prestitle1->setLabel('Attachment Title')
-                
-                ->addValidator('NotEmpty')
-                ->addFilter('StripTags')
-                ->addFilter('StringTrim');
-        $prestitle1->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
-            'Errors', array(array('data' => 'HtmlTag'), array('tag' => 'td')),
-            array('Label', array('tag' => 'td')),
-            array(array('row' => 'HtmlTag'), array('tag' => 'tr'))
-        ));
-
-        $content1 = new Zend_Form_Element_File('content1');
-        $content1->setLabel('Upload the File')
-                ->setDestination($appath . '/public/uploads');
-
-        $addmore = new Zend_Form_Element_Button('addmore');
-        $addmore->setAttrib('id', 'addmore')
-                ->setLabel("...")
-                ->setAttrib("class", "gt-add");
-
-
-
-        $prestitle2 = new Zend_Form_Element_Text('prestitle2');
-        $prestitle2->setLabel('Attachment Title')
-                ->addValidator('NotEmpty')
-                ->addFilter('StripTags')
-                ->addFilter('StringTrim');
-        $prestitle2->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
-            'Errors', array(array('data' => 'HtmlTag'), array('tag' => 'td')),
-            array('Label', array('tag' => 'td')),
-            array(array('row' => 'HtmlTag'), array('tag' => 'tr'))
-        ));
-
-        $content2 = new Zend_Form_Element_File('content2');
-        $content2->setLabel('Upload the File')
-                ->setDestination($appath . '/public/uploads');
-
-
-        $del2 = new Zend_Form_Element_Button('del2');
-        $del2->setAttrib('id', 'del2')
-                ->setLabel("...")
-                ->setAttrib("class", "gt-delete");
-
-        $prestitle3 = new Zend_Form_Element_Text('prestitle3');
-        $prestitle3->setLabel('Attachment Title')
-                ->addValidator('NotEmpty')
-                ->addFilter('StripTags')
-                ->addFilter('StringTrim');
-        $prestitle3->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
-            'Errors', array(array('data' => 'HtmlTag'), array('tag' => 'td')),
-            array('Label', array('tag' => 'td')),
-            array(array('row' => 'HtmlTag'), array('tag' => 'tr'))
-        ));
-
-        $content3 = new Zend_Form_Element_File('content3');
-        $content3->setLabel('Upload the File')
-                ->setDestination($appath . '/public/uploads');
-
-
-        $del3 = new Zend_Form_Element_Button('del3');
-        $del3->setAttrib('id', 'del3')
-                ->setLabel("...")
-                ->setAttrib("class", "gt-delete");
-
-        $prestitle4 = new Zend_Form_Element_Text('prestitle4');
-        $prestitle4->setLabel('Attachment Title')
-                ->addValidator('NotEmpty')
-                ->addFilter('StripTags')
-                ->addFilter('StringTrim');
-        $prestitle4->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
-            'Errors', array(array('data' => 'HtmlTag'), array('tag' => 'td')),
-            array('Label', array('tag' => 'td')),
-            array(array('row' => 'HtmlTag'), array('tag' => 'tr'))
-        ));
-
-        $content4 = new Zend_Form_Element_File('content4');
-        $content4->setLabel('Upload the File')
-                ->setDestination($appath . '/public/uploads');
-
-
-        $del4 = new Zend_Form_Element_Button('del4');
-        $del4->setAttrib('id', 'del4')
-                ->setLabel("...")
-                ->setAttrib("class", "gt-delete");
-
-        $prestitle5 = new Zend_Form_Element_Text('prestitle5');
-        $prestitle5->setLabel('Attachment Title')
-                ->addValidator('NotEmpty')
-                ->addFilter('StripTags')
-                ->addFilter('StringTrim');
-        $prestitle5->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
-            'Errors', array(array('data' => 'HtmlTag'), array('tag' => 'td')),
-            array('Label', array('tag' => 'td')),
-            array(array('row' => 'HtmlTag'), array('tag' => 'tr'))
-        ));
-
-        $content5 = new Zend_Form_Element_File('content5');
-        $content5->setLabel('Upload the File')
-                ->setDestination($appath . '/public/uploads');
-
-        $del5 = new Zend_Form_Element_Button('del5');
-        $del5->setAttrib('id', 'del5')
-                ->setLabel("...")
-                ->setAttrib("class", "gt-delete");
-
-
-        $info2 = new Zend_Form_Element_Hidden('info2');
-        $info2->setLabel("Attach Files")
-                ->addDecorator('Htmltag', array('tag' => 'b'));
-
-        $info = new Zend_Form_Element_Hidden('info');
-        $info->setLabel("(allowed formats - pdf,ppt,pptx,xls,xlsx,doc,docx,jpg,jpeg,png,gif)")
-                ->addDecorator('Htmltag', array('tag' => 'b'));
-
+		$attachList = Model_DbTable_GtAttachment::getList(array('columns' => array('gtid' => $gtid)));
+		
+		$attachments[""] = "Select Attachments";
+		foreach($attachList as $attach){
+			if(count($attach_ids) && in_array($attach['attachmentId'],$attach_ids)){
+				continue;
+			}			
+			$a = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$attach['attachmentId']);
+			$attachments[$a->getId()] = $a->getTitle();
+		}
         $pid = new Zend_Form_Element_Multiselect('presentationId');
-        $pid->setLabel('Or Choose an Existing Presentation')
-                ->addMultiOptions($data)
-                
-                ->addFilter('StripTags')
-                ->addFilter('StringTrim');
+        $pid->setLabel('Choose Existing Attachments (Press Ctrl key and choose multiple attachments)');
         $pid->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
             'Errors', array(array('data' => 'HtmlTag'), array('tag' => 'td')),
             array('Label', array('tag' => 'td')),
             array(array('row' => 'HtmlTag'), array('tag' => 'tr'))
+        ));		
+		
+		$pid->addMultiOptions($attachments);
+		
+		
+		
+		$newAttach = new Zend_Form_Element_Button("add-attach");
+		$newAttach->setLabel("Add a new attachment")
+				  ->setAttrib("class","gt-add")
+				  ->setAttrib("id","add-attach")
+				  ->setAttrib("value","Add a new attachment")
+				  ->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
+            'Errors', array(array('data' => 'HtmlTag'), array('tag' => 'td')),
+            array(array('row' => 'HtmlTag'), array('tag' => 'tr'))
         ));
-
+		
+		$attach_ids = new Zend_Form_Element_Hidden("attach_ids");
+		$attach_ids->setAttrib("value","TESTING")
+				   ->setAttrib("id","attach_ids");
 
         $gtid = new Zend_Form_Element_Hidden('gtid');
         $gtid->setAttrib('value', 'TESTING');
@@ -264,9 +148,8 @@ class Form_GTDataForm extends Zend_Form {
         $id->setAttrib('id', $this->getId());
 
         $Title = new Zend_Form_Element_Text('title');
-        $Title->setLabel('Title')
+        $Title->setLabel(($gtdatatype == 'lte'?strtoupper($gtdatatype):ucfirst($gtdatatype)) . ' Title')
                 ->setRequired(true)
-                
                 ->addValidator('NotEmpty')
                 ->addFilter('StripTags')
                 ->addFilter('StringTrim');
@@ -280,7 +163,6 @@ class Form_GTDataForm extends Zend_Form {
         $Data = new Zend_Form_Element_Textarea('data');
         $Data->setLabel('Data')
                 ->setRequired(true)
-                
                 ->addValidator('NotEmpty')
                 ->addFilter('StringTrim');
         $Data->setDecorators(array('ViewHelper', array('Description', array('tag' => '', 'escape' => false)),
@@ -300,9 +182,7 @@ class Form_GTDataForm extends Zend_Form {
         ));
 
         $this->addElements(array($id, $gtid, $sys, $subsys, $eoh, $dof, $toi,
-            $info2, $info, $prestitle1, $content1, $prestitle2,
-            $content2, $del2, $prestitle3, $content3, $del3, $prestitle4,
-            $content4, $del4, $prestitle5, $content5, $del5, $addmore, $pid, $Title, $Data, $submit));
+            $info2, $info, $addmore, $pid, $newAttach,$Title, $Data, $submit,$attach_ids));
         $this->setDecorators(array('FormElements', array(array('data' => 'HtmlTag'), array('tag' => 'table')), 'Form'));
     }
 

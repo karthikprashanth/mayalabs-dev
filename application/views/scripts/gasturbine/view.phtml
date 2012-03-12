@@ -6,7 +6,7 @@
         $this->tabPane("gtview",$empty,array('title' => 'Findings','contentUrl'=>"".$this->baseUrl()."/findings/list?id=$this->gtid"));
         $this->tabPane("gtview",$empty,array('title' => 'Upgrades','contentUrl'=>"".$this->baseUrl()."/upgrades/list?id=$this->gtid"));
         $this->tabPane("gtview",$empty,array('title' => 'LTE','contentUrl'=>"".$this->baseUrl()."/lte/list?id=$this->gtid"));
-        $this->tabPane("gtview",$empty,array('title' => 'Attachments','contentUrl'=>"".$this->baseUrl()."/presentation/list?id=$this->gtid"));
+        $this->tabPane("gtview",$empty,array('title' => 'Attachments','contentUrl'=>"".$this->baseUrl()."/attachment/list?id=$this->gtid&mode=gt"));
 
         echo $this->tabContainer("gtview",array());
 ?>

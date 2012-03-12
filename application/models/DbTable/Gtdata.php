@@ -23,20 +23,37 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      * @var Integer
      */
     protected $gtid;
-
+	
+	/**
+	 * Type of the Gtdata - Finding/Upgrade/Life Time Extension (LTE)
+	 * 
+	 * @var String 
+	 */
+	protected $type;
+	
     /**
      * Title of the GT Data
      *
      * @var String
      */
     protected $title;
+	
+	/**
+	 * Date and Time when the gtdata was added/last updated
+	 * 
+	 * @var Timestamp
+	 */
+	protected $updatetime;  
+	 
 
     /**
      * Details in the GT Data
      *
      * @var Array
      */
-    protected $gtData;    
+    protected $gtData;  
+	
+	
 
     /**
      * Whether mail has been sent
@@ -62,8 +79,9 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
             $this->id = $gtDataRow['id'];
             $this->gtid = $gtDataRow['gtid'];
             $this->title = $gtDataRow['title'];
-            $this->time = $gtDataRow['updatetime'];
+            $this->updatetime = $gtDataRow['updatedate'];
             $this->user = $gtDataRow['userupdate'];
+			$this->type = $gtDataRow['type'];
             $this->mailed = $gtDataRow['mailed'];
         }
     }
@@ -85,6 +103,46 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
     public function getTitle(){
         return $this->title;
     }
+	
+	/**
+	 * Gets the GT Id of the gtdata
+	 * 
+	 * @return Integer
+	 */
+	public function getGTId(){
+		return $this->gtid;
+	}
+	
+	/**
+	 * Gets the type of the gtdata
+	 * 
+	 * @return String
+	 */
+	public function getType(){
+		return $this->type;
+	}
+	
+	/**
+	 * Gets the type title - Finding (finding) , Upgrade (upgrade) or LTE (lte)
+	 */
+	public function getTypeTitle(){
+		if($this->type == "finding" || $this->type == "upgrade"){
+			return ucfirst($this->type);
+		}
+		else {
+			return strtoupper($this->type);
+		}
+	}
+	
+	/**
+	 * Gets the last update time of the gtdata
+	 * 
+	 * @return Timestamp
+	 */
+	public function getUpdateTime()
+	{
+		return $this->updatetime;
+	}
 
     /**
      * Gets the GT Data Details
@@ -93,8 +151,9 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      */
     public function getData(){
         return $this->gtData;
-    }    
-
+    }
+	
+	
     /**
      * Gets the Mailed staus
      *
@@ -103,6 +162,36 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
     public function getMailedStatus(){
         return $this->mailed;
     }
+	
+	/**
+	 * Gets the id of the user who added the gtdata or updated it lastly
+	 * 
+	 * @return Integer
+	 */
+	public function getUserUpdate(){
+		return $this->gtData['userupdate'];
+	}
+	
+	/**
+	 * Gets the name of the system to which the finding/upgrade/lte belongs
+	 * 
+	 * @return String
+	 */
+	public function getSystemName(){
+		$sys = new Model_DbTable_Gtsystems(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->gtData['sysId']);
+		return $sys->getSysName();
+	}
+	
+	/**
+	 * Gets the name of the sub-system to which the finding/upgrade/lte belongs
+	 * 
+	 * @return String
+	 */
+	public function getSubSystemName(){		
+		$subsys = new Model_DbTable_Gtsubsystems(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->gtData['subSysId']);
+		
+		return $subsys->getsubSysName();
+	}
 
     /**
      * Sets the GT Id to which the GT data belongs
@@ -148,29 +237,6 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
     }
 
     /**
-     * Checks whether the User belongs to the Gasturbine
-     * which contains this GT Data
-     *
-     * @return Boolean
-     */
-    public function isBelong(){
-        $id = $this->id;
-
-    	$gtmodel = new Model_DbTable_Gasturbine();
-    	$gt = $gtmodel->getGT($gtid);
-
-    	$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
-    	$umodel = new Model_DbTable_Userprofile();
-    	$user = $umodel->getUser($uid);
-
-    	if((int)$user['plantId'] == (int)$gt['plantId']) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
-
-    /**
      * Updates the Table based on the local values stored
      */
     public function save(){
@@ -180,34 +246,11 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
             $this->update($data,$where);
         } else{
             $data = $this->gtData;
-            $this->insert($data);
+            $this->id = $this->insert($data);
+			
         }
     }
-
-    /**
-     * Deletes the GT Data
-     */
-    public function delete(){
-    	$this->delete('id = ' . $this->id);
-    }
-
-    /**
-     * Gets all the Un-Mailed Rows
-     *
-     * @return Array
-     */
-    public static function getUnmailedData(){
-        $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $row = $dbAdapter->query("SELECT * FROM gtdata WHERE `mailed` = '0';")->fetchAll();
-     	return $row->toArray();
-    }
-
-    /**
-     * Sets the Mailed status of all GT Data to Mailed
-     */
-    public static function setMailedStatus(){
-     	Zend_Db_Table_Abstract::getDefaultAdapter()->query("UPDATE gtdata SET `mailed` = '1';");
-    }
+	
 
     /**
      * Returns a list containing all the GT Data
@@ -249,77 +292,30 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      * @param String - Type of the GT Data
      * @return Integer
      */
-    public static function getCount($type){
+    public static function getCount($options = array()){
 
-        $where = "WHERE `type` = '$type';";
+        $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
 
-        $countRow = Zend_Db_Table_Abstract::getDefaultAdapter()->query("SELECT COUNT(*) AS count FROM gtdata " . $where)->fetchAll();
-		return $countRow[0]["count"];
+        if (count($options['columns'])){
+        	$where = " WHERE ";
+			foreach($options['columns'] as $key => $value){
+				$where .= $key . " = '" . $value . "' AND ";
+			}
+			$where = substr($where,0,strlen($where)-4);
+        }
+        $stmt = $dbAdapter->query("SELECT COUNT(*) as cntRow FROM gtdata " . $like . " " . $where . " " . $order);
+        $list = $stmt->fetchAll();
+		
+		return $list[0]["cntRow"];
+    }
+	
+	/**
+     * Deletes the GT Data
+     */
+    public function deleteGtdata(){
+    	$this->delete('id = ' . $this->id);
     }    
 
-//    public function getData($id) {
-//        $id = (int) $id;
-//        $row = $this->fetchRow('id = ' . $id);
-//        if (!$row) {
-//            $row = array();
-//			return $row;
-//        }
-//        return $row->toArray();
-//    }
-//
-//    public function isGTBelong($id) {
-//    	$id = (int)$id;
-//
-//    	$gtdata = $this->fetchRow('id = ' . $id);
-//    	$gtdata = $gtdata->toArray();
-//    	$gtid = $gtdata['gtid'];
-//
-//    	$gtmodel = new Model_DbTable_Gasturbine();
-//    	$gt = $gtmodel->getGT($gtid);
-//
-//
-//    	$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
-//    	$umodel = new Model_DbTable_Userprofile();
-//    	$user = $umodel->getUser($uid);
-//
-//    	if((int)$user['plantId'] == (int)$gt['plantId']) {
-//    		return true;
-//    	}
-//    	else {
-//    		return false;
-//    	}
-//     }
-//
-//     public function getDataByType($gtid,$type)
-//     {
-//     	$row = $this->fetchAll("gtid = " . $gtid . " AND type = '" . $type . "'");
-//     	return $row->toArray();
-//     }
-//
-//     public function getDataByGt($gtid)
-//     {
-//     	$row = $this->fetchAll("gtid = " . $gtid);
-//     	return $row->toArray();
-//     }
-//
-//     public function getUnmailedData()
-//     {
-//     	$row = $this->fetchAll("mailed = 0");
-//     	return $row->toArray();
-//     }
-//
-//     public function setMailed()
-//     {
-//     	$data = array('mailed' => 1);
-//     	$where['mailed = ?'] = 0;
-//     	$this->update($data,$where);
-//     }
-//
-//	 public function getTypeCount($type,$id)
-//	 {
-//	 	$row = $this->fetchAll("gtid = " . $id . " AND type = '" . $type . "'");
-//		return count($row->toArray());
-//	 }
 }
 
 ?>

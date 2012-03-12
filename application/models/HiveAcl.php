@@ -80,6 +80,7 @@ class Model_HiveAcl extends Zend_Acl {
 		
 		$this->add(new Zend_Acl_Resource('schedule-event'));
         $this->add(new Zend_Acl_Resource('notification'));
+		$this->add(new Zend_Acl_Resource('gtsubsystems'));
 
        	$this->add(new Zend_Acl_Resource('myprofile'));
 
@@ -104,6 +105,7 @@ class Model_HiveAcl extends Zend_Acl {
 //		access privilages for user
 		
 		$this->allow('us','userprofile');
+		$this->allow('us','gtsubsystems');
 		$this->deny('us','userprofile','add');
 		$this->allow('us','gasturbine',array('index','view','details','list'));
 		$this->allow('us','plant',array('view','index','list','results'));

@@ -41,15 +41,17 @@ class Model_DbTable_Gtsubsystems extends Zend_Db_Table_Abstract {
     protected $data;
 
     /**
-     * Initializes values and fetches the respective GT Data details using the id as argument
+     * Initializes values and fetches the respective GT Sub-system details using the id as argument
      * @param Zend_Db_Table_Adapter_Abstract - Default parameter as defined in the parent function
 	 * @param Integer - Primary Key of the table
      */
     public function  __construct($config = array(), $id = 0) {
         parent::__construct($config);
 
-        if($sysId){
-            $data = $this->fetchRow("subSysId = " . $subSysId);
+        if($id){
+        	
+            $data = $this->fetchRow("id = " . $id);
+			
             $this->data = $data;
             $this->id = $id;
             $this->sysId = $data['sysId'];
@@ -89,8 +91,8 @@ class Model_DbTable_Gtsubsystems extends Zend_Db_Table_Abstract {
      *
      * @return String
      */
-    public function getsubSysName(){
-        return $this->subSysName;
+    public function getsubSysName(){        
+		return $this->subSysName;
     }
 
     /**
@@ -174,15 +176,5 @@ class Model_DbTable_Gtsubsystems extends Zend_Db_Table_Abstract {
         return $countRow[0]["count"];
     }
 
-//    public function getSubSystem($ssid) {
-//        $ssid = (int) $ssid;
-//        $row = $this->fetchRow('id = ' . $ssid);
-//        return $row->toArray();
-//    }
-//
-//    public function groupSubSystem($sid) {
-//        $row = $this->fetchAll("sysId = " . $sid);
-//        return $row->toArray();
-//    }
 
 }

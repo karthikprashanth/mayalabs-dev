@@ -20,17 +20,17 @@
 		    if ($gasturbines['fcount'] == 0) {
 		        $fline = "<span style='color: #ec2d19; margin-left: 15px;'>No Findings</span>";
 		    } else {
-		        $fline = "<a href = '/gasturbine/view?id=" . $gasturbines['GTId'] . "#ui-tabs-2' style='color: #2e4e68;'>" . $gasturbine['fcount'] . " Findings</a>";
+		        $fline = "<a href = '/gasturbine/view?id=" . $gasturbines['GTId'] . "#ui-tabs-2' style='color: #2e4e68;'>" . $gasturbines['fcount'] . " Findings</a>";
 		    }
 		    if ($gasturbines['ucount'] == 0) {
 		        $uline = "<span style='color: #ec2d19; margin-left: 15px;'>No Upgrades</span>";
 		    } else {
-		        $uline = "<a href = '/gasturbine/view?id=" . $gasturbines['GTId'] . "#ui-tabs-3' style='color: #2e4e68;'>" . $gasturbine['ucount'] . " Upgrades</a>";
+		        $uline = "<a href = '/gasturbine/view?id=" . $gasturbines['GTId'] . "#ui-tabs-3' style='color: #2e4e68;'>" . $gasturbines['ucount'] . " Upgrades</a>";
 		    }
 		    if ($gasturbines['lcount'] == 0) {
 		        $lline = "<span style='color: #ec2d19; margin-left: 15px;'>No LTEs</span>";
 		    } else {
-		        $lline = "<a href = '/gasturbine/view?id=" . $gasturbines['GTId'] . "#ui-tabs-4' style='color: #2e4e68;'>" . $gasturbine['lcount'] . " LTEs</a>";
+		        $lline = "<a href = '/gasturbine/view?id=" . $gasturbines['GTId'] . "#ui-tabs-4' style='color: #2e4e68;'>" . $gasturbines['lcount'] . " LTEs</a>";
 		    }
 			
 		    $pid = $gasturbines['plantId'];

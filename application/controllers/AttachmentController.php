@@ -12,60 +12,92 @@ class AttachmentController extends Zend_Controller_Action {
 
     public function addAction() {
         try {
-            if($this->getRequest()->isXmlHttpRequest())
-                $this->_helper->getHelper('Layout')->disableLayout();
-			
-            $this->view->headTitle('New Attachment', 'PREPEND');
-            $form = new Form_AttachmentForm();
-            
-			if($this->getRequest()->getPost('cid')){
-				$data['cid'] = $this->getRequest()->getPost('cid');
-				$form->populate($data);
-			}
-			
-            $this->view->form = $form;
-            
-            if ($this->getRequest()->getPost('title')) {
-                $formData = $this->getRequest()->getPost();
+        	if($this->getRequest()->isPost()){     
+	            //$this->_helper->getHelper('Layout')->disableLayout();
+	            $userp = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter());
+	            $content = $this->getRequest()->getPost();
 				
-                if ($form->isValid($formData)) {
-                    $userp = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(), 0);
-                    $content = $form->getValues();
-
-                    $pdata = file_get_contents($form->content->getFileName());
-                    $funcs = new Model_Functions();
-
-                    $filename = $form->content->getFileName();
-                    $fileext = $funcs->getFileExt($filename);
+				$pdata = file_get_contents($_FILES['attachment']['tmp_name']);
+				$ext = Model_Functions::getFileExt($_FILES['attachment']['name']);
+				
+				if($_FILES['attachment']['name'] == "") {
+					$this->view->fileEmpty = "true";
+					return;
+				}
+	            $content['content'] = $pdata;
+	            if(empty($content['title'])){
+	            	$content['title'] = str_replace(".".$ext,"",$_FILES['attachment']['name']); 
+	            }
+				$this->view->gtdata = $this->getRequest()->getPost('gtdata');
+				$this->view->mode = $this->getRequest()->getPost('mode');
+				$this->view->id = $this->getRequest()->getPost('modeId');
+				$this->view->source = $this->getRequest()->getPost('src');
+				//Check for title name clash
+				if($this->getRequest()->getPost('mode') == 'conf')
+					$existingPres = Model_DbTable_ConferenceAttachment::getList(array("columns" => array("conferenceId" => $this->getRequest()->getPost('modeId'))));
+				else 
+					$existingPres = Model_DbTable_GtAttachment::getList(array("columns" => array("gtid" => $this->getRequest()->getPost('modeId'))));
+				foreach($existingPres as $a){
+					$attach = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$a['attachmentId']);
+					if($attach->getTitle() == $content['title']){
+						$this->view->titleValid = "false";
+						return;
+					}
+				}
+				
+	            $columns = array(
+	                'title' => $content['title'],
+	                'content' => $pdata,
+	                'filetype' => $ext,
+	                'updatedBy' => Zend_Auth::getInstance()->getStorage()->read()->id
+	            );
+				//Check for title name clash ends
+				
+	            $userp->setData($columns);                        
+	            $userp->save();
+				if($this->getRequest()->getPost('mode') == 'conf'){
+					$cid = $this->getRequest()->getPost('modeId');
 					
-                    if (in_array($fileext, array('pdf', 'doc', 'ppt', 'docx', 'pptx', 'xls', 'xlsx', 'jpg', 'jpeg', 'gif', 'png'))) {
-                        $content['content'] = $pdata;
-                        
-                        $columns = array(
-                            'title' => $content['title'],
-                            'description' => $content['description'],
-                            'content' => $pdata,
-                            'filetype' => $fileext,
-                            'updatedBy' => Zend_Auth::getInstance()->getStorage()->read()->id
-                        );
-
-                        $userp->setData($columns);                        
-                        $userp->save();
-						
-						if($this->getRequest()->getPost('cid')){
-							$pres = new Model_DbTable_ConferenceAttachment(Zend_Db_Table_Abstract::getDefaultAdapter());
-							$data = array('conferenceId' => $this->getRequest()->getPost('cid'),'attachmentId' => $userp->getId());
-							$pres->setData($data);
-							$pres->save();
-							$this->_redirect("/conference/view?id=".$data['conferenceId']."#ui-tabs-2");
-						}
-												
-                    } else {
-                        $this->view->message = "File Type Not Allowed";
-                        return;
-                    }
-                }
-            }
+					$pres = new Model_DbTable_ConferenceAttachment(Zend_Db_Table_Abstract::getDefaultAdapter());
+					$data = array(
+									'conferenceId' => $cid,
+								  	'attachmentId' => $userp->getId()
+								 );
+					$pres->setData($data);
+					$pres->save();
+				}
+				else {
+					$data = array("gtid" => $this->getRequest()->getPost('modeId'),"attachmentId" => $userp->getId());
+					$gtPres = new Model_DbTable_GtAttachment(Zend_Db_Table_Abstract::getDefaultAdapter());
+					$gtPres->setData($data);
+					$gtPres->save();
+					$gtPresId = $gtPres->getId();
+					
+					if($this->getRequest()->getPost('gtdataid')){
+						$gtdataid = $this->getRequest()->getPost('gtdataid');
+						$gtdataPres = new Model_DbTable_GtdataAttachment(Zend_Db_Table_Abstract::getDefaultAdapter());
+						$data = array("attachmentId" => $userp->getId(),"gtdataId" => $gtdataid);
+						$gtdataPres->setData($data);
+						$gtdataPres->save();
+					}
+				}
+				
+				unlink($content['filePath']);
+				
+				$up = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
+				
+				$content = $userp->getData();
+				$content['updatedBy'] = Model_DbTable_Userprofile::getUserName($content['updatedBy']);
+				$content['attachmentId'] = $userp->getId();
+				$content['filetype'] = $userp->getFileType();
+				$content['date'] = date("Y-m-d H:i:s");
+				$content['userplantname'] = $up->getPlantName();
+				$content['gtPresId'] = $gtPresId;
+				$content['titleValid'] = "true";
+				$this->view->fileEmpty = "false";
+				$this->view->content = $content;
+			}
+       
         } catch (Exception $e) {
             echo $e;
         }
@@ -73,8 +105,9 @@ class AttachmentController extends Zend_Controller_Action {
 
     public function deleteAction() {
         try{
-            $id = $this->getRequest()->getPost("attachmentId");
-            if($this->getRequest()->getPost("cid")){            	
+			$this->_helper->getHelper('Layout')->disableLayout();
+			$id = $this->getRequest()->getPost("attachmentId");			
+            if($this->getRequest()->getPost("cid")){            	       	
             	$redirect = "/conference/view?id=".$this->getRequest()->getPost("cid")."#ui-tabs-2";
             	$confAttachments = Model_DbTable_ConferenceAttachment::getList(array("columns" => array("attachmentId" => $id)));				
 				foreach($confAttachments as $ca){
@@ -83,21 +116,42 @@ class AttachmentController extends Zend_Controller_Action {
 				}
             }
 			else {
-				$redirect = "/gasturbine/view?id=".$this->getRequest()->getPost("gtid")."#ui-tabs-4";
-				$gdAttachments = Model_DbTable_GtdataAttachment::getList(array("columns" => array("attachmentId" => $id)));
+				$redirect = "/gasturbine/view?id=".$this->getRequest()->getPost("gtid")."#ui-tabs-5";
+				$gdAttachments = Model_DbTable_GtAttachment::getList(array("columns" => array("attachmentId" => $id)));
 				foreach($gdAttachments as $gda){
-					$gAttach = new Model_DbTable_GtdataAttachment(Model_Db_Table_Abstract::getDefaultAdapter(),$gda['id']);
+					$gAttach = new Model_DbTable_GtAttachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$gda['id']);
+					$gAttach->deleteGtAttachment();
+				}
+				
+				$gtdataAttachments = Model_DbTable_GtdataAttachment::getList(array("columns" => array("attachmentId" => $id)));
+				foreach($gtdataAttachments as $gda){
+					$gAttach = new Model_DbTable_GtdataAttachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$gda['id']);
 					$gAttach->deleteGTdataAttachment();
 				}
 			}
 			$attachment = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$id);
 			$attachment->deleteAttachment();
-			$this->_redirect($redirect);
+			if(!$this->getRequest()->isXmlHttpRequest())
+				$this->_redirect($redirect);
         }
         catch(Exception $e){
             echo $e;
         }
     }
+
+	public function uploadAction(){
+		try{
+			if($this->getRequest()->isPost()){
+				$this->_helper->getHelper('Layout')->disableLayout();
+				
+			}
+			
+		}
+		catch(Exception $e){
+			echo $e;
+		}
+	}
+	
 
     public function listAction() {
         try{
@@ -110,7 +164,7 @@ class AttachmentController extends Zend_Controller_Action {
 			$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
 	        $user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$uid);
 			if($mode == 'gt'){
-            	$attachments = Model_DbTable_GtdataAttachment::getList(array('columns' => array('gtid' => $id)));
+            	$attachments = Model_DbTable_GtAttachment::getList(array('columns' => array('gtId' => $id)));
 	            $upid = $user->getPlantId();
 	            $gt = new Model_DbTable_Gasturbine(Zend_Db_Table_Abstract::getDefaultAdapter(), $id);
 	            $gtpid = $gt->getPlantId();
@@ -129,9 +183,14 @@ class AttachmentController extends Zend_Controller_Action {
                 $attachmentList[] = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$list['attachmentId']);                
             }
 			
+			$attachmentForm = new Form_AttachmentForm();
+			$fArray = array("mode" => $mode,"modeId" => $id);
+			$attachmentForm->populate($fArray);
+			
             $this->view->attachments = $attachmentList;
             $this->view->mode = $mode;
 			$this->view->id = $id;
+			$this->view->attachmentForm = $attachmentForm;
         }
         catch(Exception $e){
             echo $e;
@@ -152,6 +211,24 @@ class AttachmentController extends Zend_Controller_Action {
 		}
 		catch(Exception $e){
 			echo $e;
+		}
+	}
+	
+	public function unlinkAction(){
+		try{
+			$this->_helper->getHelper('Layout')->disableLayout();
+			$id = $this->getRequest()->getPost('attachmentId');
+			$gtdataid = $this->getRequest()->getPost('gtdataid');
+			$attach = new Model_DbTable_Attachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$id);
+			
+			$gta = Model_DbTable_GtdataAttachment::getList(array("columns" => array("attachmentId" => $id,"gtdataId" => $gtdataid)));			
+			$gta = new Model_DbTable_GtdataAttachment(Zend_Db_Table_Abstract::getDefaultAdapter(),$gta[0]['id']);
+			$gta->deleteGTdataAttachment();
+			
+			echo json_encode(array("title" => $attach->getTitle()));
+		}
+		catch(Exception $e){
+			
 		}
 	}
 }

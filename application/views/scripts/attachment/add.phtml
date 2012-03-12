@@ -1,31 +1,41 @@
-<!--<form id="file_upload_form" method="post" enctype="multipart/form-data" action="/attachments/upload">
-<input name="file" id="file" size="27" type="file" /><br />
-<input type="submit" id = "upload" name="action" value="Upload" /><br />
-<iframe id="upload_target" name="upload_target" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
-</form>
-
-<script type = "text/javascript">
-	function init() {
-		document.getElementById('file_upload_form').onsubmit=function() {
-			document.getElementById('file_upload_form').target = 'upload_target'; //'upload_target' is the name of the iframe
-		}
+<?php 
+	if($this->mode == 'conf'){
+		$name = 'cid';
 	}
-	window.onload=init;
-</script>-->
-<script type = "text/javascript" src = "/js/file_ext_check.js"></script>
-<script type="text/javascript">
-    $(document).ready(function(){
-	    $("input").blur(function(){
-	    	if(this.value == "" || this.value == null)
-	    	{
-	    		return;
-	    	}
-	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
-	        doValidationPlant($(this).attr('id'),'../validation/validate?form=attachment');
-	   });
+	else {
+		$name = 'gtid';
+	}
+?>
+<script language="javascript" type="text/javascript">
+	$(document).ready(function(){
+		var id = '<?php echo $this->content['attachmentId']; ?>';
+		var title = '<?php echo $this->content['title'];?>';
+		var source = '<?php echo $this->source;?>';
+		
+		<?php if($this->titleValid == "false") :?>
+			window.parent.$("#spinnerimage").css("display","none");
+			parent.alert("Title already exists");
+		<?php elseif($this->fileEmpty == "true") :?>
+			window.parent.$("#spinnerimage").css("display","none");
+			parent.alert("File not uploaded");
+		<?php else :?>
+			<?php if($this->mode == 'gtdata') :?>
+				window.parent.$("#spinnerimage").css("display","block");
+				window.parent.$("#attachments-head").html("<b>Attachments Added</b>");
+	       		window.parent.$("#attachments-list").append("<li id='a-" + id + "'><a href='/attachment/view?id=" + id + "'>" + title + "</a> <input type = 'button' id = 'del-" + id + "' class = 'gt-delete' onclick = 'del_attach(" + id + ")'></li>");
+	       		
+	       		if(source == 'edit'){
+	       			window.parent.$("#a-"+id).append("<a href='#' onclick='unlink(" + id + ")'>Unlink</a>");
+	       		}
+	       		window.parent.attach_ids = window.parent.$("#attach_ids").val() + id + ",";
+	       		window.parent.$("#attach_ids").val(window.parent.attach_ids);
+	       		window.parent.$("#attach-form").dialog('close');
+			<?php else : ?>
+				window.parent.$("#attach-table").append("<tr><td><a href = '/attachment/view?id=<?php echo $this->content['attachmentId'];?>'><?php echo $this->content['title'];?></a></td><td><?php echo $this->content['filetype'];?></td><td><?php echo $this->content['updatedBy'] . ' - ' . $this->content['userplantname'];?></td><td><?php echo $this->content['date'];?></td><td><form action = '/attachment/delete' method = 'post'><input type = 'hidden' name = 'attachmentId' value = '<?php echo $this->content['attachmentId'];?>'><input type = 'hidden' name = '<?php echo $name;?>' value = '<?php echo $this->id;?>'><input type = 'submit' value = 'Delete' class = 'gt-delete'></form></td>");
+				window.parent.$("#attach-table").css("display","table");
+				window.parent.$("center").html("");
+				window.parent.$("#attach-form").dialog('close');
+			<?php endif; ?>
+		<?php endif; ?>	
 	});
 </script>
-<?php 
-	echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
-	echo $this->form; 
-?>

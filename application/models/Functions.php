@@ -1,9 +1,20 @@
 <?php
+	include("../library/phMagick/phMagick.php");
+	
 	class Model_Functions {
 		
 		protected $column;
 		
-		
+		public static function getThumbnail($src,$dest,$height,$width){
+			
+			$phMagick = new \phMagick\Core\Runner();
+			
+			$resizeAction = new \phMagick\Action\Resize\Proportional($src,$dest);
+			$resizeAction->setWidth($width);
+			if($height)
+				$resizeAction->setHeight($height);
+			$phMagick->run($resizeAction);
+		}
 
 		public static function generateRandom($size) 
 	    {
@@ -76,26 +87,7 @@
 		
 		public static function getFileExt($filepath)
 		{
-			$i=0;
-			for($i=0;$i<strlen($filepath);$i++)
-			{
-				if(substr($filepath,$i,1) == '/')
-				{
-					$pos = $i;
-				}
-			}
-			$filename = substr($filepath,$pos+1,strlen($filepath)-$pos);
-			$i=0;
-			for($i=0;$i<strlen($filename);$i++)
-			{
-				if(substr($filename,$i,1) == '.')
-				{
-					$pos = $i;
-				}
-			}
-			$ext = substr($filename,$pos+1,strlen($filename)-$pos); 
-			return strtolower($ext);
-			
+			return substr(strrchr($filepath,'.'),1);
 		}
 		
 		public static function highlightResults($query,$text)

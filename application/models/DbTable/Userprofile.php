@@ -285,6 +285,21 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
         $user = $stmt->fetchObject();
         return $user->fullName;
     }
+	
+	/**
+     * Maps user id to user's plantname. Defined as static function for quick access
+     *
+     * @param Integer - User Id
+     * @return String - User's plantname
+     */
+    public static function getUserPlantName($userid){
+        
+        $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
+        $stmt = $dbAdapter->query("SELECT plantName FROM userprofile WHERE id = ".$userid);
+        
+        $user = $stmt->fetchObject();
+        return $user->plantName;
+    }
 
     /**
      * Updates details about user profile

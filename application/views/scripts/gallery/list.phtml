@@ -1,79 +1,46 @@
-<script type = "text/javascript" src = "/js/ajaxupload.3.6.js"></script>
 <script type = "text/javascript">
 	var imageNo = 0;
-	
+	var data;
+    var json;
+    var content = "";
+    var colNo;
+    var rowNo;
+    
 	if(document.getElementById("imageNo").innerHTML != "") {
 		imageNo = parseInt(document.getElementById("imageNo").innerHTML);
 	}
 	
 	function showImg(id){
-            document.getElementById("large-img").src = "/uploads/gallery/photo_" + id + ".jpg";
-            $("#photo-box").dialog({
-            	height:'auto',
-            	width:'auto',
-            	title:$("#img-"+id).attr("alt"),
-            	my:'center',
-            	at:'center',
-            	of:window
-           	});
+	    document.getElementById("large-img").src = "/uploads/gallery/photo_" + id + ".jpg";
+	    $("#photo-box").dialog({
+	    	height:'auto',
+	    	width:'auto',
+	    	title:$("#img-"+id).attr("alt"),
+	    	my:'center',
+	    	at:'center',
+	    	of:window
+	   	});
     }
-        
+    
 	$(document).ready(function(){
-		new AjaxUpload("#image",{
-			action: '/gallery/upload',
-			name : 'image',
-			onSubmit : function(file,ext){
-				this.disable();
-			},
-			onComplete: function(file, response){
-	            this.enable();
-	            if(response[0] != "{")
-	            {
-	            	alert("Filename seems to have invalid characters. Rename the file and try again");
-	            	return;
-	            }
-	            var data = response.split("<");
-	            var json = eval("(" + data[0] + ")");
-	            var content = "";
-	            var colNo;
-	            var rowNo;
-	            if(json.error == "1"){
-	            	alert("Filename seems to have invalid characters. Rename the file and try again");
-	            	return;
-	            }
-	            $("#no-photos").remove();	
-	            $.ajax({	            	
-	            	type:"POST",
-	            	data:"cid=" + $("#cid").val() + "&tag=" + $("#tag").val() + 
-	            	     "&imgPath="+encodeURI(json.imgPath)+"&thumbPath="+encodeURI(json.thumbPath),
-	            	     
-	            	dataType:"json",
-	            	url:"/gallery/add",
-	            	success:function(msg){
-	            		if(msg != ''){	            			
-							rowNo = Math.floor(imageNo/3);
-							if(imageNo == 0 || imageNo%3 == 0){
-								content = "<tr id = 'row-" + rowNo + "'><td id = 'img" + rowNo + "-0'><img src = '" + msg.thumbPath + "' id = 'img-" + msg.imgId + "' alt = '"  + msg.tag + "' onclick='showImg(" + msg.imgId + ")'><form action = '/gallery/delete' method = 'post'><input type = 'submit' class = 'gt-delete' value=''><input type = 'hidden' name = 'photoId' value = '" + msg.imgId + "'></form></td>" +
-								               "<td id = 'img" + rowNo + "-1'></td>" +
-								               "<td id = 'img" + rowNo + "-2'></td>";								
-								$("#image").append(content);
-							}		
-							else {
-								colNo = imageNo - (rowNo*3);							
-								$("#row-" + rowNo).append("<td id = 'img" + rowNo + "-" + colNo + "'><img src = '" + msg.thumbPath + "' alt = '" + msg.tag + "' id = 'img-" + msg.imgId + "' onclick='showImg(" + msg.imgId + ")'><form action = '/gallery/delete' method = 'post'><input type = 'submit' class = 'gt-delete' value=''><input type = 'hidden' name = 'photoId' value = '" + msg.imgId + "'></form></td>");
-							}
-							imageNo++;
-	            		}
-                        $("#gallery-form").dialog('close');
-	            	}
-	            });
-	        }
-		});
-		
 		$("#add-photo").click(function(){
         	$("#tag").val("");
+        	$("input:file").val("");
 			$("#gallery-form").dialog({title:"Add a new Photo",width:'auto',height:'auto'});
 		});
+		
+		function startUpload(){			
+		    return true;
+	    }
+	    
+	    function stopUpload(data){
+		    return true;
+	    }
+	    
+	    function loadPhoto(){
+	    	alert('hey');
+	    }
+	    
 	});
 </script>
 <div id = "gallery-form" style="display:none">
@@ -110,13 +77,16 @@
 			if(($imageNo+1)%3==0 && $imageNo != 0){
 				echo "</tr>";
 			}
+			
 			$imageNo++;
 		}
 		echo "<span id = 'imageNo' style='display:none'>$imageNo-1</span>";
 	?>	
 </table>
+<div id = 'img'></div>
 <?php
 	if($this->allowed){
 		echo "<button id='add-photo' class = 'gt-add'>Add Photo</button>";
 	}
 ?>
+<iframe id="upload_target" name="upload_target" src="#" style="display:none"></iframe>

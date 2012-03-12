@@ -24,16 +24,9 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
     protected $title;
 
     /**
-     * Description of the Attachment
+     * Binary Content
      *
-     * @var String
-     */
-    protected $description;
-
-    /**
-     * Description of the Content
-     *
-     * @var String
+     * @var Long Blob
      */
     protected $content;
 
@@ -51,15 +44,13 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
 	 */
     public function __construct($config = array(), $id = 0 ) {
         parent::__construct($config);
-		
         $data = array();
         if($id){
             $data = $this->fetchRow("id = " . $id);
-
+			
             $this->data = $data->toArray();
             $this->id = $data['id'];            
             $this->title = $data['title'];
-            $this->description = $data['description'];
             $this->content = $data['content'];
         }
     }
@@ -198,6 +189,18 @@ class Model_DbTable_Attachment extends Zend_Db_Table_Abstract {
         
         return Model_DbTable_Userprofile::getUserName($uid);
     }
+	
+	
+	
+	/**
+	 * Gets the name of the plant to which the user belongs
+	 * 
+	 * @return String
+	 */
+	public function getUserPlantName(){
+		$up = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->data['updatedBy']);
+		return $up->getPlantName();
+	}
     
     /**
      * Updates the database with the local values

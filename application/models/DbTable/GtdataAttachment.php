@@ -17,18 +17,18 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
     protected $id;
 
     /**
-     * Id of the Gtdata to which the attachment belongs
-     *
-     * @var Integer
-     */
-    protected $gtdataId;
-
-    /**
      * Id of the Attachment in the attachment table
      *
      * @var Integer
      */
     protected $attachmentId;
+
+	/**
+	 * Id of the gtdata to which the attachment belongs
+	 * 
+	 * @var Integer
+	 */
+	protected $gtdataId;
 
     /**
      * Entire data about the Gtdata attachment
@@ -50,11 +50,9 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
         if($id){
             $data = $this->fetchRow("id = ".$id);
             $this->data = $data->toArray();
-
             $this->id = $this->data['id'];
             $this->gtdataId = $this->data['gtdataId'];
             $this->attachmentid = $this->data['attachmentId'];
-
         }
     }
 
@@ -148,14 +146,9 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
                 }
                 $where = substr($where,0,strlen($where)-4);
             }
-
-            if($options['columns']['gtid']){
-                $query = "SELECT * FROM gtdata_attachment WHERE gtdataId IN(SELECT id FROM gtdata WHERE gtid = " .
-                          $options['columns']['gtid'] . ")";
-            }
-            else{
-                $query = "SELECT * FROM gtdata_attachment " . $where . " " . $order;
-            }
+			
+            $query = "SELECT * FROM gtdata_attachment " . $where . " " . $order;
+            
         }
         
         $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
@@ -202,17 +195,9 @@ class  Model_DbTable_GtdataAttachment extends Zend_Db_Table_Abstract  {
 
     /**
      * Deletes the gtdata attachment from the database
-     *
-     * @param Integer $gtdataid - Optional parameter to delete the attachments belonging to a particular gtdata
      */
-    public function deleteGTdataAttachment($gtdataid){
-        if(!$gtdataid){
-            $this->delete('id = '.$this->id);
-        }
-        else{
-            $this->delete('gtdataId = '.$this->gtdataId);
-        }
-
+    public function deleteGTdataAttachment(){
+    	$this->delete('id = '.$this->id);
     }
 
 }

@@ -1,53 +1,46 @@
+<script type = "text/javascript" src = "/js/attachUpload.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#sysId").change( function() {
+        $.ajax({
+            type: "POST",
+            data: "sid=" + $(this).val(),
+            url: "/gtsubsystems/list",
+            success: function(msg){
+                if (msg != ''){
+                    $("#subSysId").html(msg).show();
+                }
+            }
+        });
+    });
+	
+	$("input").blur(function(){
+    	if(this.value == "" || this.value == null){
+    		return;
+    	}
+        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+        doValidationPlant($(this).attr('id'),'../validation/validate?form=gtdata&type=finding');
+   });
+});
+</script>
 <?php
 	echo $this->headScript()->prependFile($this->baseUrl().'/js/tiny_mce/tiny_mce.js');
 	echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
-	//echo $this->form;
 	$this->spinner = "<div id = 'spinnerimage' style = 'display:none'>Uploading ... <img src = '/images/spinner.gif'></div>";
 	if($this->message != "")
 	$this->message = "<br><div class ='errors'>" . $this->message . "</div>";
 	else {
 		$this->message = "";
 	}
-	//$this->tabcontent = $this->form .  $this->message  . $this->spinner;
+	$this->tabcontent = $this->form .  $this->message;
 	$this->tabPane("findingAdd",$this->tabcontent,array('title' => 'Finding Add'));
 	echo $this->tabContainer("findingAdd",array());
-	
 ?>
-
 <script type="text/javascript" src='/js/tinyMCEinit.js'></script>
-<script type="text/javascript" src = '/js/multiattach.js'></script>
-<script type = "text/javascript" src = "/js/gtdata_checkext.js"></script>
-<script type = "text/javascript" src = "/js/spinnerImage.js"></script>
-<script type="text/javascript">
+<div style="display:none" id="attach-form">
+	<?php echo $this->attachForm . $this->spinner; ?>
+</div>
 
-
-$(document).ready(function(){ 
-	
-    $("#sysId").change( function() {
-        $.ajax({
-            type: "POST",
-            data: "id=" + $(this).val(),
-            url: "/findings/index",
-            success: function(msg){
-                if (msg != ''){
-                    $("#subSysId").html(msg).show();
-                    
-                }
-            }
-        });
-    });
-	$("#submitbutton").addClass('gt-add');
-});
-</script>
-<script type="text/javascript">
-    $(document).ready(function(){
-	    $("input").blur(function(){
-	    	if(this.value == "" || this.value == null)
-	    	{
-	    		return;
-	    	}
-	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
-	        doValidationPlant($(this).attr('id'),'../validation/validate?form=gtdata&type=finding');
-	   });
-	});
-</script>
+<span id = 'mode' style='display:none'>gt</span>
+<span id = 'modeId' style = 'display:none'><?php echo $this->gtid;?></span>
+<span id = 'source' style = 'display:none'>add</span>

@@ -5,10 +5,9 @@ class Form_GasturbineForm extends Zend_Form {
     public function __construct($options = null) {
         parent::__construct($options);
 
-
         $this->setName('Gas Turbine Profile');
         $this->addElementPrefixPath('Hive_Form_Decorators', 'Hive/Form/Decorators', 'decorator');
-
+		$this->setEnctype(Zend_Form::ENCTYPE_MULTIPART);
         if (Zend_Registry::get('role') == 'sa') {
             $plantObj = new Model_DbTable_Plant();
             $plantValue = $plantObj->fetchAll();

@@ -1,5 +1,5 @@
 <?php
-	if(!count($this->findings))
+	if(!count($this->findingList))
 	{
 		echo "<center>No Findings Added</center>";
 		
@@ -18,55 +18,42 @@
 		</tr>";
 	}
 ?>
-
-
 <?php
-foreach($this->findings as $finding) : ?>
+foreach($this->findingList as $finding) : ?>
 <tr>
 <td>
 <?php
-echo "<a href='".$this->url(array('action'=>'view'))."?id=".$this->escape($finding['id'])."'>".$finding['title']."</a><br/>";
-$user = $this->umodel->getUser($finding['userupdate']);
-$username = $user['firstName'] . " " . $user['lastName'] . " - " . $user['plantName'];
+echo "<a href='".$this->url(array('action'=>'view'))."?id=".$this->escape($finding->getId())."'>".$finding->getTitle()."</a><br/>";
+
+$username = Model_DbTable_Userprofile::getUserName($finding->getUserUpdate()) . " - " . Model_DbTable_Userprofile::getUserPlantName($finding->getUserUpdate());
+$fdata = $finding->getData();
 ?></td>
-<?php
-	$ssModel = $this->subSysModel;
-	$ss = $ssModel->getSubSystem($finding['subSysId']);
-	$system = $this->sysModel->getSystem($finding['sysId']);
-?>
-<?php if($ss['subSysName'] == '-') : ?>
-	<td><?php echo $system['sysName']; ?></td>
+<?php if($finding->getSubSystemName() == '-') : ?>
+	<td><?php echo $finding->getSystemName(); ?></td>
 <?php else : ?>
-	<td><?php echo $system['sysName']; ?> / <?php echo $ss['subSysName']; ?></td>
+	<td><?php echo $finding->getSystemName(); ?> / <?php echo $finding->getSubSystemName(); ?></td>
 <?php endif; ?>
 
-<?php if($finding['EOH'] != "") : ?>
-	<td><?php echo $finding['EOH']; ?></td>
+<?php if($fdata['EOH'] != "") : ?>
+	<td><?php echo $fdata['EOH']; ?></td>
 <?php else : ?>
 	<td> </td>
 <?php endif; ?>
-<?php if($finding['TOI'] != "") : ?>
-	<td><?php echo $finding['TOI']; ?></td>
+<?php if($fdata['TOI'] != "") : ?>
+	<td><?php echo $fdata['TOI']; ?></td>
 <?php else : ?>
 	<td> </td>
 <?php endif; ?>
+
 <td><?php echo $username;?></td>
-<td><?php echo $this->escape($finding['updatedate']); ?></td>
+<td><?php echo $this->escape($fdata['updatedate']);?></td>
 <?php
-    $valid = false;
-    foreach ($this->gt as $temp) {
-        if ((int) $temp['GTId'] == (int) $finding['gtid']) {
-            $valid = true;
-        }
-    }
-    $role = Zend_Registry::get('role');
-    if($valid || $role == 'sa') {
+    if($this->allowed) {
 ?>
-<td><a href="/findings/edit?id=<?php echo $finding['id']; ?>">Edit</a>
+<td><a href="/findings/edit?id=<?php echo $finding->getId(); ?>">Edit</a>
 </td>
-
 	<td><form action="<?php echo $this->url(array('action'=>'delete')); ?>" method="post">
-	<input type="hidden" name="id" value="<?php echo $this->escape($finding['id']);?>" />
+	<input type="hidden" name="id" value="<?php echo $this->escape($finding->getId());?>" />
 	<input class='gt-delete' type="submit" name="del" value="Delete" />
 	</form>
 	</td>
@@ -74,17 +61,16 @@ $username = $user['firstName'] . " " . $user['lastName'] . " - " . $user['plantN
 }
 ?>
 <?php endforeach;?>
+
 </table>
-
-<?php if($this->ubool) : ?>
-<form action="<?php echo $this->url(array('action'=>'add')); ?>" method="post" style='float:left;'>
-<input type="hidden" name="gtid" value="<?php echo $this->escape($this->id);?>" />
-
-<input class='gt-add' type="submit" name="add" value="Add New Finding" />
-</form>
-<?php endif; ?>
 <div style='clear:both; height:5px;'>&nbsp;</div>
-<?php if(count($this->findings) != 0) :?>
+<?php if($this->allowed){ ?>
+	<form action = '/findings/add' method = 'post'>
+		<input type = 'hidden' value = '<?php echo $this->gtid;?>' name = 'gtid'>
+		<input type = 'submit' value = 'Add a new finding' class = 'gt-add'>
+	</form>
+<?php } ?>
+<?php if(count($this->findingList) != 0) :?>
 	<form action = '/reports/generate' method = 'post' style='float:right;'>
 		<input type = 'hidden' name = 'type' value = 'fdatalist'>
 		<input type = 'hidden' name = 'id' value = "<?php echo $this->id; ?>">
@@ -95,5 +81,4 @@ $username = $user['firstName'] . " " . $user['lastName'] . " - " . $user['plantN
 			<input class='gt-configure' type = 'submit' name = 'reportgen' value = 'Configure'>
 		</form>
 	</div>	
-<?php endif;
-?>
+<?php endif;?>

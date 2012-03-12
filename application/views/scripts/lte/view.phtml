@@ -1,95 +1,73 @@
 <?php
-	foreach($this->plist as $pvalue){	
-		$pres = $this->presmodel->getPresentation(key($pvalue));
-		$filetype = $pres['filetype'];
-		$h = 30;
-		$w = 30;
-		 if($filetype == 'doc' || $filetype == 'docx')
-		 {
-		 	$filename = "images/word.png";
-			$list=$list."<a href='/presentation/view/?id=".$this->escape(key($pvalue))."'><img src = '/".$filename."' height = $h width = $w>".current($pvalue)."</a><br>";
-		 }
-		 else if($filetype == 'xls' || $filetype == 'xlsx')
-		{
-			$filename = "images/excel.png";
-			$list=$list."<a href='/presentation/view/?id=".$this->escape(key($pvalue))."'><img src = '/".$filename."' height = $h width = $w>".current($pvalue)."</a><br>";
-		}
-		else if($filetype == 'ppt' || $filetype == 'pptx')
-		{
-			$filename = "images/ppt.png";
-			$list=$list."<a href='/presentation/view/?id=".$this->escape(key($pvalue))."'><img src = '/".$filename."' height = $h width = $w>".current($pvalue)."</a><br>";
-		}
-		else if($filetype == 'pdf')
-		{
-			$filename = "images/pdf.png";
-			$list=$list."<a href='/presentation/view/?id=".$this->escape(key($pvalue))."'><img src = '/".$filename."' height = $h width = $w>".current($pvalue)."</a><br>";
-		}
-		 else {
-		 	$h = 300;
-			 $w = 400;
-		 	$filename = "random/thnail" . rand(0,999999);
-			$data = $pres['content'];
-			file_put_contents($filename,$data);
-			$ilist=$ilist."<a href='/presentation/view/?id=".$this->escape(key($pvalue))."'><img src = '/".$filename."' height = $h width = $w>".current($pvalue)."</a><br>";
-		 }
-     
-}
-$list .= $ilist;
-$ssModel = $this->subSysModel;
-$ss = $ssModel->getSubSystem($this->lte['subSysId']);
-$system = $this->sysModel->getSystem($this->lte['sysId']);
-$dataid = $this->lte['id'];
-
-$role = Zend_Registry::get("role");
-$uid = Zend_Auth::getInstance()->getStorage()->read()->id;
-$umodel = new Model_DbTable_Userprofile();
-$user = $umodel->getUser($uid);
-$upid = $user['plantId'];
-$gtid = $this->lte['gtid'];
-$gtmodel = new Model_DbTable_Gasturbine();
-$gt = $gtmodel->getGT($gtid);
-$gtpid = $gt['plantId'];
-$valid = false;
-if($upid == $gtpid || $role == 'sa')
+$lte = $this->lte;
+$this->lte = $this->lte->getData();
+if($this->allowed)
 {
-	$editlink = "<div style='float:left;' class='gt-edit'><a href = '/lte/edit?id=$dataid' style='color: #719b3e;'>Edit</a></div>";
+	$editlink = "<div style='float:left;' class='gt-edit'><a href = '/lte/edit?id=" . $this->lte['id'] . "' style='color: #719b3e;'>Edit</a></div>";
 }
 
 $content = "<div class='gtdata-title'>".$this->lte['title'];
-if($ss['subSysName'] == "-")
+if($lte->getSubSystemName() == "-")
 {
-	$content = $content." <span style='color:#77B464;'>".$system['sysName'] ."</span>";
+	$content = $content." <span style='color:#77B464;'>".$lte->getSystemName() ."</span>";
 }
 else
 {
-	$content = $content." <span style='color:#77B464;'>".$system['sysName'] . "/" . $ss['subSysName'] ."</span>";
+	$content = $content." <span style='color:#77B464;'>".$lte->getSystemName() . "/" . $lte->getSubSystemName() ."</span>";
 }
 $content = $content." <span style='color:#268FBB;'>".$this->gt['GTName']."</span><br/>";
 if($this->lte['EOH'] != 0 && $this->lte['EOH'] != "")
 	$content = $content." <span style='color:#268FBB;'><b>EOH at Occurence</b>: ". $this->lte['EOH']."</span>";
 if($this->lte['DOF'] != "" && $this->lte['DOF'] != "0000-00-00")
-	$content = $content." <span style='color:#268FBB;'><b>Date of Finding</b>: ".$this->lte['DOF']."</span>";
+	$content = $content." <span style='color:#268FBB;'><b>Date of LTE</b>: ".$this->lte['DOF']."</span>";
 if($this->lte['TOI'] != "")
-	$content = $content." <span style='color:#268FBB;'><b>Type of Inspection</b>: ".$this->lte['TOI']."</span><br>";
-$content = $content." <span style='color:#268FBB; font-size: 12px; font-style: normal; font-weight:bold;'>Updated On ".$this->lte['updatedate']."</span></div>";
+	$content = $content." <span style='color:#268FBB;'><b>Type of Inspection</b>: ".$this->lte['TOI']."</span>";
+$content = $content."<br><span style='color:#268FBB; font-size: 12px; font-style: normal; font-style:italic;'><b>Updated On</b> ".$this->lte['updatedate']."</span></div>";
 $content = $content."<div class='gtdata-data'>".$this->lte['data']."</div>";
 
-if($list == "")
-	$list="<span style='color:#d95e1c;'>No Presentations Added</span>";
-$content = $content."<div class='gtdata-presentations'><div style='font-size: 16px; padding-bottom: 5px;'>Presentations:</div>$list</div>";
+$list = "<table>";
+$ilist = "<table>";
+$src['doc'] = '/images/word.png';
+$src['docx'] = '/images/word.png';
+$src['ppt'] = '/images/ppt.png';
+$src['pptx'] = '/images/ppt.png';
+$src['xls'] = '/images/excel.png';
+$src['xlsx'] = '/images/excel.png';
+$src['pdf'] = '/images/pdf.png';
+
+foreach($this->attachmentList as $attach){
+	$ext = $attach->getFileExtension();	
+	if(in_array($ext,array('jpg','jpeg','png','gif'))){
+		$data = $attach->getContent();
+		$isrc = "uploads/" . str_replace(' ','',$attach->getTitle()) . "." . $ext;
+		file_put_contents($isrc,$data);
+		$dest = "uploads/th-" . $this->lte['id'] . "-" . $attach->getId() . "." . $ext;		
+		Model_Functions::getThumbnail($isrc,$dest,300,300);
+		$ilist .= "<tr><td><img src = '/$dest'></td><td><a href='/attachment/view?id=" . $attach->getId() . "'>" . $attach->getTitle() . "</a></td></tr>";
+	}
+	else {
+		$list .= "<tr><td><img src = '" . $src[$ext] . "'></td><td><a href='/attachment/view?id=" . $attach->getId() . "'>" . $attach->getTitle() . "</a></td></tr>";
+	}
+}
+$list .= "</table>";
+$ilist .= "</table>";
+$list .= $ilist;
+if($list == "<table></table><table></table>")
+	$list="<span style='color:#d95e1c;'>No Attachments Added</span>";
+$content = $content."<div class='gtdata-presentations'><div style='font-size: 16px; padding-bottom: 5px;'>Attachments:</div>$list</div>";
 
 $content = $content .$editlink;
 
 $content = $content . "<form action = '/reports/generate' method = 'post' style='float:right'>
 	<input type = 'hidden' name = 'type' value = 'lte'>
 	<input type = 'hidden' name = 'id' value = '".$this->lte['id']."'>
-	<input class = 'gt-report' type = 'submit' name = 'report' value = 'Generate LTEs Report'>
+	<input class = 'gt-report' type = 'submit' name = 'report' value = 'Generate lte Report'>
 </form>";
 $content = $content . "<div align='right'>
 	<form action = '/reports/configure?id=".$this->lte['id']."&type=gtdataview' method = 'post'>
 		<input class = 'gt-configure	' type = 'submit' name = 'reportgen' value = 'Configure Report'>
 	</form>
 </div>";
-$this->tabPane("LTEView",$content,array('title' => 'LTE View'));
-echo $this->tabContainer("LTEView",array());
+$this->tabPane("lteView",$content,array('title' => 'LTE View'));
+echo $this->tabContainer("lteView",array());
 ?>

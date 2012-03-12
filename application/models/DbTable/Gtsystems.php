@@ -32,7 +32,7 @@ class Model_DbTable_Gtsystems extends Zend_Db_Table_Abstract {
     protected $data;
 
     /**
-     * Initializes values and fetches the respective GT Data details using the id as argument
+     * Initializes values and fetches the respective GT System details using the id as argument
      * @param Zend_Db_Table_Adapter_Abstract - Default parameter as defined in the parent function
 	 * @param Integer - Primary Key of the table
      */
@@ -139,10 +139,4 @@ class Model_DbTable_Gtsystems extends Zend_Db_Table_Abstract {
         return $countRow[0]["count"];
     }
 
-//    public function getSystem($sid)
-//    {
-//        $sid = (int)$sid;
-//        $row = $this->fetchRow('sysId = ' . $sid);
-//        return $row->toArray();
-//    }
 }

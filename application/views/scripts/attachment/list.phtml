@@ -1,19 +1,43 @@
-<?php
-if (!count($this->attachments)) {
-    echo "<center>No Attachments Added</center>";
-} else {
-?>
-    <table cellspacing='0' cellpadding='0' onmouseover='tablecloth();'>
+<script type = 'text/javascript' src = '/js/file_ext_check.js'></script>
+<script type = "text/javascript">
+	$(document).ready(function(){
+		var data;
+		var json;
+		var title;
+		var modeId;
+		var mode;
+		var name;
+		$("#attach-box").click(function(){
+			$("#attach-form").dialog({width:'auto',height:'auto',title:'Add a new attachment'});
+			$("#attachTitle").val("");
+			$("input:file").val("");
+		});		
+		function startUpload(){			
+		    return true;
+	    }
+	    
+	    function stopUpload(data){
+		    return true;
+	    }
+	});
+</script>
+	<?php
+	if (!count($this->attachments)) {
+	    echo "<center>No Attachments Added</center>";
+		$style = "style='display:none'";
+	} 
+	?>
+    <table cellspacing='0' cellpadding='0' id = 'attach-table' <?php echo $style; ?> onmouseover='tablecloth();'>
         <thead>
             <tr>
                 <th>Title</th>
                 <th>File Type</th>
-                <th>User</th>
+                <th>Added By</th>
                 <th>Date</th>
             </tr>
         </thead>
 
-        <tbody>
+        <tbody id = 'attachments-list'>
 <?php for ($i = 0; $i < count($this->attachments); $i++) : ?>
                 <tr>
                     <td>
@@ -22,7 +46,7 @@ if (!count($this->attachments)) {
         $attach_data = $this->attachments[$i]->getData();
         ?></td>
             <td><?php echo $this->attachments[$i]->getFiletype(); ?></td>
-                    <td><?php echo $this->attachments[$i]->getUsername(); ?></td>
+                    <td><?php echo $this->attachments[$i]->getUsername()." - ".$this->attachments[$i]->getUserPlantName(); ?></td>
                     <td><?php echo $attach_data['updatedAt']; ?></td>
                 <?php if ($this->allowed) : ?>
                 <td>
@@ -43,18 +67,14 @@ if (!count($this->attachments)) {
             <?php endfor; ?>
             </tbody>
         </table>
-<?php } ?>
 
-<?php 
+<?php
 	if($this->allowed){
-		echo "<form action = '/attachment/add' method = 'post'>";
-		echo "<input type = 'submit' class = 'gt-add' value = 'Add New Attachment'>";
-		if($this->mode == 'conf'){
-			echo "<input type = 'hidden' name = 'cid' value = '$this->id'>";
-		}
-		else {
-			echo "<input type = 'hidden' name = 'gtid' value = '$this->id'>";
-		}
-		echo "</form>";
+		echo "<button class = 'gt-add' id='attach-box'>Add new attachment</button>";
+		echo "<div id='attach-form' style='display:none'>$this->attachmentForm</div>";
+		echo "<span id = 'mode' style='display:none'>$this->mode</span>";
+		echo "<span id = 'modeId' style = 'display:none'>$this->id</span>";
+		echo "<span id = 'source' style='display:none'>list</span>";
 	}
 ?>
+<iframe id="upload_target" name="upload_target" src="#" style="display:none"></iframe>

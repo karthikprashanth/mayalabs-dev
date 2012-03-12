@@ -1,121 +1,59 @@
-<?php
-echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
-$existPresList = "<b>Attachments already added to this</b><br><br>";
-$pres_str = substr($this->gtdata['presentationId'],0,strlen($this->gtdata['presentationId'])-1);
-$pres_array = explode(",",$pres_str);
-$this->spinner = "<div id = 'spinnerimage' style = 'display:none'>Uploading ... <img src = '/images/spinner.gif'></div>";
-if(count($pres_array) == 0 || (count($pres_array) == 1 && $pres_array[0] == 0))
-{
-	$existPresList = "";
-}
-else
-{
-	$presmodel = new Model_DbTable_Presentation();
-	for($i=0;$i<count($pres_array);$i++)
-	{
-		$pres = $presmodel->getPresentation($pres_array[$i]);
-		$existPresList .= "<div id = 'presdiv" . $pres_array[$i] . "'><a href = '/presentation/view?id=" . $pres_array[$i] . "'>" . $pres['title'] . "</a>";
-		$gid = $this->gtdata['id'];
-		$filetype = $pres['filetype'];
-		$h = 25;
-		$w = 25;
-		 if($filetype == 'doc' || $filetype == 'docx')
-		 {
-		 	$filename = "images/word.png";
-		 }
-		 else if($filetype == 'xls' || $filetype == 'xlsx')
-		{
-			$filename = "images/excel.png";
-		}
-		else if($filetype == 'ppt' || $filetype == 'pptx')
-		{
-			$filename = "images/ppt.png";
-		}
-		else if($filetype == 'pdf')
-		{
-			$filename = "images/pdf.png";
-		}
-		else {
-		 	$h = 50;
-		 	$w = 50;
-			$rn = rand(0,999999);
-		 	$filename = "random/thnail" . $rn;
-			$data = $pres['content'];
-			file_put_contents($filename,$data);
-		 }
-		$existPresList .= "<img src = '/".$filename."' height = $h width = $w>";
-		$existPresList .= "<span style = 'display:none' id = 'ptitle" . $pres_array[$i] . "'>" . $pres['title'] . "</span>";
-		$existPresList .= "<input type = 'button' onClick = 'unlink($pres_array[$i],$gid)' class = 'gt-delete' value = ''></form></div>";
-		
-	}
-}
-echo $this->headScript()->prependFile($this->baseUrl().'/js/tiny_mce/tiny_mce.js');
-$this->jQuery()->enable();
-if($this->message != "")
-	$this->message = "<br><div class ='errors'>" . $this->message . "</div>";
-else {
-	$this->message = "";
-}
-$this->tabPane("FindingEdit",$existPresList .$this->form . $this->message . $this->spinner ,array('title' => 'Finding Edit'));
-echo "<div id = 'ssid' style = 'display:none'>" . $this->gtdata['subSysId'] . "</div>";
-echo $this->tabContainer("FindingEdit",array());
-?>
-<script type = "text/javascript" src = "/js/gtdata_checkext.js"></script>
-<script type="text/javascript" src='/js/tinyMCEinit.js'></script>
-<script type = "text/javascript" src = "/js/spinnerImage.js"></script>
-<script type = "text/javascript" src = "/js/multiattach.js"></script>
+<script type = "text/javascript" src = "/js/attachUpload.js"></script>
 <script type = "text/javascript">
-	function unlink(pid,gid)
-	{
-		url = "/presentation/unlink";
-		var data = {};
-		data['id'] = pid;
-		data['gtdataid'] = gid;
-		$.post(url,data,function(resp){
-	        $('#presentationId').html(resp);
-	    });
-	    document.getElementById("presdiv" + pid).style.display = "none";
-	}
 	$(document).ready(function(){
-	var sid = document.getElementById("sysId").value;
-	var ssid = document.getElementById("ssid").innerHTML;
-	if(sid != "" && sid != 0)
-	{
-       $.ajax({
-            type: "POST",
-            data: "id=" + sid + "&ssid=" + ssid,
-            url: "/findings/index",
-            success: function(msg){
-                if (msg != ''){
-                    $("#subSysId").html(msg).show();
-                }
-            }
-       });
-	}
-    $("#sysId").change( function() {
-        $.ajax({
-            type: "POST",
-            data: "id=" + $(this).val(),
-            url: "/findings/index",
-            success: function(msg){
-                if (msg != ''){
-                    $("#subSysId").html(msg).show();
-                    
-                }
-            }
-        });
-    });
-});
-</script>
-<script type="text/javascript">
-    $(document).ready(function(){
+		$("#sysId").change( function() {
+	        $.ajax({
+	            type: "POST",
+	            data: "sid=" + $(this).val(),
+	            url: "/gtsubsystems/list",
+	            success: function(msg){
+	                if (msg != ''){
+	                    $("#subSysId").html(msg).show();
+	                }
+	            }
+	        });
+	    });
+	    
 	    $("input").blur(function(){
-	    	if(this.value == "" || this.value == null)
-	    	{
+	    	if(this.value == "" || this.value == null){
 	    		return;
 	    	}
 	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
 	        doValidationPlant($(this).attr('id'),'../validation/validate?form=gtdata&type=finding');
-	   });
+	   });	
 	});
 </script>
+
+<?php
+	echo $this->headScript()->prependFile($this->baseUrl().'/js/tiny_mce/tiny_mce.js');
+	echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
+	$lastUpdateInfo = "<i>Last updated by " . Model_DbTable_Userprofile::getUserName($this->userupdate) . " on " .
+	                  $this->updatetime . "</i>";
+	$this->message = "<br><div class ='errors'>" . $this->message . "</div>";
+	$this->tabPane("gtdataEdit",$this->form.$lastUpdateInfo,array('title' => $this->typeTitle . ' Edit'));
+	echo $this->tabContainer("gtdataEdit",array());
+	echo $this->message;
+	$this->spinner = "<div id = 'spinnerimage' style = 'display:none'>Uploading ... <img src = '/images/spinner.gif'></div>";
+?>
+<script type="text/javascript" src='/js/tinyMCEinit.js'></script>
+<div style="display:none" id="attach-form">
+	<?php echo $this->attachForm . $this->spinner; ?>
+</div>
+<span id = 'mode' style='display:none'>gt</span>
+<span id = 'modeId' style = 'display:none'><?php echo $this->gtid;?></span>
+<span id = 'gtdataId' style = 'display:none'><?php echo $this->id;?></span>
+<span id = 'source' style = 'display:none'>edit</span>
+<span id = 'added-attachments' style='display:none'>
+	<?php		
+		if(count($this->addedAttachments)){
+			echo "<td><span id = 'attachments-head'>Attachments Added</span><br><ul id = 'attachments-list'>";
+			foreach($this->addedAttachments as $attach){								
+				echo "<li id = 'a-" . $attach->getId() . "'><a href = '/attachment/view?id=" . $attach->getId() . "'>" .
+				     $attach->getTitle() . "</a>  <input type = 'button' id = 'del-" . $attach->getId() . 
+				     "' class = 'gt-delete' onclick = 'del_attach(" . $attach->getId() . ")'> 
+				     <a href='#' onclick='unlink(" . $attach->getId() . ")'>Unlink</a></li>"; 
+			}
+			echo "</ul></td>";
+		}
+	?>
+</span>

@@ -1,0 +1,10 @@
+<script type = 'text/javascript'>
+	var rows = window.parent.$("#image tr").length;
+    var cn = window.parent.$("#image").find('tr')[rows-1].cells.length;
+    
+	if(cn <= 2)
+		window.parent.$("#image").find("tr:last").append("<td><img src = '/<?php echo $this->thumbPath;?>' onclick ='showImg(<?php echo $this->id;?>)' alt='<?php echo $this->tag;?>' id = 'img-<?php echo $this->id;?>'><br><form action = '/gallery/delete' method = 'post'><input type = 'submit' class = 'gt-delete' value = ''><input type = 'hidden' name = 'photoId' value = '<?php echo $this->id;?>'></form></td></td>");
+	else
+		window.parent.$("#image").append("<tr><td><img src = '/<?php echo $this->thumbPath;?>' onclick ='showImg(<?php echo $this->id;?>)' alt = '<?php echo $this->tag;?>' id = 'img-<?php echo $this->id;?>'><br><form action = '/gallery/delete' method = 'post'><input type = 'submit' class = 'gt-delete' value = ''><input type = 'hidden' name = 'photoId' value = '<?php echo $this->id;?>'></form></td></td></td></tr>");
+	window.parent.$("#gallery-form").dialog('close');
+</script>

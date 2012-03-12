@@ -12,11 +12,4 @@ class IndexController extends Zend_Controller_Action
     {
         $this->view->headTitle('Index Page','PREPEND');
     }
-
-    public function generateReportsAction()
-    {
-        // action body
-    }
-
-
 }

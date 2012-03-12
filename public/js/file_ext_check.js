@@ -1,7 +1,7 @@
 $(document).ready(function(){
-	$("#content").change(function(){
-		var filename = document.getElementById("content").value;
-		var file_ext = filename.substring(filename.indexOf(".")+1);
+	$("input:file").change(function(){
+		var filename = $("input:file").val();
+		var file_ext = filename.split(".").pop();
 		file_ext = file_ext.toLowerCase();
 		if(file_ext == 'pdf' || file_ext == 'doc' || file_ext == 'ppt' ||
 		file_ext == 'docx' || file_ext == 'pptx' || file_ext == 'xls' ||
@@ -13,7 +13,7 @@ $(document).ready(function(){
 		else
 		{
 			alert("'" + file_ext + "' Files are not allowed");
-			document.getElementById("content").value = "";
+			$("input:file").val("");
 		}
 			
 	});	

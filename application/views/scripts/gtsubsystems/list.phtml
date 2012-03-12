@@ -1,0 +1,6 @@
+<?php
+	echo "<option value = ''>Select an option</option>";
+	foreach($this->list as $list){
+		if($list['subSysName'] == "-") continue;
+		echo "<option value = '" . $list['id'] . "'>" . $list['subSysName'] . "</option>";	
+	}

@@ -69,9 +69,6 @@ class ScheduleController extends Zend_Controller_Action
 				$event->save();
 			}
 			
-			
-    		
-			
 		}
 		catch(Exception $e){
 			echo $e;
