@@ -1,8 +1,6 @@
 public/forums/config.php
 application/configs/application.ini
-library/Zend
-library/ZendX
-library/Hive
+library
 .settings/
 public/forums/cache/
 public/random/
