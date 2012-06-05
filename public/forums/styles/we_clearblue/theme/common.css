@@ -9,7 +9,7 @@ html {
 }
 
 body {
-	/*background: #fff url("{T_THEME_PATH}/images/background.png") repeat-x;*/
+	background: #fff url("{T_THEME_PATH}/images/background.png") repeat-x;
 	font-family: Tahoma, Arial, Helvetica, sans-serif;
 	color: #828282;
 	font-size: 10px;
@@ -677,98 +677,4 @@ p.rules a {
 	font-size: 1px;
 	line-height: 1px;
 	background: transparent;
-}
-
-/* Hive Header */
-#header-bg{
-    width: 100%;
-    background:#2e4e68 ;
-    border-bottom: solid 7px #83ac52;
-}
-
-#header-bg{
-    width: 100%;
-    background:#2e4e68 ;
-    border-bottom: solid 7px #83ac52;
-}
-
-#header
-{
-    height:50px;
-    width: 990px;
-    margin:0 auto;
-    display:block;
-    background:#2e4e68 ;
-    font: 14px "Calibri",Arial,Helvetica,sans-serif;
-    color:#FFFFFF;
-}
-
-#header-logo
-{
-    float:left;
-    margin-left: 35px;
-    margin-right: 35px;
-    border-top: solid 7px #0e4b78;
-}
-
-#header-logo a img{
-    border: 0;
-    text-decoration: none;
-    margin:0;
-    padding:0;
-}
-
-#header-menu
-{    
-    padding-top: 20px;
-    float:left;
-}
-
-#header-name{
-    float: right;
-    font-size: 16px;    
-}
-
-#header-name img{
-    padding-top: 15px;
-    padding-right: 5px;
-}
-/* Search Bar */
-
-#search-box-menu{
-    float: left;
-    margin-left: 20px;
-    margin-top: 25px;
-}
-
-.search-box{
-    height: 22px;
-    width: 160px;
-    float: left;
-}
-
-.search-box img{
-    float: left
-}
-
-input.search-field{
-    border:0;
-    margin-top: 1px;
-    float: left;
-    font-family:tahoma;
-    font-size: 12px;
-    height:17px;
-    background: #FFF;
-    width: 105px;
-}
-
-input.search-go {
-    border:0;
-    margin:0;
-    padding:0;
-    float: left;
-    height: 22px;
-    width: 31px;
-    background: url(/images/search-icon.png) no-repeat top left;
-    cursor: pointer;
 }

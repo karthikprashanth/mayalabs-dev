@@ -640,7 +640,7 @@ input[type="submit"], button{
     padding-left: 20px;
     margin: 3px;
     cursor: pointer;
-
+	
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px 5px 5px 5px;
     -khtml-border-radius: 5px 5px 5px 5px;

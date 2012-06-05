@@ -1,4 +1,3 @@
-
 <?php
 
 class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
@@ -45,7 +44,6 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
 	 */
 	protected $updatetime;  
 	 
-
     /**
      * Details in the GT Data
      *
@@ -53,8 +51,6 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      */
     protected $gtData;  
 	
-	
-
     /**
      * Whether mail has been sent
      *
@@ -68,13 +64,13 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
 	 * @param Integer - Primary Key of the table
 	 */
     function  __construct($config = array(), $id = 0) {
-
-        parent::__construct($config);
-		
-        $gtData = array();
-        if($id){
-            $gtDataRow = $this->fetchRow("id = " . $id);
-
+         
+         parent::__construct($config);
+		   
+         $gtData = array();
+         if($id){
+             $gtDataRow = $this->fetchRow("id = " . $id);
+ 
             $this->gtData = $gtDataRow->toArray();
             $this->id = $gtDataRow['id'];
             $this->gtid = $gtDataRow['gtid'];
@@ -152,7 +148,6 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
     public function getData(){
         return $this->gtData;
     }
-	
 	
     /**
      * Gets the Mailed staus
@@ -251,7 +246,6 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
         }
     }
 	
-
     /**
      * Returns a list containing all the GT Data
      *
@@ -314,7 +308,7 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
      */
     public function deleteGtdata(){
     	$this->delete('id = ' . $this->id);
-    }    
+    }  
 
 }
 

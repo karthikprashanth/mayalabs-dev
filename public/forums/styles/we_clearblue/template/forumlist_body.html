@@ -41,7 +41,9 @@
 				<td>
 					<!-- IF forumrow.LAST_POST_TIME -->
 						<p>{forumrow.LAST_POST_TIME}</p>
-						<p>{L_POST_BY_AUTHOR} {forumrow.LAST_POSTER_FULL} - <strong>{forumrow.PLANTNAME}</strong></p>
+						<p>{L_POST_BY_AUTHOR} 
+<span class = 'username-coloured' style='color:#AA0000'>
+<a href = '/userprofile/view?id={forumrow.HIVE_LAST_POSTER_ID}'>{forumrow.HIVE_LAST_POSTER_FULLNAME}</a> - <a href = '/plant/view?id={forumrow.HIVE_LAST_POSTER_PLANTID}'>{forumrow.HIVE_LAST_POSTER_PLANTNAME}</a></span> <!-- IF not S_IS_BOT --><a href="{forumrow.U_LAST_POST}">{LAST_POST_IMG}</a><!-- ENDIF --></p>
 					<!-- ELSE -->
 						<p>{L_NO_POSTS}</p>
 					<!-- ENDIF -->

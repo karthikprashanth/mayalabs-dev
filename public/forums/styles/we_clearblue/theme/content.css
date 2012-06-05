@@ -1,6 +1,5 @@
 ul.topiclist {
 	display: block;
-	
 	list-style-type: none;
 	margin: 0;
 }
@@ -764,8 +763,6 @@ dl.pmlist dd {
 	-moz-border-radius-topright: 8px;
 	border-top-left-radius: 8px;
 	border-top-right-radius: 8px;
-	
-	
 }
 
 .forums {

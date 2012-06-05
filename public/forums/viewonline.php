@@ -20,11 +20,7 @@ include($phpbb_root_path . 'common.' . $phpEx);
 $user->session_begin();
 $auth->acl($user->data);
 $user->setup('memberlist');
-if($user->data['username'] == "Anonymous")
-{
-    $part_url = urlencode('forums' . '/' . $user->page['page']);
-    header('Location:/authentication/login?t=' . $part_url);
-}
+
 // Get and set some variables
 $mode		= request_var('mode', '');
 $session_id	= request_var('s', '');

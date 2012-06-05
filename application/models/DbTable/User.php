@@ -320,8 +320,6 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      */
     public function isPassword($password)
     {
-    	//echo $this->userData['password'];
-		//echo "<br>" . $this->encryptPassword($password);
         return !strcmp($this->userData['password'],$this->encryptPassword($password));
     }
     
@@ -333,12 +331,6 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      */
     public function setPassword($password)
     {
-        //$forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
-        //$forumUserModel->setPassword($password);
-		/*$data['password'] = $this->encryptPassword($password);		
-        $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);
-        $rowsAffected =  $this->update($data,$where);
-		return $rowsAffected;*/
 		$this->userData['password'] = $this->encryptPassword($password);
     }
 
@@ -361,30 +353,16 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
      * Updates details about users
      */
     public function save()
-    {        
-//        $forumData = array(
-//            'user_id' => $this->userId,
-//            'user_type' => 0,
-//            'group_id' => 2,
-//            'username' => $this->userName,
-//            'user_password' => encryptPassword($this->userData['password'],1)
-//        );
-        if($this->userId){
-//            $forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
-//            $forumUserModel->setForumData($forumData);
-//            $forumUserModel->save();
+    {   
+        if($this->userId){            
             $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);
             $this->update($this->userData, $where);
         }
         else {
-//            $forumUserModel = new Model_DbTable_Forum_Users();
-//            $forumUserModel->setForumData($forumData);
-//            $forumUserModel->save();
-
             /*
-             * Adding Hard-Coded Values for non-NOTNULL fields
-             */
-            $this->userData['password'] = md5("password");
+             * Adding password as 'password' so that debugging will be easy
+             * Has to be changed when mailing module is done
+             */            
             $this->userData['conf_chair'] = 0;
             $this->userId = $this->insert($this->userData);
         }
@@ -398,119 +376,8 @@ class Model_DbTable_User extends Zend_Db_Table_Abstract {
     {
         $this->delete('id = ' . $this->userId);
      	   
-        //$userProfileModel = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
-        //$userProfileModel->deleteUserprofile();
+        $userProfileModel = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
+        $userProfileModel->deleteUserprofile();
 		
-        //$forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
-        //$forumUserModel->deleteUser();   
     }
-
-    /*public function resetPassword()
-    {
-
-        $upModel = new Model_DbTable_Userprofile();
-        $user = $upModel->getUser($this->userId);
-        $rpassword = Model_Functions::generateRandom(8);
-
-        Model_Functions::sendMail("changepassword", array(
-                                                        'rpassword' => $rpassword,
-                                                        'email' => $user['email'],
-                                                        'firstName' => $user['firstName'],
-                                                        'subject' => "Password Reset"
-                                                        ));
-
-        $where = $this->getAdapter()->quoteInto('id = ?', $this->userId);
-        $rowaffected = $this->update(array('password' => md5($rpassword . "{" . $this->userId . "}")),
-                        array($where));
-        $data['user_password'] = md5($rpassword);
-        $whereClause['user_id = ?'] = $this->userId;
-        $forumUserModel = new Model_DbTable_Forum_Users();
-        $forumUserModel->update($data, $whereClause);
-
-        return array('rowsAffected' => $rowaffected, 'password' => $rpassword);
-
-    }*/
-    /*public function ccinfo() {
-        $rSet = $this->fetchRow('conf_chair = 1');
-        if (count($rSet) != 0) {
-            return $rSet['id'];
-        } else {
-            return 0;
-        }
-    }*/
-
-    /* public function getUser($id)
-      {
-      try {
-      $id = (int) $id;
-      $row = $this->fetchRow('id = ' . $id);
-
-      if (!$row) {
-      throw new Exception("Could not find row $id");
-      }
-      } catch (Exception $e) {
-      echo $e;
-      }
-      return array('id' => $row->id, 'username' => $row->username, 'password' => $row->password,'sid' => $row->sid, 'role' => $row->role, 'lastlogin' => $row->lastlogin);
-      }
-
-      public function getUserByName($uname)
-      {
-      $row = $this->fetchRow("username = '" . $uname . "'");
-      return $row->toArray();
-      }
-
-      public static function getListOfUsers()
-      {
-      try {
-      $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
-      $stmt = $dbAdapter->query('SELECT u.id,u.username,u.role,up.firstName,up.lastName,p.plantName FROM users u,userprofile up,plants p ' .
-      'WHERE u.role not like \'sa\' AND u.id = up.id AND up.plantId = p.plantId group by up.plantId');
-      $row = $stmt->fetchAll();
-      return $row;
-      } catch (Exception $e) {
-      echo $e;
-      }
-      }
-
-      public function getUsersList($plantId)
-      {
-      try {
-      $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
-      $stmt = $dbAdapter->query("SELECT u.id,u.username,u.role,up.firstName,up.lastName FROM users u,userprofile up,plants " .
-      "WHERE plants.plantId='$plantId' AND plants.plantId = up.plantId AND u.id = up.id");
-      $row = $stmt->fetchAll();
-      return $row;
-      } catch (Exception $e) {
-      echo $e;
-      }
-      } */
-
-    /*
-      public static function generateRandom($size)
-      {
-      $arr = '';
-      $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      for ($i = 0; $i < $size; $i++) {
-      $r = rand(0, 62);
-      $arr = $arr . $chars[$r];
-      }
-      return $arr;
-      }
-      Moved to Functions.php */
-
-    /* public function timeStamp($id)
-      {
-      $time = date('Y-m-d H:i:s');
-      $where = $this->getAdapter()->quoteInto('id = ?', $id);
-      $this->update(array('lastlogin' => $time), array($where));
-      } changed to setLastLogin */
-
-    /* public function is_confchair($id)
-      {
-      $id = (int) $id;
-      $rSet = $this->fetchRow('id = ' . $id);
-      $rSet->toArray();
-      return $rSet['conf_chair'];
-      } Changed to isCC */
 }

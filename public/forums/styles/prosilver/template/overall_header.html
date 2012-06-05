@@ -8,12 +8,10 @@
 <meta http-equiv="imagetoolbar" content="no" />
 <meta name="resource-type" content="document" />
 <meta name="distribution" content="global" />
-<meta name="copyright" content="2000, 2002, 2005, 2007 phpBB Group" />
 <meta name="keywords" content="" />
 <meta name="description" content="" />
-<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9" />
 {META}
-<title>{SITENAME} - <!-- IF S_IN_MCP -->{L_MCP} &bull; <!-- ELSEIF S_IN_UCP -->{L_UCP} &bull; <!-- ENDIF -->Forums</title>
+<title>{SITENAME} &bull; <!-- IF S_IN_MCP -->{L_MCP} &bull; <!-- ELSEIF S_IN_UCP -->{L_UCP} &bull; <!-- ENDIF -->{PAGE_TITLE}</title>
 
 <!-- IF S_ENABLE_FEEDS -->
 	<!-- IF S_ENABLE_FEEDS_OVERALL --><link rel="alternate" type="application/atom+xml" title="{L_FEED} - {SITENAME}" href="{U_FEED}" /><!-- ENDIF -->
@@ -35,7 +33,7 @@
 	      The phpBB Group is not responsible for the content of this page and forum. For more information
 	      about phpBB please visit http://www.phpbb.com
 -->
-<script type = "text/javascript" src = "../js/jquery/js/jquery-1.5.1.min.js"></script>
+
 <script type="text/javascript">
 // <![CDATA[
 	var jump_page = '{LA_JUMP_PAGE}:';
@@ -47,12 +45,9 @@
 	var onload_functions = new Array();
 	var onunload_functions = new Array();
 
-	<!-- IF S_USER_PM_POPUP -->
-		if ({S_NEW_PM})
-		{
-			var url = '{UA_POPUP_PM}';
-			window.open(url.replace(/&amp;/g, '&'), '_phpbbprivmsg', 'height=225,resizable=yes,scrollbars=yes, width=400');
-		}
+	<!-- IF S_USER_PM_POPUP and S_NEW_PM -->
+		var url = '{UA_POPUP_PM}';
+		window.open(url.replace(/&amp;/g, '&'), '_phpbbprivmsg', 'height=225,resizable=yes,scrollbars=yes, width=400');
 	<!-- ENDIF -->
 
 	/**
@@ -69,12 +64,11 @@
 	*/
 	window.onload = function()
 	{
-		
 		for (var i = 0; i < onload_functions.length; i++)
 		{
 			eval(onload_functions[i]);
 		}
-	}
+	};
 
 	window.onunload = function()
 	{
@@ -82,22 +76,16 @@
 		{
 			eval(onunload_functions[i]);
 		}
-	}
-	
-	$(document).ready(function() {
-		$("#hivemenu").load("http://www.hiveusers.com/administration/showmenu");
-	});
+	};
 
 // ]]>
 </script>
-<script type="text/javascript" src="{T_TEMPLATE_PATH}/styleswitcher.js"></script>
-<script type="text/javascript" src="{T_TEMPLATE_PATH}/forum_fn.js"></script>
+<script type="text/javascript" src="{T_SUPER_TEMPLATE_PATH}/styleswitcher.js"></script>
+<script type="text/javascript" src="{T_SUPER_TEMPLATE_PATH}/forum_fn.js"></script>
 
 <link href="{T_THEME_PATH}/print.css" rel="stylesheet" type="text/css" media="print" title="printonly" />
-<link href = "{T_THEME_PATH}/hivestyle.css" rel = "stylesheet" />
-<link href = "{T_THEME_PATH}/ddsmoothmenu.css" rel = "stylesheet" />
-<link href = "{T_THEME_PATH}/hiveword.css" rel = "stylesheet" />
 <link href="{T_STYLESHEET_LINK}" rel="stylesheet" type="text/css" media="screen, projection" />
+
 <link href="{T_THEME_PATH}/normal.css" rel="stylesheet" type="text/css" title="A" />
 <link href="{T_THEME_PATH}/medium.css" rel="alternate stylesheet" type="text/css" title="A+" />
 <link href="{T_THEME_PATH}/large.css" rel="alternate stylesheet" type="text/css" title="A++" />
@@ -109,21 +97,42 @@
 </head>
 
 <body id="phpbb" class="section-{SCRIPT_NAME} {S_CONTENT_DIRECTION}">
+
 <div id="wrap">
-	
 	<a id="top" name="top" accesskey="t"></a>
-	
-	<div id="page-header">				
-		<div class="navbar">
-			<div id = "hivemenu"></div>		
+	<div id="page-header">
+		<div class="headerbar">
 			<div class="inner"><span class="corners-top"><span></span></span>
-			
+
+			<div id="site-description">
+				<a href="{U_INDEX}" title="{L_INDEX}" id="logo">{SITE_LOGO_IMG}</a>
+				<h1>{SITENAME}</h1>
+				<p>{SITE_DESCRIPTION}</p>
+				<p class="skiplink"><a href="#start_here">{L_SKIP}</a></p>
+			</div>
+
+		<!-- IF S_DISPLAY_SEARCH and not S_IN_SEARCH -->
+			<div id="search-box">
+				<form action="{U_SEARCH}" method="get" id="search">
+				<fieldset>
+					<input name="keywords" id="keywords" type="text" maxlength="128" title="{L_SEARCH_KEYWORDS}" class="inputbox search" value="<!-- IF SEARCH_WORDS-->{SEARCH_WORDS}<!-- ELSE -->{L_SEARCH_MINI}<!-- ENDIF -->" onclick="if(this.value=='{LA_SEARCH_MINI}')this.value='';" onblur="if(this.value=='')this.value='{LA_SEARCH_MINI}';" />
+					<input class="button2" value="{L_SEARCH}" type="submit" /><br />
+					<a href="{U_SEARCH}" title="{L_SEARCH_ADV_EXPLAIN}">{L_SEARCH_ADV}</a> {S_SEARCH_HIDDEN_FIELDS}
+				</fieldset>
+				</form>
+			</div>
+		<!-- ENDIF -->
+
+			<span class="corners-bottom"><span></span></span></div>
+		</div>
+
+		<div class="navbar">
+			<div class="inner"><span class="corners-top"><span></span></span>
+
 			<ul class="linklist navlinks">
-				
-				<li class="icon-home"><a href="{U_INDEX}" accesskey="h">{L_INDEX}</a> <!-- BEGIN navlinks --> <strong>&#8249;</strong> <a href="{navlinks.U_VIEW_FORUM}">{navlinks.FORUM_NAME}</a><!-- END navlinks --></li><br>
-				 
-				<h2><center>{L_LOGIN_LOGOUT}</center></h2>
-				<li class="rightside">
+				<li class="icon-home"><a href="{U_INDEX}" accesskey="h">{L_INDEX}</a> <!-- BEGIN navlinks --> <strong>&#8249;</strong> <a href="{navlinks.U_VIEW_FORUM}">{navlinks.FORUM_NAME}</a><!-- END navlinks --></li>
+
+				<li class="rightside"><a href="#" onclick="fontsizeup(); return false;" onkeypress="return fontsizeup(event);" class="fontsize" title="{L_CHANGE_FONT_SIZE}">{L_CHANGE_FONT_SIZE}</a></li>
 
 				<!-- IF U_EMAIL_TOPIC --><li class="rightside"><a href="{U_EMAIL_TOPIC}" title="{L_EMAIL_TOPIC}" class="sendemail">{L_EMAIL_TOPIC}</a></li><!-- ENDIF -->
 				<!-- IF U_EMAIL_PM --><li class="rightside"><a href="{U_EMAIL_PM}" title="{L_EMAIL_PM}" class="sendemail">{L_EMAIL_PM}</a></li><!-- ENDIF -->
@@ -151,28 +160,15 @@
 				<!-- IF not S_IS_BOT -->
 					<!-- IF S_DISPLAY_MEMBERLIST --><li class="icon-members"><a href="{U_MEMBERLIST}" title="{L_MEMBERLIST_EXPLAIN}">{L_MEMBERLIST}</a></li><!-- ENDIF -->
 					<!-- IF not S_USER_LOGGED_IN and S_REGISTER_ENABLED and not (S_SHOW_COPPA or S_REGISTRATION) --><li class="icon-register"><a href="{U_REGISTER}">{L_REGISTER}</a></li><!-- ENDIF -->
-					
+					<li class="icon-logout"><a href="{U_LOGIN_LOGOUT}" title="{L_LOGIN_LOGOUT}" accesskey="x">{L_LOGIN_LOGOUT}</a></li>
 				<!-- ENDIF -->
 			</ul>
 
 			<span class="corners-bottom"><span></span></span></div>
-			
 		</div>
-		<!-- IF S_DISPLAY_SEARCH and not S_IN_SEARCH -->
-			<div id="search-box">
-				<form action="{U_SEARCH}" method="post" id="search">
-				<fieldset>
-					<input name="keywords" id="keywords" type="text" maxlength="128" title="{L_SEARCH_KEYWORDS}" class="inputbox search" value="<!-- IF SEARCH_WORDS-->{SEARCH_WORDS}<!-- ELSE -->{L_SEARCH_MINI}<!-- ENDIF -->" onclick="if(this.value=='{LA_SEARCH_MINI}')this.value='';" onblur="if(this.value=='')this.value='{LA_SEARCH_MINI}';" />
-					<input class="button2" value="{L_SEARCH}" type="submit" /><br />
-				</fieldset>
-				</form>
-				
-			</div>
-			<br><br><br><div><a href="{U_SEARCH}" title="{L_SEARCH_ADV_EXPLAIN}">{L_SEARCH_ADV}</a>{S_SEARCH_HIDDEN_FIELDS}</div>
-		<!-- ENDIF --> 	
-	
 
 	</div>
+
 	<a name="start_here"></a>
 	<div id="page-body">
 		<!-- IF S_BOARD_DISABLED and S_USER_LOGGED_IN and (U_MCP or U_ACP) -->
@@ -182,4 +178,3 @@
 			<span class="corners-bottom"><span></span></span></div>
 		</div>
 		<!-- ENDIF -->
-		

@@ -41,15 +41,15 @@ class UserprofileController extends Zend_Controller_Action {
 					}
 					if($exists)
 					{
-						$this->view->message = "Email already belongs to another user";
-						return;
+						//$this->view->message = "Email already belongs to another user";
+						//return;
 					}
 					$plant = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter(),$content['plantid']);
 					$content['id'] = $id;
 					$content['corporateName'] = $plant->getCorporateName();
 					$content['plantName'] = $plant->getPlantName();
 					$userProfile->setUserprofileData($content);
-                    $userProfile->save();
+                    $userProfile->save('add');
                     $this->_redirect('/userprofile/view?id='.$id);
                 } else {
                     $form->populate($formData);
@@ -77,7 +77,7 @@ class UserprofileController extends Zend_Controller_Action {
                     $content = $form->getValues();
 					$content['id'] = Zend_Auth::getInstance()->getStorage()->read()->id;
                     $user->setUserprofileData($content);
-                    $user->save();
+                    $user->save('edit');
                    	$this->_redirect('userprofile/view');
                 }
                 else {
@@ -97,7 +97,7 @@ class UserprofileController extends Zend_Controller_Action {
 
     public function viewAction() {
         try {
-        	if($this->_getParam('id') != 0) {
+        	if($this->_getParam('id',0) != 0) {
         		$myUser = $this->_getParam('id');
         	}
         	else {
@@ -144,11 +144,16 @@ class UserprofileController extends Zend_Controller_Action {
                     $oldPassword = $form->getValue('oldPassword');
                     $newPassword = $form->getValue('newPassword');
                     $reNewPassword = $form->getValue('reNewPassword');
-					//echo $oldPassword . "<br>" . $newPassword . "<br>" . $reNewPassword;
+					
                     if ($newPassword == $reNewPassword && $newPassword != NULL && $oldPassword != NULL) {
                         if ($userPass->isPassword($oldPassword)) {
                         	$userPass->setPassword($newPassword);
 							$userPass->save();
+                            
+                            $forumUser = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),Zend_Auth::getInstance()->getStorage()->read()->id);
+                            $forumUser->setPassword($newPassword);
+                            $forumUser->save();
+                            
                             $this->view->message = 'Password has been changed';
 							//Send Mail
 							

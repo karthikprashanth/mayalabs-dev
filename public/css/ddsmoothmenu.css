@@ -1,7 +1,7 @@
 .ddsmoothmenu{
 margin-left: 50px;
 font:  12px Verdana;
-background: #414141; /*background of menu bar (default state)*/
+background: #2e4e68; /*background of menu bar (default state)*/
 width: 100%;
 height: 100%;
 }
@@ -23,7 +23,7 @@ float: left;
 /*Top level menu link items style*/
 .ddsmoothmenu ul li a{
 display: block;
-background: #414141; /*background of menu items (default state)*/
+background: #2e4e68; /*background of menu items (default state)*/
 color: white;
 padding: 8px 10px;
 color: #2d2b2b;

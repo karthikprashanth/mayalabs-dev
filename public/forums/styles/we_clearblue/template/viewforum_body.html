@@ -136,7 +136,9 @@
 				<!-- IF topicrow.S_TOPIC_REPORTED --><a href="{topicrow.U_MCP_REPORT}">{REPORTED_IMG}</a><!-- ENDIF -->
 			</h4>
 			<!-- IF topicrow.PAGINATION --><strong class="pagination"><span>{topicrow.PAGINATION}</span></strong><!-- ENDIF -->
-			<p>{L_POST_BY_AUTHOR} <span style="color: #AA0000;" class="username-coloured">{topicrow.TOPIC_AUTHOR_FULL} - <strong>{topicrow.TOPIC_POSTER_PLANTNAME} </span></strong> &raquo; {topicrow.FIRST_POST_TIME}</p>
+			<p>{L_POST_BY_AUTHOR} 
+<span class = 'username-coloured' style='color:#AA0000'>
+<a href = '/userprofile/view?id={topicrow.HIVE_AUTHOR_ID}'>{topicrow.HIVE_AUTHOR_FULLNAME}</a> - <a href = '/plant/view?id={topicrow.HIVE_AUTHOR_PLANTID}'>{topicrow.HIVE_AUTHOR_PLANTNAME}</a></span></p>
 		</td>
 		<td class="bg2">
 			<p>{L_REPLIES}: <strong>{topicrow.REPLIES}</strong></p>
@@ -144,7 +146,9 @@
 		</td>
 		<td>
 			<p>{topicrow.LAST_POST_TIME}</p>
-			<p>{L_POST_BY_AUTHOR} {topicrow.LAST_POST_AUTHOR_FULL} - <strong>{topicrow.TOPIC_POSTER_PLANTNAME} </strong><!-- IF not S_IS_BOT --><a href="{topicrow.U_LAST_POST}">{LAST_POST_IMG}</a><!-- ENDIF --></p>
+			<p>{L_POST_BY_AUTHOR} 
+<span class = 'username-coloured' style='color:#AA0000'>
+<a href = '/userprofile/view?id={topicrow.HIVE_LAST_POST_ID}'>{topicrow.HIVE_LAST_POST_FULLNAME}</a> - <a href = '/plant/view?id={topicrow.HIVE_LAST_POST_PLANTID}'>{topicrow.HIVE_LAST_POST_PLANTNAME}</a></span></p>
 		</td>
 	</tr>
 
@@ -165,18 +169,9 @@
 	<!-- ENDIF -->
 <!-- END topicrow -->
 
-<!-- IF S_SELECT_SORT_DAYS and not S_DISPLAY_ACTIVE -->
-	<form method="post" action="{S_FORUM_ACTION}">
-		<fieldset class="display-options">
-			<!-- IF PREVIOUS_PAGE --><a href="{PREVIOUS_PAGE}" class="left-box {S_CONTENT_FLOW_BEGIN}">{L_PREVIOUS}</a><!-- ENDIF -->
-			<!-- IF NEXT_PAGE --><a href="{NEXT_PAGE}" class="right-box {S_CONTENT_FLOW_END}">{L_NEXT}</a><!-- ENDIF -->
-		</fieldset>
-	</form>
-	<hr />
-<!-- ENDIF -->
-
 <!-- IF .topicrow and not S_DISPLAY_ACTIVE -->
 	<div class="topic-actions">
+		
 
 		<!-- IF PAGINATION or TOTAL_POSTS or TOTAL_TOPICS -->
 		<div class="pagination">
@@ -190,5 +185,10 @@
 	</div>
 <!-- ENDIF -->
 
-<!-- INCLUDE overall_footer.html -->
+<!-- IF S_DISPLAY_ONLINE_LIST -->
+	<h3><!-- IF U_VIEWONLINE --><a href="{U_VIEWONLINE}">{L_WHO_IS_ONLINE}</a><!-- ELSE -->{L_WHO_IS_ONLINE}<!-- ENDIF --></h3>
+	<p>{LOGGED_IN_USER_LIST}</p>
+<!-- ENDIF -->
 
+
+<!-- INCLUDE overall_footer.html -->

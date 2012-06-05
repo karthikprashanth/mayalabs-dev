@@ -1,5 +1,4 @@
 <?php
-
 class SearchController extends Zend_Controller_Action
 {
 
@@ -322,51 +321,49 @@ class SearchController extends Zend_Controller_Action
 	{
 		//indexing gtdata//
 		
-		$gtdatamodel = new Model_DbTable_Gtdata();
-		$gtdata = $gtdatamodel->fetchAll();
-		/*$type['finding'] = "Finding";
-		$type['upgrade'] = "Upgrade";
-		$type['lte'] = 'LTE';*/
-		$umodel = new Model_DbTable_Userprofile();
-		$upmodel = new Model_DbTable_Plant();
-		$sysmodel = new Model_DbTable_Gtsystems();
-		$subsysmodel = new Model_DbTable_Gtsubsystems();
+		$gtdataList = Model_DbTable_Gtdata::getList();
+        
 		$appath = substr(APPLICATION_PATH,0,strlen(APPLICATION_PATH)-12);
 		$path = $appath . DIRECTORY_SEPARATOR . "search" . DIRECTORY_SEPARATOR . "gtdata";
 		$index = Zend_Search_Lucene::create($path);
-		
-		foreach($gtdata as $list)
-		{
-			echo $list['id'] . "  " . $list['title'] . "<br>";
+		echo "<h1>Indexed Gasturbine Data</h1>";
+		foreach($gtdataList as $gtd)
+		{    
+		    $gtdata = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtd['id']);
+            
+            $gdArray = $gtdata->getData();
+			echo $gtdata->getTitle() . " " . $gtdata->getType() . "<br>"; 
 			
-			$user = $umodel->getUser($list['userupdate']);
+            $user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtd['userupdate']);
+            
+			$uplant = $user->getPlantId();
+			$uplantname = $user->getPlantName();
 			
-			$uplant = $upmodel->getPlant($user['plantId']);
-			$uplantname = $uplant['plantName'];
+            $system = new Model_DbTable_Gtsystems(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtd['sysId']);
+            $sysname = $system->getSysName();
 			
-			$sysname = $sysmodel->getSystem($list['sysId']);
-			$sysname = $sysname['sysName'];
+			$eoh = $gdArray['EOH'];
+			$toi = $gdArray['TOI'];
 			
-			$eoh = $list['EOH'];
-			$toi = $list['TOI'];
-			
-			if($list['subSysId'] != 34 && $list['subSysId'] != 0)
+            
+			if($gdArray['subSysId'] != 34 && $gdArray['subSysId'] != 0)
 			{
-				$subsysname = $subsysmodel->getSubSystem($list['subSysId']);
-				$subsysname = $subsysname['subSysName'];
+				$subsystem = new Model_DbTable_Gtsubsystems(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtd['subSysId']);
+                $subsysname = $subsystem->getsubSysName();
 			}
 			
 			$doc = new Zend_Search_Lucene_Document();
-			$doc->addField(Zend_Search_Lucene_Field::UnIndexed('dataid',$list['id']));
+			$doc->addField(Zend_Search_Lucene_Field::UnIndexed('dataid',$gdArray['id']));
 			
-			$doc->addField(Zend_Search_Lucene_Field::UnStored('title',$list['title']));
-			$doc->addField(Zend_Search_Lucene_Field::UnStored('data',$list['data']));
-			$doc->addField(Zend_Search_Lucene_Field::UnStored('type',$list['type']));
+			$doc->addField(Zend_Search_Lucene_Field::UnStored('title',$gdArray['title']));
+			$doc->addField(Zend_Search_Lucene_Field::UnStored('data',$gdArray['data']));
+			$doc->addField(Zend_Search_Lucene_Field::UnStored('type',$gdArray['type']));
 			
 			$doc->addField(Zend_Search_Lucene_Field::UnStored('sysname',$sysname));  
 			$doc->addField(Zend_Search_Lucene_Field::UnStored('subsysname',$subsysname));
 			$doc->addField(Zend_Search_Lucene_Field::Keyword('eoh',$eoh));
 			$doc->addField(Zend_Search_Lucene_Field::UnStored('toi',$toi));
+            
 			$doc->addField(Zend_Search_Lucene_Field::UnStored('userplantname',$uplantname));
 			
 			$index->addDocument($doc);
@@ -376,32 +373,27 @@ class SearchController extends Zend_Controller_Action
 		
 		//forum data indexing//
 		
-		$forumPostModel = new Model_DbTable_Forum_Posts();
-		$forumPosts = $forumPostModel->getFieldsForSearch();
+		$forumPosts = Model_DbTable_Forum_Posts::getList();
 		
-		
-		$appath = substr(APPLICATION_PATH,0,strlen(APPLICATION_PATH)-12);
+	    $appath = substr(APPLICATION_PATH,0,strlen(APPLICATION_PATH)-12);
 		$path = $appath . DIRECTORY_SEPARATOR . "search" . DIRECTORY_SEPARATOR . "forum";
-		$index = Zend_Search_Lucene::create($path);
-		$topicmodel = new Model_DbTable_Forum_Topics();
-		$forummodel = new Model_DbTable_Forum_Data();
-		$posterModel = new Model_DbTable_Userprofile();
-		$plantmodel = new Model_DbTable_Plant();
 		
-		foreach($forumPosts as $list)
+		$index = Zend_Search_Lucene::create($path);
+		
+		foreach($forumPosts as $post)
 		{
 			$doc = new Zend_Search_Lucene_Document();
 			
-			$topic = $topicmodel->getTopic($list['topic_id']);
-			$topicname = $topic['topic_title'];
+			$forumTopic = new Model_DbTable_Forum_Topics(Zend_Db_Table_Abstract::getDefaultAdapter(),$post['topic_id']);
+            $forumTopicData = $forumTopic->getTopicData();
+			$topicname = $forumTopicData['topic_title'];
 			
-			$forum = $forummodel->getForum($list['forum_id']);
-			$forumname = $forum['forum_name'];
+			$forum = new Model_DbTable_Forum_Forums(Zend_Db_Table_Abstract::getDefaultAdapter(),$post['forum_id']);
+			$forumData = $forum->getForumData();
+			$forumname = $forumData['forum_name'];
 			
-			$poster = $posterModel->getUser($list['poster_id']);
-			
-			$plant = $plantmodel->getPlant($poster['plantId']);
-			$uplantname = $plant['plantName'];
+			$poster = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$post['poster_id']);
+			$uplantname = $poster->getPlantName();
 			
 			$doc->addField(Zend_Search_Lucene_Field::UnIndexed('post_id',$list['post_id']));
 			
@@ -412,18 +404,18 @@ class SearchController extends Zend_Controller_Action
 			
 			$doc->addField(Zend_Search_Lucene_Field::UnStored('userplantname',$uplantname));
 			$index->addDocument($doc);
-			}
+		}
 		$index->commit();  
 		$index->optimize();
-		$this->_redirect("/dashboard/index");
+        
+        $redirector = Zend_Controller_Action_HelperBroker::getStaticHelper('redirector');
+        $baseUrl = new Zend_View_Helper_BaseUrl();
+        $this->_redirect("/dashboard/index");
 	}
 
 	public function searchlayoutAction()
 	{		
-                if (!$this->_request->isXmlHttpRequest())
-                    $this->_helper->viewRenderer->setResponseSegment('searchlayout');
-	}
-
-	
-	
+        if (!$this->_request->isXmlHttpRequest())
+            $this->_helper->viewRenderer->setResponseSegment('searchlayout');
+	}	
 }

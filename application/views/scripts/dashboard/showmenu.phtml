@@ -1,5 +1,13 @@
-<div id="smoothmenu1" class="ddsmoothmenu" >
-<?php
-	echo $this->navigation()->menu();
-?>
+<div id="header">
+	<div id="header-logo">
+	    <a href="<?php echo $this->baseUrl() . "/dashboard/index" ?>"><img src="<?php echo $this->baseUrl(); ?>/images/logo_small_new.png"/></a>
+	</div>
+	
+	<div id="header-menu">
+		<div id="smoothmenu1" class="ddsmoothmenu">
+			<?php
+				echo $this->navigation()->menu();
+			?>
+		</div>
+	</div>
 </div>

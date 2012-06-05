@@ -25,29 +25,12 @@ class cache extends acm
 	/**
 	* Get config values
 	*/
-	public function obtain_config()
+	function obtain_config()
 	{
 		global $db;
-		if($db == NULL){
-			define('IN_CRON',true);
-			if (defined('IN_CRON'))
-			{
-				$phpbb_root_path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-			}
-			$phpbb_root_path = substr($phpbb_root_path,0,strlen($phpbb_root_path)-9);
-			if (file_exists($phpbb_root_path . 'config.php'))
-			{
-				require($phpbb_root_path . 'config.php');
-			}
-			$db = new dbal_mysqli();
-			$db->sql_connect($dbhost, $dbuser, $dbpasswd, $dbname, $dbport, false, defined('PHPBB_DB_NEW_LINK') ? PHPBB_DB_NEW_LINK : false);
-			
-		}
-		
-		
+
 		if (($config = $this->get('config')) !== false)
 		{
-			
 			$sql = 'SELECT config_name, config_value
 				FROM ' . CONFIG_TABLE . '
 				WHERE is_dynamic = 1';
@@ -61,9 +44,8 @@ class cache extends acm
 		}
 		else
 		{
-			
 			$config = $cached_config = array();
-			
+
 			$sql = 'SELECT config_name, config_value, is_dynamic
 				FROM ' . CONFIG_TABLE;
 			$result = $db->sql_query($sql);
@@ -100,26 +82,9 @@ class cache extends acm
 			$result = $db->sql_query($sql);
 
 			$censors = array();
-			$unicode = ((version_compare(PHP_VERSION, '5.1.0', '>=') || (version_compare(PHP_VERSION, '5.0.0-dev', '<=') && version_compare(PHP_VERSION, '4.4.0', '>='))) && @preg_match('/\p{L}/u', 'a') !== false) ? true : false;
-
 			while ($row = $db->sql_fetchrow($result))
 			{
-				if ($unicode)
-				{
-					// Unescape the asterisk to simplify further conversions
-					$row['word'] = str_replace('\*', '*', preg_quote($row['word'], '#'));
-					
-					// Replace the asterisk inside the pattern, at the start and at the end of it with regexes
-					$row['word'] = preg_replace(array('#(?<=[\p{Nd}\p{L}_])\*(?=[\p{Nd}\p{L}_])#iu', '#^\*#', '#\*$#'), array('([\x20]*?|[\p{Nd}\p{L}_-]*?)', '[\p{Nd}\p{L}_-]*?', '[\p{Nd}\p{L}_-]*?'), $row['word']);
-
-					// Generate the final substitution
-					$censors['match'][] = '#(?<![\p{Nd}\p{L}_-])(' . $row['word'] . ')(?![\p{Nd}\p{L}_-])#iu';
-				}
-				else
-				{
-					$censors['match'][] = '#(?<!\S)(' . str_replace('\*', '\S*?', preg_quote($row['word'], '#')) . ')(?!\S)#iu';
-				}
-
+				$censors['match'][] = get_censor_preg_expression($row['word']);
 				$censors['replace'][] = $row['replacement'];
 			}
 			$db->sql_freeresult($result);

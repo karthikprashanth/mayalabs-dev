@@ -1817,13 +1817,7 @@ function utf8_normalize_nfc($strings)
 function utf8_clean_string($text)
 {
 	global $phpbb_root_path, $phpEx;
-	if($phpEx == NULL) {
-		$phpEx =  "php";
-	}
-	if($phpbb_root_path == NULL) {
-		$phpbb_root_path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-		$phpbb_root_path = substr($phpbb_root_path,0,strlen($phpbb_root_path)-13);
-	}
+
 	static $homographs = array();
 	if (empty($homographs))
 	{

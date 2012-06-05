@@ -1,4 +1,4 @@
-/* General proSilver Markup Styles
+/* General Markup Styles
 ---------------------------------------- */
 
 * {
@@ -138,11 +138,11 @@ a#logo:hover {
 #search-box {
 	color: #FFFFFF;
 	position: relative;
-	margin-top: 10px;
+	margin-top: 30px;
 	margin-right: 5px;
 	display: block;
-	float: left;
-	text-align: left;
+	float: right;
+	text-align: right;
 	white-space: nowrap; /* For Opera */
 }
 
@@ -168,10 +168,6 @@ a#logo:hover {
 #search-box img {
 	vertical-align: middle;
 	margin-right: 3px;
-}
-
-#adv_search_link {
-	color : #0000a0;	
 }
 
 /* Site description and logo */

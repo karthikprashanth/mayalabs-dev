@@ -10,7 +10,6 @@ class DashboardController extends Zend_Controller_Action
 
     public function indexAction()
     {
-    		
         $this->view->headTitle('Dashboard','PREPEND');
         $username = Zend_Auth::getInstance()->getStorage()->read()->username;
         $role=Zend_Auth::getInstance()->getStorage()->read()->role;
@@ -32,6 +31,37 @@ class DashboardController extends Zend_Controller_Action
         }
 	    $navContainerConfig = new Zend_Config_Xml(APPLICATION_PATH . '/configs/navigation.xml',$navTag);               
 		$navContainer=new Zend_Navigation($navContainerConfig);
+		$conflist = Model_DbTable_Conference::getList(array('ll' => 0,'ul' => 2));
+		$role = Zend_Registry::get('role');
+		foreach($conflist as $conf)
+		{
+			$page = array(
+				'label' => $conf['year'] . " (" . $conf['place'] . ")",
+				'controller' => 'conference',
+				'action' => 'view',
+				'params' => array('id' => $conf['cId'])
+			);
+			$navContainer->findOneBy('codename','conf')->addPage($page);
+		}
+		$page = array(
+			'label' => "Others",
+			'controller' => 'conference',
+			'action' => 'list'
+		);
+		
+		$navContainer->findOneBy('codename','conf')->addPage($page);
+		
+		$user = new Model_DbTable_User(Zend_Db_Table_Abstract::getDefaultAdapter(),$uid);
+		if($role == 'sa' || $user->isConfChair())
+		{
+			$page = array(
+				'label' => "Add Conference",
+				'controller' => 'conference',
+				'action' => 'add',
+				
+			);
+			$navContainer->findOneBy('codename','conf')->addPage($page);	
+		}
 		Zend_Registry::set('navcontainer',$navContainer);
 		$acl = new Model_HiveAcl();
 		$this->view->navigation($navContainer)->setAcl($acl)->setRole($role);

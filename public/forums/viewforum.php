@@ -20,11 +20,20 @@ include($phpbb_root_path . 'includes/functions_display.' . $phpEx);
 // Start session
 $user->session_begin();
 $auth->acl($user->data);
+
 if($user->data['username'] == "Anonymous")
 {
-    $part_url = urlencode('forums'.'/' . $user->page['page']);
-    header('Location:/authentication/login?t='.$part_url);
+    $pageURL = 'http';
+    if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+    $pageURL .= "://";
+    if ($_SERVER["SERVER_PORT"] != "80") {
+    $pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+    } else {
+    $pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+    }
+    header("Location: /?redirect=" . $pageURL);
 }
+
 // Start initial var setup
 $forum_id	= request_var('f', 0);
 $mark_read	= request_var('mark', '');
@@ -209,10 +218,10 @@ $s_watching_forum = array(
 	'is_watching'	=> false,
 );
 
-if (($config['email_enable'] || $config['jab_enable']) && $config['allow_forum_notify'] && $forum_data['forum_type'] == FORUM_POST && $auth->acl_get('f_subscribe', $forum_id))
+if (($config['email_enable'] || $config['jab_enable']) && $config['allow_forum_notify'] && $forum_data['forum_type'] == FORUM_POST && ($auth->acl_get('f_subscribe', $forum_id) || $user->data['user_id'] == ANONYMOUS))
 {
 	$notify_status = (isset($forum_data['notify_status'])) ? $forum_data['notify_status'] : NULL;
-	watch_topic_forum('forum', $s_watching_forum, $user->data['user_id'], $forum_id, 0, $notify_status);
+	watch_topic_forum('forum', $s_watching_forum, $user->data['user_id'], $forum_id, 0, $notify_status, $start, $forum_data['forum_name']);
 }
 
 $s_forum_rules = '';
@@ -271,6 +280,21 @@ $post_alt = ($forum_data['forum_status'] == ITEM_LOCKED) ? $user->lang['FORUM_LO
 // Display active topics?
 $s_display_active = ($forum_data['forum_type'] == FORUM_CAT && ($forum_data['forum_flags'] & FORUM_FLAG_ACTIVE_TOPICS)) ? true : false;
 
+$s_search_hidden_fields = array('fid' => array($forum_id));
+if ($_SID)
+{
+	$s_search_hidden_fields['sid'] = $_SID;
+}
+
+if (!empty($_EXTRA_URL))
+{
+	foreach ($_EXTRA_URL as $url_param)
+	{
+		$url_param = explode('=', $url_param, 2);
+		$s_hidden_fields[$url_param[0]] = $url_param[1];
+	}
+}
+
 $template->assign_vars(array(
 	'MODERATORS'	=> (!empty($moderators[$forum_id])) ? implode(', ', $moderators[$forum_id]) : '',
 
@@ -308,7 +332,8 @@ $template->assign_vars(array(
 	'S_WATCHING_FORUM'		=> $s_watching_forum['is_watching'],
 	'S_FORUM_ACTION'		=> append_sid("{$phpbb_root_path}viewforum.$phpEx", "f=$forum_id" . (($start == 0) ? '' : "&amp;start=$start")),
 	'S_DISPLAY_SEARCHBOX'	=> ($auth->acl_get('u_search') && $auth->acl_get('f_search', $forum_id) && $config['load_search']) ? true : false,
-	'S_SEARCHBOX_ACTION'	=> append_sid("{$phpbb_root_path}search.$phpEx", 'fid[]=' . $forum_id),
+	'S_SEARCHBOX_ACTION'	=> append_sid("{$phpbb_root_path}search.$phpEx"),
+	'S_SEARCH_LOCAL_HIDDEN_FIELDS'	=> build_hidden_fields($s_search_hidden_fields),
 	'S_SINGLE_MODERATOR'	=> (!empty($moderators[$forum_id]) && sizeof($moderators[$forum_id]) > 1) ? false : true,
 	'S_IS_LOCKED'			=> ($forum_data['forum_status'] == ITEM_LOCKED) ? true : false,
 	'S_VIEWFORUM'			=> true,
@@ -373,6 +398,12 @@ if ($forum_data['forum_type'] == FORUM_POST)
 
 	while ($row = $db->sql_fetchrow($result))
 	{
+		if (!$row['topic_approved'] && !$auth->acl_get('m_approve', $row['forum_id']))
+		{
+			// Do not display announcements that are waiting for approval.
+			continue;
+		}
+
 		$rowset[$row['topic_id']] = $row;
 		$announcement_list[] = $row['topic_id'];
 
@@ -530,10 +561,13 @@ if ($s_display_active)
 	$topics_count = 1;
 }
 
+// We need to readd the local announcements to the forums total topic count, otherwise the number is different from the one on the forum list
+$total_topic_count = $topics_count + sizeof($announcement_list) - sizeof($global_announce_list);
+
 $template->assign_vars(array(
 	'PAGINATION'	=> generate_pagination(append_sid("{$phpbb_root_path}viewforum.$phpEx", "f=$forum_id" . ((strlen($u_sort_param)) ? "&amp;$u_sort_param" : '')), $topics_count, $config['topics_per_page'], $start),
 	'PAGE_NUMBER'	=> on_page($topics_count, $config['topics_per_page'], $start),
-	'TOTAL_TOPICS'	=> ($s_display_active) ? false : (($topics_count == 1) ? $user->lang['VIEW_FORUM_TOPIC'] : sprintf($user->lang['VIEW_FORUM_TOPICS'], $topics_count)))
+	'TOTAL_TOPICS'	=> ($s_display_active) ? false : (($total_topic_count == 1) ? $user->lang['VIEW_FORUM_TOPIC'] : sprintf($user->lang['VIEW_FORUM_TOPICS'], $total_topic_count)))
 );
 
 $topic_list = ($store_reverse) ? array_merge($announcement_list, array_reverse($topic_list)) : array_merge($announcement_list, $topic_list);
@@ -627,33 +661,48 @@ if (sizeof($topic_list))
 		$topic_unapproved = (!$row['topic_approved'] && $auth->acl_get('m_approve', $topic_forum_id)) ? true : false;
 		$posts_unapproved = ($row['topic_approved'] && $row['topic_replies'] < $row['topic_replies_real'] && $auth->acl_get('m_approve', $topic_forum_id)) ? true : false;
 		$u_mcp_queue = ($topic_unapproved || $posts_unapproved) ? append_sid("{$phpbb_root_path}mcp.$phpEx", 'i=queue&amp;mode=' . (($topic_unapproved) ? 'approve_details' : 'unapproved_posts') . "&amp;t=$topic_id", true, $user->session_id) : '';
-		
-		
-		$sql = "SELECT * FROM forum_users WHERE user_id = " . $row['topic_poster'];
-		$hresult = $db->sql_query($sql);
-		$r = $db->sql_fetchrow($hresult);
-		$plantname = $r['user_plantname'];
-		$fullname = $r['user_fullname'];
-		$sql = "SELECT * FROM forum_users WHERE user_id = " . $row['topic_last_poster_id'];
-		$hresult = $db->sql_query($sql);
-		$r = $db->sql_fetchrow($hresult);
-		$lfullname = $r['user_fullname'];
+        
+        /*Hive Customization*/
+            $sql = "SELECT * FROM userprofile WHERE id = " . $row['topic_poster'];
+            $result = $db->sql_query($sql);
+            $hrow = $db->sql_fetchrow($result);
+            $authorName = $hrow['firstName'] . " " . $hrow['lastName'];
+            $authorPlantName = $hrow['plantName'];
+            $authorPlantId = $hrow['plantId'];
+            
+            $sql = "SELECT * FROM userprofile WHERE id = " . $row['topic_last_poster_id'];
+            $result = $db->sql_query($sql);
+            $hrow = $db->sql_fetchrow($result);
+            $lpName = $hrow['firstName'] . " " . $hrow['lastName'];
+            $lpPlantName = $hrow['plantName'];
+            $lpPlantId = $hrow['plantId'];
+        /*Ends*/
+        
 		// Send vars to template
-		$template->assign_block_vars('topicrow', array(
+	    $template->assign_block_vars('topicrow', array(
 			'FORUM_ID'					=> $topic_forum_id,
 			'TOPIC_ID'					=> $topic_id,
-			'TOPIC_POSTER_PLANTNAME'    => $plantname,
-			'TOPIC_AUTHOR'				=> $fullname,
+			'TOPIC_AUTHOR'				=> get_username_string('username', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
 			'TOPIC_AUTHOR_COLOUR'		=> get_username_string('colour', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
-			'TOPIC_AUTHOR_FULL'			=> $fullname,
+			'TOPIC_AUTHOR_FULL'			=> get_username_string('full', $row['topic_poster'], $row['topic_first_poster_name'], $row['topic_first_poster_colour']),
 			'FIRST_POST_TIME'			=> $user->format_date($row['topic_time']),
 			'LAST_POST_SUBJECT'			=> censor_text($row['topic_last_post_subject']),
 			'LAST_POST_TIME'			=> $user->format_date($row['topic_last_post_time']),
 			'LAST_VIEW_TIME'			=> $user->format_date($row['topic_last_view_time']),
-			'LAST_POST_AUTHOR'			=> $lfullname,
+			'LAST_POST_AUTHOR'			=> get_username_string('username', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
 			'LAST_POST_AUTHOR_COLOUR'	=> get_username_string('colour', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
-			'LAST_POST_AUTHOR_FULL'		=> $lfullname,
-
+			'LAST_POST_AUTHOR_FULL'		=> get_username_string('full', $row['topic_last_poster_id'], $row['topic_last_poster_name'], $row['topic_last_poster_colour']),
+            
+            'HIVE_AUTHOR_FULLNAME'      => $authorName,
+            'HIVE_AUTHOR_PLANTNAME'     => $authorPlantName,
+            'HIVE_AUTHOR_PLANTID'       => $authorPlantId,
+            'HIVE_AUTHOR_ID'            => $row['topic_poster'],
+            'HIVE_LAST_POST_FULLNAME'   => $lpName,
+            'HIVE_LAST_POST_PLANTNAME'  => $lpPlantName,
+            'HIVE_LAST_POST_PLANTID'  =>   $lpPlantId,
+            'HIVE_LAST_POST_ID'       => $row['topic_last_poster_id'],
+            
+            
 			'PAGINATION'		=> topic_generate_pagination($replies, $view_topic_url),
 			'REPLIES'			=> $replies,
 			'VIEWS'				=> $row['topic_views'],

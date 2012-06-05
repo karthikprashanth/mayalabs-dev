@@ -63,11 +63,11 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
      */
     function __construct($config = array(), $userId = 0) {
         parent::__construct($config);
-
+        
         $userData = array();
         if ($userId) {
             $userprofileRow = $this->fetchRow("id = " . $userId);
-			
+		    	
             $this->userprofileData = $userprofileRow->toArray();
             $this->userId = $this->userprofileData['id'];
             $this->plantId = $this->userprofileData['plantId'];
@@ -304,9 +304,9 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
     /**
      * Updates details about user profile
      */
-    public function save()
+    public function save($mode)
     {
-        if($this->userprofileData['id']){
+        if($mode == 'edit'){
             //$forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
             //$forumUserModel->setUserData($this->userprofileData);
             //$forumUserModel->save();
@@ -316,7 +316,7 @@ class Model_DbTable_Userprofile extends Zend_Db_Table_Abstract {
         else {
             /*$forumUserModel = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->userId);
             $forumUserModel->setUserData($this->userprofileData);
-            $forumUserModel->save();*/
+            $forumUserModel->save();*/       
             $this->userId = $this->insert($this->userprofileData);
 			
         }

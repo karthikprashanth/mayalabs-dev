@@ -15,23 +15,12 @@ define('IN_PHPBB', true);
 $phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : './';
 $phpEx = substr(strrchr(__FILE__, '.'), 1);
 
-// Report all errors, except notices and deprecation messages
-if (!defined('E_DEPRECATED'))
-{
-	define('E_DEPRECATED', 8192);
-}
-error_reporting(E_ALL ^ E_NOTICE ^ E_DEPRECATED);
-
+require($phpbb_root_path . 'includes/startup.' . $phpEx);
 require($phpbb_root_path . 'config.' . $phpEx);
 
 if (!defined('PHPBB_INSTALLED') || empty($dbms) || empty($acm_type))
 {
 	exit;
-}
-
-if (version_compare(PHP_VERSION, '6.0.0-dev', '<'))
-{
-	@set_magic_quotes_runtime(0);
 }
 
 // Load Extensions
@@ -212,6 +201,7 @@ if ($id)
 
 		$cache->destroy('sql', STYLES_THEME_TABLE);
 	}
+
 	// Only set the expire time if the theme changed data is older than 30 minutes - to cope with changes from the ACP
 	if ($recache || $theme['theme_mtime'] > (time() - 1800))
 	{
@@ -223,10 +213,7 @@ if ($id)
 	}
 
 	header('Content-type: text/css; charset=UTF-8');
-	if($phpbb_root_path == NULL)
-	{
-		$phpbb_root_path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-	}
+
 	// Parse Theme Data
 	$replace = array(
 		'{T_THEME_PATH}'			=> "{$phpbb_root_path}styles/" . $theme['theme_path'] . '/theme',
@@ -236,7 +223,7 @@ if ($id)
 		'{T_STYLESHEET_NAME}'		=> $theme['theme_name'],
 		'{S_USER_LANG}'				=> $user['user_lang']
 	);
-	
+
 	$theme['theme_data'] = str_replace(array_keys($replace), array_values($replace), $theme['theme_data']);
 
 	$matches = array();

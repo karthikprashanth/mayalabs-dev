@@ -25,7 +25,7 @@ class AdministrationController extends Zend_Controller_Action {
 	                $role = $form->getValue('role');
 	                $plantId = $form->getValue('plantId');
 	                $register = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),0,"");
-					$users = $register->fetchAll();
+					$users = $register::getList();
 	                
 					$exists = false;
 					foreach($users as $user)
@@ -40,15 +40,41 @@ class AdministrationController extends Zend_Controller_Action {
 						$this->view->message = "Username already exists";
 						return;
 					}
-	                
+                    $password = "reason";
+                    //Setting password as 'reason' for easy debugging. 
+                    //Will be changed when mail module is done 
 	                $register->setUserName($username);
+                     
+	                
 	                $register->setRole($role);                
 	                $register->save();
+                    $register->setPassword($password);
+                    $register->save();
+                    
+                    /* Adding forum user */
+                    $forumData = array(
+                        'user_id' => $register->getUserId(),
+                        'user_type' => 0,
+                        'group_id' => 2,
+                        'username' => $register->getUserName(),
+                        'user_password' => md5($password)
+                    );
+                    global $phpbb_root_path, $phpEx, $user, $db, $config, $cache, $template;
+                    define('IN_PHPBB', true);
+                    define('PHPBB_INSTALLED', true);
+                    $phpbb_root_path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+                    $phpbb_root_path = substr($phpbb_root_path, 0, strlen($phpbb_root_path) - 24);
+                    $phpbb_root_path = $phpbb_root_path . "public" . DIRECTORY_SEPARATOR . "forums" . DIRECTORY_SEPARATOR;
+                    $phpEx = 'php';
+                    include($phpbb_root_path . 'common.php');
+                    include($phpbb_root_path . 'includes' . DIRECTORY_SEPARATOR . 'functions_user.php');
+                    user_add($forumData);
+                    /* Done Adding forum user */ 
 	                $this->_redirect('/userprofile/add?id=' . $register->getUserId());
-	            } else {
-	                $form->populate($formData);
-	            }
-	        }
+  	            } else {
+  	                $form->populate($formData);
+  	            }
+            }
 	     }
 		 catch(Exception $e)
 		 {
@@ -64,6 +90,19 @@ class AdministrationController extends Zend_Controller_Action {
 				$id = $this->getRequest()->getPost('id');
                 $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$id,"");
                 $user->deleteUser();
+                
+                /* Delete user from forum */
+                global $phpbb_root_path, $phpEx, $user, $db, $config, $cache, $template;
+                define('IN_PHPBB', true);
+                define('PHPBB_INSTALLED', true);
+                $phpEx = 'php';
+                $phpbb_root_path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+                $phpbb_root_path = substr($phpbb_root_path, 0, strlen($phpbb_root_path) - 24);
+                $phpbb_root_path = $phpbb_root_path . "public" . DIRECTORY_SEPARATOR . "forums" . DIRECTORY_SEPARATOR;
+                include($phpbb_root_path . 'common.php');
+                include($phpbb_root_path . 'includes' . DIRECTORY_SEPARATOR . 'functions_user.php');
+                user_delete("remove", $id);
+                /* Forum deleting done */
             }
             $this->_redirect("/administration/list");
         }
@@ -77,12 +116,16 @@ class AdministrationController extends Zend_Controller_Action {
                 	$role = Zend_Registry::get('role');
 					$userid = $this->getRequest()->getPost('id');
                     $user = new Model_DbTable_User(Zend_Db_Table::getDefaultAdapter(),$userid,"");
-					$password=Model_Functions::generateRandom(8);
-                    $status = $user->setPassword($password);
-                    if ($status)
-                        $this->_redirect("administration/list");
-                    else
-                        $this->view->message = 'Resetting Password Failed';
+					$password=Model_Functions::generateRandom(8);					
+                    $user->setPassword($password);
+                    $user->save();                    
+                    
+                    $forumUser = new Model_DbTable_Forum_Users(Zend_Db_Table_Abstract::getDefaultAdapter(),$userid);
+                    $forumUser->setPassword($password);
+                    $forumUser->save();
+                    
+                    $this->_redirect("administration/list");
+                    
                 }
             }
         } catch (Exception $e) {
