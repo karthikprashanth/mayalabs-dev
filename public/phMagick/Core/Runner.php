@@ -91,6 +91,7 @@ class Runner extends ActionCollection
 
     public function run(Action $action = null)
     {
+        
         if (!is_null($action)) {
             $this->add($action);
         }

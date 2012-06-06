@@ -69,8 +69,10 @@ class Model_DbTable_Gtdata extends Zend_Db_Table_Abstract {
 		   
          $gtData = array();
          if($id){
-             $gtDataRow = $this->fetchRow("id = " . $id);
- 
+         	$gtDataRow = $this->fetchRow("id = " . $id);
+ 			if(!$gtDataRow) {
+ 				return 0;
+ 			}
             $this->gtData = $gtDataRow->toArray();
             $this->id = $gtDataRow['id'];
             $this->gtid = $gtDataRow['gtid'];

@@ -135,13 +135,14 @@ class Model_DbTable_Gasturbine extends Zend_Db_Table_Abstract {
      */
     public static function getList($options = array()){
         $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
-
+		
         if (count($options['columns'])){
         	$where = " WHERE ";
 			foreach($options['columns'] as $key => $value){
 				$where .= $key . " = '" . $value . "' AND ";
 			}
 			$where = substr($where,0,strlen($where)-4);
+			
         }
         
         $stmt = $dbAdapter->query("SELECT * FROM gasturbines " . $where);

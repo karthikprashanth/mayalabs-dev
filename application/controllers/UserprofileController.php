@@ -214,7 +214,7 @@ class UserprofileController extends Zend_Controller_Action {
 			{
                 $pid = $up->getPlantId();
 				$gtmodel = new Model_DbTable_Gasturbine(Zend_Db_Table::getDefaultAdapter());
-                $gt = $gtmodel->getList(array("plantId" => $pid));
+                $gt = $gtmodel->getList(array("columns" => array("plantId" => $pid)));
 				
 				$plantmodel = new Model_DbTable_Plant(Zend_Db_Table::getDefaultAdapter(), $pid);
 				$plantname = $plantmodel->getPlantName();

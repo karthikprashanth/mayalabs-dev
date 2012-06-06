@@ -35,7 +35,7 @@ class Model_DbTable_Forum_Posts extends Zend_Db_Table_Abstract
            $this->postData = array();
             
            if($postId != 0) {
-               $postData = $this->fetchRow("post_id = " . $forumId);
+               $postData = $this->fetchRow("post_id = " . $postId);
                $this->postId = $postId;
                $this->postData = $postData->toArray();
            }
@@ -55,9 +55,14 @@ class Model_DbTable_Forum_Posts extends Zend_Db_Table_Abstract
         * 
         * @return Array
         */
-        public static function getList() {
+        public static function getList($options = array()) {
+        	if(count($options)) {
+        		if($options['post_id']){
+        			$where = " WHERE post_id = " . $options['post_id'];
+        		}
+        	}
             $dbAdapter = Zend_Db_Table_Abstract::getDefaultAdapter();
-            $stmt = $dbAdapter->query("SELECT * FROM forum_posts");
+            $stmt = $dbAdapter->query("SELECT * FROM forum_posts" . $where);
             $list = $stmt->fetchAll();
             array($list);   
             return $list;

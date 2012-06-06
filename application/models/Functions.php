@@ -14,6 +14,8 @@
 			if($height)
 				$resizeAction->setHeight($height);
 			$phMagick->run($resizeAction);
+			
+			
 		}
 
 		public static function generateRandom($size) 
@@ -92,8 +94,7 @@
 		
 		public static function highlightResults($query,$text)
 		{
-			
-			$keywords = explode(" ",$query);
+			$keywords = explode(" ",$query);			
 			if(count($keywords) == 0)
 			{
 				$keywords[0] = $query;
@@ -141,7 +142,7 @@
 				$min = strlen($str1);
 				$minstr = $str1;
 			}
-			if ($min <= 4)
+			if ($min <= 3)
 			{
 				return false;
 			}

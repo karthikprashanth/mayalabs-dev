@@ -87,6 +87,8 @@ class UpgradesController extends Zend_Controller_Action {
 							}
 						}
 						//add notifications
+						//update search index
+						Model_SearchIndex::updateIndex("gtdata", $fid);
                         $this->_redirect('/upgrades/view?id=' . $fid);
                     } else {
                         $form->populate($formData);
@@ -178,7 +180,8 @@ class UpgradesController extends Zend_Controller_Action {
 				$gtdata->save();
 				
 				//add notifications here
-				
+				//update search index
+				Model_SearchIndex::updateIndex("gtdata",$id);
 				$this->_redirect("/upgrades/view?id=".$id);
 				
 			}
@@ -262,8 +265,16 @@ class UpgradesController extends Zend_Controller_Action {
 				}
 				
 				$gtdata = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(),$id);
+				
+				$title = $gtdata->getTitle();
+				$type = $gtdata->getType();
+				
 				$gtid = $gtdata->getGTId();
 				$gtdata->deleteGtdata();
+				
+				//delete the relevant indices
+				
+				Model_SearchIndex::deleteGTDataIndices($title,$type);
 				
 				$this->_redirect("/gasturbine/view?id=".$gtid."#ui-tabs-3");
 				//delete notifications

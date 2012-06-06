@@ -120,17 +120,15 @@
                     </div>
                 <div id="content-container">
                         <div id="sidebar2">
-						<?php 
-							
+						<?php
 							if(!Zend_Registry::isRegistered('sidebar2')) {
 							
 							//$gtdatamodel = new Model_DbTable_Gtdata();
 							//$unmailed = $gtdatamodel->fetchAll("mailed = 0");
 							//$unmailed = count($unmailed);
 							$unmailed = "Not defined";
-							
                         ?>
-							<!--<div id="advert"><?php echo $this->layout()->advert; ?></div>
+							<div id="advert"><?php echo $this->layout()->advert; ?></div>
                             <div id="bookmark"><?php echo $this->layout()->bookmark; ?></div><br><br>
                              <div id = "demovideo" style = "margin-left: 10px">
                             	<iframe width="190" height="150" src="http://www.youtube.com/embed/iXixiKCPNrM" 
@@ -148,7 +146,7 @@
                             		<input class = "reset-button" type = "submit" value = "Fortnight Mail (<?php echo $unmailed;?>)">
                             	</form>
                             </div>
-                     <?php endif; ?>-->
+                     <?php endif; ?>
 						<?php } ?>
                         </div>
   						

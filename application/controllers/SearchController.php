@@ -13,8 +13,9 @@ class SearchController extends Zend_Controller_Action
 		$searchForm->showfilters();
 		$searchForm->removeElement('keyword');
 		$this->view->advSearch = $searchForm;
-		$sysModel = new Model_DbTable_Gtsystems();
-		$system = $sysModel->fetchAll();		
+		
+		$this->view->syslist = Model_DbTable_Gtsystems::getList();
+		$this->view->subsyslist = Model_DbTable_Gtsubsystems::getList();		
 		
         if($this->_getParam('keyword',"") != "")
 		{
@@ -109,17 +110,12 @@ class SearchController extends Zend_Controller_Action
 			
 			if($cat == "gt")
 			{
-				$gtdatamodel = new Model_DbTable_Gtdata();
-				$plantmodel  = new Model_DbTable_Plant();
-				$umodel = new Model_DbTable_Userprofile();
-				$gtmodel = new Model_DbTable_Gasturbine();
-				$gtsysmodel = new Model_DbTable_Gtsystems();
-				$gtsubsysmodel = new Model_DbTable_Gtsubsystems();
 				$count = 0;
 				$type['finding'] = "findings";
 				$type['upgrade'] = "upgrades";
 				$type['lte'] = "lte";
 				$i = 1;
+				
 				foreach($results as $result)
 				{
 					if($i<$ll || $i > $ul)
@@ -133,26 +129,40 @@ class SearchController extends Zend_Controller_Action
 					
 					$gtdataid = $data[$count]['id'];
 					
-					$gtdata = $gtdatamodel->getData($gtdataid);
-					if(!count($gtdata))
+					$gd = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtdataid);
+					
+					if(!count($gd))
 					{
 						$i--;
 						continue;
 					}
-					$user = $umodel->getUser($gtdata['userupdate']);
-					$uplant = $plantmodel->getPlant($user['plantId']);
-					$uplantname = $uplant['plantName'];
 					
-					$sys = $gtsysmodel->getSystem($gtdata['sysId']);
-					$sysname = $sys['sysName'];
-					$subsys = $gtsubsysmodel->getSubSystem($gtdata['subSysId']);
-					$subsysname = $subsys['subSysName'];
+					$gtdata = $gd->getData();
+					
+					$user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtdata['userupdate']);
+					$userplantid = $user->getPlantId();
+					$userFullName = $user->getFullName();
+					$uplantname = $user->getPlantName();
+					
+					$gt = new Model_DbTable_Gasturbine(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtdata['gtid']);
+					
+					$gtname = $gt->getGTName();
+					
+					$sys = new Model_DbTable_Gtsystems(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtdata['sysId']);
+					$sysname = $sys->getSysName();
+					
+					$subsys = new Model_DbTable_Gtsubsystems(Zend_Db_Table_Abstract::getDefaultAdapter(),$gtdata['subSysId']);
+					$subsysname = $subsys->getsubSysName();
+					
 					$data[$count]['url'] = "/" . $type[$gtdata['type']] . "/view?id=" . $data[$count]['id'];				
 					$data[$count]['gtid'] = $gtdata['gtid'];
+					$data[$count]['gtname'] = $gtname;
 					$data[$count]['updatedate'] = $gtdata['updatedate'];
 					$data[$count]['data'] = strip_tags($gtdata['data']);
 					$data[$count]['type'] = $gtdata['type'];
 					$data[$count]['userupdate'] = $gtdata['userupdate'];
+					$data[$count]['userfullname'] = $userFullName;
+					$data[$count]['userplantid'] = $userplantid;
 					$data[$count]['userplantname'] = $uplantname;
 					$data[$count]['sysname'] = $sysname;
 					$data[$count]['subsysname'] = $subsysname;
@@ -179,17 +189,10 @@ class SearchController extends Zend_Controller_Action
 				
 				$results = $forumIndex->find($queryStr . " OR eoh:[$from TO $to]");
 				
-				$forummodel = new Model_DbTable_Forum_Data();
-				$postmodel = new Model_DbTable_Forum_Posts();
-				$topicsmodel = new Model_DbTable_Forum_Topics();
-				$umodel = new Model_DbTable_Userprofile();
-				$plantmodel = new Model_DbTable_Plant();
-				
 				$i=1;
 				$tc=0;
 				foreach($results as $result)
-				{
-						
+				{	
 					if($i<$ll || $i > $ul)
 					{
 						continue;
@@ -197,34 +200,43 @@ class SearchController extends Zend_Controller_Action
 					$i++;
 					$fdata[$count]['post_id'] = $result->post_id;
 					$pid = $fdata[$count]['post_id'];
-					$post = $postmodel->getPost($pid);
+					
+					$post = new Model_DbTable_Forum_Posts(Zend_Db_Table_Abstract::getDefaultAdapter(),$fdata[$count]['post_id']);
+					$postData = $post->getPostData();
 					if(!count($post))
 					{
 						$i--;
-						continue;
-						
+						continue;						
 					}
-					$fid = $post['forum_id'];
-					$tid = $post['topic_id'];
-					$uid = $post['poster_id'];
 					
-					$user = $umodel->getUser($uid);
-					$uplant = $plantmodel->getPlant($user['plantId']);
-					$uplantname = $uplant['plantName'];
-					$topic = $topicsmodel->getTopic($tid);
-					$topicname = $topic['topic_title'];
-					$forum = $forummodel->getForum($fid);
-					$forumname = $forum['forum_name'];
+					$fid = $postData['forum_id'];
+					$tid = $postData['topic_id'];					
+					$uid = $postData['poster_id'];
+					
+					$user = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$uid);
+					$userFullName = $user->getFullName();
+					$userplantid = $user->getPlantId();
+					$uplantname = $user->getPlantName();
+					
+					$topic = new Model_DbTable_Forum_Topics(Zend_Db_Table_Abstract::getDefaultAdapter(),$tid);					
+					$topicdata = $topic->getTopicData();
+					$topicname = $topicdata['topic_title'];
+					
+					$forum = new Model_DbTable_Forum_Forums(Zend_Db_Table_Abstract::getDefaultAdapter(),$fid);
+					$forumdata = $forum->getForumData();
+					$forumname = $forumdata['forum_name'];
 					
 					$fdata[$count]['url'] = "/forums/viewtopic.php?f=" .$fid ."&t=".$tid."&p=".$pid."#p".$pid;
 					$fdata[$count]['post_id'] = $pid;
 					$fdata[$count]['topic_id'] = $tid;
 					$fdata[$count]['forum_id'] = $fid;
 					$fdata[$count]['poster_id'] = $uid;
-					$fdata[$count]['post_subject'] = $post['post_subject'];
-					$fdata[$count]['post_text'] = strip_tags($post['post_text']);
+					$fdata[$count]['post_subject'] = $postData['post_subject'];
+					$fdata[$count]['post_text'] = strip_tags($postData['post_text']);
 					$fdata[$count]['topicname'] = $topicname;
 					$fdata[$count]['forumname'] = $forumname;
+					$fdata[$count]['userfullname'] = $userFullName;
+					$fdata[$count]['userplantid'] = $userplantid;
 					$fdata[$count]['userplantname'] = $uplantname;
 					$fdata[$count]['lucene_id'] = $result->id;
 								
@@ -245,76 +257,7 @@ class SearchController extends Zend_Controller_Action
 			$this->view->ul = $ul;
 			$this->view->queryStr = $queryStr;
 			$t2=time();	                	 
-		}
-		$sid = $this->getRequest()->getPost("sid");
-		$uname = $this->getRequest()->getPost("uname");
-		if($sid != "") {
-			$umodel = new Model_DbTable_User();
-			$user = $umodel->fetchRow("username = '" . $uname . "'");
-			$secureId = explode(",",$user['sid']);
-			$valid=false;
-			foreach($secureId as $s)
-			{
-				if($s==$sid)
-				{
-					$valid=true;
-					break;
-				}
-			}
-			$this->view->jsonvalid = $valid;
-			$umodel = new Model_DbTable_Userprofile();
-			if($cat=='gt')
-			{
-				$results = array();
-				$results['noOfResults'] = $this->view->tgr;
-				$i=1;
-				
-				foreach($data as $row)
-				{
-					$user = $umodel->getUser($row['userupdate']);
-					$username = $user['firstName'] . " " . $user['lastName'];
-					$result = array(
-						'title'         => $row['title'],
-						'type'       	=> $row['type'],
-						'data'       	=> $row['data'],
-						'sysname'       => $row['sysname'],
-						'subsysname'    => $row['subsysname'],
-						'eoh'  			=> $row['eoh'],
-						'dof'			=> $row['dof'],
-						'toi'			=> $row['toi'],
-						'username'   	=> $username,
-						'userplantname' => $row['userplantname'],
-						'updatedate' 	=> $row['updatedate']
-					);
-					$results['result#'.$i++] = $result;
-				}
-			}
-			else {
-				$results = array();
-				$results['noOfResults'] = $this->view->fgr;
-				$i=1;
-				foreach($fdata as $row)
-				{
-					if(count($row) < 11)
-					{
-						continue;
-					}
-					$user = $umodel->getUser($row['poster_id']);
-					$username = $user['firstName'] . " " . $user['lastName']; 
-					$result = array(
-						'postsubject'         => $row['post_subject'],
-						'posttext'       	  => $row['post_text'],
-						'topicname'       	  => $row['topicname'],
-						'forumname'           => $row['forumname'],
-						'postername'   	      => $username,
-						'userplantname'       => $row['userplantname']
-					);
-					$results['result#'.$i++] = $result;
-				}
-			}
-			$this->view->jsondata = json_encode($results);
-			$this->view->jsonview = "true";
-		}
+		}		
    	}
 	
 	public function searchindexAction()
@@ -388,6 +331,7 @@ class SearchController extends Zend_Controller_Action
             $forumTopicData = $forumTopic->getTopicData();
 			$topicname = $forumTopicData['topic_title'];
 			
+			
 			$forum = new Model_DbTable_Forum_Forums(Zend_Db_Table_Abstract::getDefaultAdapter(),$post['forum_id']);
 			$forumData = $forum->getForumData();
 			$forumname = $forumData['forum_name'];
@@ -395,10 +339,10 @@ class SearchController extends Zend_Controller_Action
 			$poster = new Model_DbTable_Userprofile(Zend_Db_Table_Abstract::getDefaultAdapter(),$post['poster_id']);
 			$uplantname = $poster->getPlantName();
 			
-			$doc->addField(Zend_Search_Lucene_Field::UnIndexed('post_id',$list['post_id']));
+			$doc->addField(Zend_Search_Lucene_Field::Keyword('post_id',$post['post_id']));
 			
-			$doc->addField(Zend_Search_Lucene_Field::UnStored('post_subject',$list['post_subject']));
-			$doc->addField(Zend_Search_Lucene_Field::UnStored('post_text',$list['post_text']));
+			$doc->addField(Zend_Search_Lucene_Field::UnStored('post_subject',$post['post_subject']));
+			$doc->addField(Zend_Search_Lucene_Field::UnStored('post_text',$post['post_text']));
 			$doc->addField(Zend_Search_Lucene_Field::UnStored('topicname',$topicname));
 			$doc->addField(Zend_Search_Lucene_Field::UnStored('forumname',$forumname));
 			

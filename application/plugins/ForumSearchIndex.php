@@ -8,23 +8,24 @@
 		public function  dispatchLoopStartup(Zend_Controller_Request_Abstract $request) {
         	parent::dispatchLoopStartup($request);
 			
-			$searchIndexModel = new Model_DbTable_SearchIndex();
-			$posts = $searchIndexModel->getPosts();
-			if(count($posts))
-			{
-				$indexModel = new Model_SearchIndex();
-				foreach($posts as $post)
-				{
-					if($post['post_id'] != 0)
-						$indexModel->updateIndex("forum",$post['post_id'],"newpost");
-					else
-						$indexModel->updateIndex("forum",$post['topic_id'],"newtopic");
-					
-				}
-				$searchIndexModel->delete();
+			if($request->getControllerName() == "dashboard" && $request->getControllerName == "showmenu") {
+				return;
 			}
 			
-			
+			if(Model_DbTable_SearchIndex::getCount()){				
+				$indices = Model_DbTable_SearchIndex::getList();
+				
+				foreach($indices as $spIndex) {					
+					$sp = new Model_DbTable_SearchIndex(Zend_Db_Table_Abstract::getDefaultAdapter(),$spIndex['id']);
+					
+					if($sp->getType() == "add" || $sp->getType() == "edit") {
+						Model_SearchIndex::updateIndex("forum",$sp->getPostId());
+					}
+					else {
+						Model_SearchIndex::deleteForumIndices($sp->getPostId());
+					}
+					$sp->deleteIndexData();
+				}
+			}
 		}
 	}
-?>

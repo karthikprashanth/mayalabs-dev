@@ -86,6 +86,8 @@ class FindingsController extends Zend_Controller_Action {
 							}
 						}
 						//add notifications
+						//update search index
+						Model_SearchIndex::updateIndex("gtdata", $fid);
                         $this->_redirect('/findings/view?id=' . $fid);
                     } else {
                         $form->populate($formData);
@@ -177,7 +179,8 @@ class FindingsController extends Zend_Controller_Action {
 				$gtdata->save();
 				
 				//add notifications here
-				
+				//update search index
+				Model_SearchIndex::updateIndex("gtdata",$id);
 				$this->_redirect("/findings/view?id=".$id);
 				
 			}
@@ -250,7 +253,9 @@ class FindingsController extends Zend_Controller_Action {
 
     public function deleteAction() {
         try{
+        	
         	if($this->getRequest()->isPost()){
+        		
         		$id = $this->getRequest()->getPost("id");
 				
 				$gtdataAttachments = Model_DbTable_GtdataAttachment::getList(array("columns" => array("gtdataId" => $id)));
@@ -261,8 +266,16 @@ class FindingsController extends Zend_Controller_Action {
 				}
 				
 				$gtdata = new Model_DbTable_Gtdata(Zend_Db_Table_Abstract::getDefaultAdapter(),$id);
+				
+				$title = $gtdata->getTitle();
+				$type = $gtdata->getType();
+				
 				$gtid = $gtdata->getGTId();
 				$gtdata->deleteGtdata();
+				
+				//delete the relevant indices
+				
+				Model_SearchIndex::deleteGTDataIndices($title,$type);
 				
 				$this->_redirect("/gasturbine/view?id=".$gtid."#ui-tabs-2");
 				//delete notifications

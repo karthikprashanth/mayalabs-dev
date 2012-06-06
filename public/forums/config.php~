@@ -6,12 +6,10 @@ $dbhost = 'localhost';
 $dbport = '';
 $dbname = 'hive';
 $dbuser = 'root';
-$dbpasswd = 'reason';
+$dbpasswd = '';
 $table_prefix = 'forum_';
 $acm_type = 'file';
 $load_extensions = '';
-
-
 
 @define('PHPBB_INSTALLED', true);
 // @define('DEBUG', true);
