@@ -5,15 +5,18 @@ echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxbookmark.js');
 <h3>Bookmarks - Long List</h3>
 <br/>
 <br/>
-
-<?php foreach($this->longList as $ll){ ?>
-
-    <a href ="/<?php echo $this->escape($ll['category'])."/view?id=".$this->escape($ll['catId']);?>"><?php echo $ll['bmName']; ?></a>
-    <button id="remove-bookmark" onclick="removeBookmark('<?php echo $this->escape($ll['bmId']);?>','longlist')">Remove Bookmark</button>
-    <br/>
+<table>
+<?php foreach($this->bookmarks as $bl){
+	   $bl = new Model_DbTable_Bookmark(Zend_Db_Table_Abstract::getDefaultAdapter(),$bl['bmId']);
+	   $ll = $bl->getBookmarkData();
+?>
+    <tr><td><a href ="/<?php echo $this->escape($ll['category'])."/view?id=".$this->escape($ll['catId']);?>"><?php echo $ll['bmName']; ?></a></td>
+    <td><button id="remove-bookmark" onclick="removeBookmark('<?php echo $this->escape($ll['bmId']);?>','longlist')">Remove Bookmark</button></td>
+    </tr>
 
 <?php   }
-if(!count($this->longList))
+?> </table> <?php
+if(!count($this->bookmarks))
 {
 	echo "No bookmarks added";
 }

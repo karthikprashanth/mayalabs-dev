@@ -37,6 +37,7 @@ class Plugin_BookmarkLayout extends Zend_Controller_Plugin_Abstract  {
                             'Zend_Controller_Plugin_ActionStack');
         }
         //Set category to the current controller for bookmarking
+        
         Zend_Registry::set('controller',$request->getControllerName());
         $myBookmarkAction = clone($request);
         $myBookmarkAction->setActionName('view')

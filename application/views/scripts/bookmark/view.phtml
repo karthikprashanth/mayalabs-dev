@@ -1,11 +1,14 @@
 <?php
+if(!$this->display) {
+	return;
+}
 $this->jQuery()->enable();
 echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxbookmark.js');
 ?>
 
 <?php if($this->result):?>
 <div id="bookmark-container">
-    <button id="remove-bookmark" onclick="removeBookmark('<?php echo $this->escape($this->id);?>','normal')">Remove Bookmark</button>
+    <button id="remove-bookmark" onclick="removeBookmark('<?php echo $this->escape($this->bmid);?>','normal')">Remove Bookmark</button>
 </div>
 <?php endif; ?>
 

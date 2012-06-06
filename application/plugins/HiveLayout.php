@@ -51,11 +51,11 @@ class Plugin_HiveLayout extends Zend_Controller_Plugin_Abstract  {
         
         $notificationAction = clone($request);
         $notificationAction->setActionName('view')->setControllerName('notification');
-      	$actionStack->pushStack($notificationAction);
+      	$actionStack->pushStack($notificationAction);*/
 
         $bookmarkAction = clone($request);
         $bookmarkAction->setActionName('list')->setControllerName('bookmark');
-        $actionStack->pushStack($bookmarkAction);*/        
+        $actionStack->pushStack($bookmarkAction);    
 
         $searchAction = clone($request);
         $searchAction->setActionName('index')->setControllerName('search');
