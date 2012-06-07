@@ -50,9 +50,9 @@ class Plugin_HiveLayout extends Zend_Controller_Plugin_Abstract  {
                 ->setControllerName('advertisement');
         $actionStack->pushStack($advertAction);
         
-        /*$notificationAction = clone($request);
+        $notificationAction = clone($request);
         $notificationAction->setActionName('view')->setControllerName('notification');
-      	$actionStack->pushStack($notificationAction);*/
+      	$actionStack->pushStack($notificationAction);
 
         $bookmarkAction = clone($request);
         $bookmarkAction->setActionName('list')->setControllerName('bookmark');

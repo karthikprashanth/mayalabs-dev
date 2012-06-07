@@ -37,9 +37,7 @@ class ScheduleController extends Zend_Controller_Action
 	        	$this->_helper->getHelper('Layout')->disableLayout();
 			
 			$fday = $this->getRequest()->getPost('first_day');
-			$lday = $this->getRequest()->getPost('last_day');
-			//$notModel = new Model_DbTable_Notification();
-    		//$notModel = $notModel->add($id,'schedule',1);
+			$lday = $this->getRequest()->getPost('last_day');			
     		$fint = explode("-",$fday);
 			$lint = explode("-",$lday);
 			$f = mktime(0,0,0,$fint[1],$fint[2],$fint[0]);
@@ -53,7 +51,8 @@ class ScheduleController extends Zend_Controller_Action
 			$data = array(
 				'first_day' => $this->getRequest()->getPost('first_day'),
 				'last_day' => $this->getRequest()->getPost('last_day'),
-				'cId' => $this->getRequest()->getPost('cid')
+				'cId' => $this->getRequest()->getPost('cid'),
+				'lastupdateuser' => Zend_Auth::getInstance()->getStorage()->read()->id
     		);
     		$schedule = new Model_DbTable_Schedule(Zend_Db_Table_Abstract::getDefaultAdapter());
 			$schedule->setScheduleData($data);

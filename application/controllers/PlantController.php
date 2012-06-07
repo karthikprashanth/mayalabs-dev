@@ -50,7 +50,8 @@ class PlantController extends Zend_Controller_Action {
                         }
 
 					}
-                    $pModel = new Model_DbTable_Plant();
+					$content['lastupdateuser'] = Zend_Auth::getInstance()->getStorage()->read()->id;
+                    $pModel = new Model_DbTable_Plant(Zend_Db_Table_Abstract::getDefaultAdapter());
 					$pModel->setPlantData($content);
 					$pModel->save();    
                     $this->_redirect('plant/view?id=' . $pModel->getPlantId());
@@ -118,6 +119,7 @@ class PlantController extends Zend_Controller_Action {
                     $content = array_merge($form->partPlant1->getValues(), $form->partPlant2->getValues(),
                                                                 $form->partPlant3->getValues());
                     $content['plantId'] = $plantId;
+					$content['lastupdateuser'] = $userId;
                     unset($content['modeselect']);
                     $plant->setPlantData($content);
                     $plant->save();

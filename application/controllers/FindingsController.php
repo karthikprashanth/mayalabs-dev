@@ -178,7 +178,6 @@ class FindingsController extends Zend_Controller_Action {
 				$gtdata->setGTData($content);
 				$gtdata->save();
 				
-				//add notifications here
 				//update search index
 				Model_SearchIndex::updateIndex("gtdata",$id);
 				$this->_redirect("/findings/view?id=".$id);

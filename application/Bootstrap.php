@@ -17,6 +17,8 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
             Zend_Registry::set('role', 'guest');
         }
 		
+		Zend_Registry::set('usergroup','v93.4A');
+		
 		$mailconfig = $this->getOption('mailconfig');
 		Zend_Registry::set('mailconfig',$mailconfig);
 		
