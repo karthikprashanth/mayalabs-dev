@@ -1,6 +1,4 @@
 <!--<br /><br /><center>View script for controller <b>Advertisement</b> and script/action name <b>list</b></center>-->
-
-
 <table>
 <tr>
 <th>Title</th>
@@ -19,10 +17,8 @@ echo "<a href='".$this->url(array('action'=>'view'))."?id=".$this->escape($ad['a
 
 <td><?php echo "&nbsp;&nbsp;". $this->escape($ad['GTModel']); ?></td>
 
-<?php 
-	if($this->role != 'sa') {
-		continue;
-	}
+<?php
+	
 	$editUrl = $this->url(
 					array(
 						'action' => 'edit',
@@ -33,16 +29,13 @@ echo "<a href='".$this->url(array('action'=>'view'))."?id=".$this->escape($ad['a
 					
 						
 <td>
-<form action="<?php echo $editUrl; ?>" method="post">
-<input type="hidden" name="advertId" value="<?php echo $this->escape($ad['advertId']);?>" />
-<input type="submit" name="edit" value="Edit" />
-</form>
+<?php echo "<a href = '/advertisement/edit?id=" . $ad['advertId'] . "' class = 'a-edit ui-corner-all'>Edit</a>";?>
 </td>
 
 <td>
 <form action="<?php echo $this->url(array('action'=>'delete')); ?>" method="post">
 <input type="hidden" name="id" value="<?php echo $this->escape($ad['advertId']);?>" />
-<input type="submit" name="del" value="Delete" />
+<input type="submit" name="del" value="Delete" class = "gt-delete"/>
 </form>
 </td>
 
@@ -51,7 +44,7 @@ echo "<a href='".$this->url(array('action'=>'view'))."?id=".$this->escape($ad['a
 <?php endforeach; ?>
 
 </table>
+<br>
+<form action = '/advertisement/add'><input type = 'submit' class = 'gt-add' value = 'Add New Advertisement'></form>
 <?php 
-echo "<div style='padding:20px;'>".$this->paginationControl($this->adList,'Sliding','pagination.phtml')."</div>"; 
-?>
-
+echo "<div style='padding:20px;'>".$this->paginationControl($this->adList,'Sliding','pagination.phtml')."</div>";

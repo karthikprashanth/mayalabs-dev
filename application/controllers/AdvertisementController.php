@@ -14,25 +14,21 @@ class AdvertisementController extends Zend_Controller_Action {
         try {
             $this->view->headTitle('Add New Advertisement', 'PREPEND');
             $form = new Form_AdvertisementForm();
-            //JQuery Form Enable
-            ZendX_JQuery::enableForm($form);
             $form->submit->setLabel('Add');
+			$form->submit->setAttrib('class','gt-add');
             $this->view->form = $form;
             if ($this->getRequest()->isPost()) {
                 $formData = $this->getRequest()->getPost();
                 if ($form->isValid($formData)) {
-                    $userp = new Model_DbTable_Advertisement();
+                    $advert = new Model_DbTable_Advertisement(Zend_Db_Table_Abstract::getDefaultAdapter());
+                    
                     $content = $form->getValues();
-
-                    $time = new Model_DbTable_Advertisement();
-                    $time = $time->timeStamp();
-                    $content['timeupdate'] = $time;
-
                     $fdata = file_get_contents($form->advertImage->getFileName());
                     $content['advertImage'] = $fdata;
-
-                    $userp->add($content);
-                    //$this->_redirect('index');
+					
+					$advert->setAdvertData($content);
+					$advert->save();
+                    $this->_redirect("/advertisement/view?id=".$advert->getId());
                 } else {
                     $form->populate($formData);
                 }
@@ -45,38 +41,30 @@ class AdvertisementController extends Zend_Controller_Action {
     public function editAction() {
         $this->view->headTitle('Edit Advertisement', 'PREPEND');
         try {
-
             $form = new Form_AdvertisementForm();
-            //JQuery Form Enable
-            ZendX_JQuery::enableForm($form);
+            $id['advertId'] = $this->_getParam('id', 0);
 
-            $id['advertId'] = $this->_getParam('advertId', 0);
-
-            $GTVal = new Model_DbTable_Advertisement();
-            $form->populate($GTVal->getAdvertisement($id['advertId']));
+            $advert = new Model_DbTable_Advertisement(Zend_Db_Table_Abstract::getDefaultAdapter(),$id['advertId']);
+            $form->populate($advert->getAdvertData());
             $form->submit->setLabel('Save');
+			$form->submit->setAttrib('class','user-save');
 
             if ($this->getRequest()->isPost()) {
                 $formData = $this->getRequest()->getPost();
                 if (isset($formData['title'])) {
                     if ($form->isValid($formData)) {
-                        $GT = new Model_DbTable_Advertisement();
                         $content = $form->getValues();
-
-                        $time = new Model_DbTable_Advertisement();
-                        $time = $time->timeStamp();
-                        $content['timeupdate'] = $time;
-
+						
                         $fdata = file_get_contents($form->advertImage->getFileName());
                         $content['advertImage'] = $fdata;
-                        $GT->updateAdvertisement($content);
+                        $advert->setAdvertData($content);
+						$advert->save();
                         $this->_helper->redirector('list');
                     }
                 } else {
                     $form->populate($formData);
                 }
             }
-
             $this->view->form = $form;
             $form->populate($id);
         } catch (exception $e) {
@@ -88,9 +76,9 @@ class AdvertisementController extends Zend_Controller_Action {
         try {
             $this->view->headTitle('View Advertisement', 'PREPEND');
             $id = $this->_getParam('id', 0);
-            $advert = new Model_DbTable_Advertisement();
-            $data = $advert->getAdvertisement($id);
-            $img = 'random/abcd';
+            $advert = new Model_DbTable_Advertisement(Zend_Db_Table_Abstract::getDefaultAdapter(),$id);
+            $data = $advert->getAdvertData();			
+            $img = 'uploads/'.$advert->getTitle();
             file_put_contents($img, $data['advertImage']);
             $this->view->viewImg = $img;
             $this->view->viewData = $data;
@@ -101,13 +89,10 @@ class AdvertisementController extends Zend_Controller_Action {
 
     public function listAction() {
         try {
-            $role = Zend_Registry::get('role');
-            $this->view->role = $role;
             $this->view->headTitle('List Advertisement', 'PREPEND');
-            $advert = new Model_DbTable_Advertisement();
-            $data = $advert->fetchAll();
-            $data = $advert->listAds();
-            $adList = new Zend_Paginator(new Zend_Paginator_Adapter_DbSelect($data));
+            $advertList = Model_DbTable_Advertisement::getList();
+            
+            $adList = new Zend_Paginator(new Zend_Paginator_Adapter_Array($advertList));
             $adList->setItemCountPerPage(5)
                     ->setCurrentPageNumber($this->_getParam('page', 1));
             $this->view->adList = $adList;
@@ -121,15 +106,13 @@ class AdvertisementController extends Zend_Controller_Action {
             if (!$this->_request->isXmlHttpRequest())
                 $this->_helper->viewRenderer->setResponseSegment('advert');
 			
-            $advert = new Model_DbTable_Advertisement();
-            $data = $advert->randomAd();
-			
-            $img = 'random/abc' . rand(0,999999);
-            file_put_contents($img, $data['advertImage']);
-			
-            $this->view->randomAd = $img;
-			$this->view->desc = $data['description'];
-            $this->view->adTitle = $data;
+            $advert = Model_DbTable_Advertisement::getRandomAd();			
+            $img = 'uploads/' . $advert['title'];
+            file_put_contents($img, $advert['advertImage']);			
+            $this->view->randomAd = $img;			
+            $this->view->id = $advert['advertId'];
+			$this->view->title = $advert['title'];
+            
         } catch (Exception $e) {
             echo $e;
         }
@@ -138,11 +121,9 @@ class AdvertisementController extends Zend_Controller_Action {
     public function deleteAction() {
         if ($this->getRequest()->isPost()) {
             $del = $this->getRequest()->getPost('del');
-            if ($del == 'Delete') {
-                echo 'hi';
-                $id = $this->getRequest()->getPost('id');
-                $user = new Model_DbTable_Advertisement();
-                $user->deleteAdvertisement($id);
+            if ($del == 'Delete') {                
+                $advert = new Model_DbTable_Advertisement(Zend_Db_Table_Abstract::getDefaultAdapter(),$this->getRequest()->getPost('id'));
+				$advert->deleteAdvertisement();
             }
             $this->_helper->redirector('list');
         }

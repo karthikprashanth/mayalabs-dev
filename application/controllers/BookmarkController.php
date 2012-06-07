@@ -63,8 +63,8 @@ class BookmarkController extends Zend_Controller_Action
     {
             try{
                 $this->view->headTitle('Bookmarks Full List','PREPEND');
-                
-				$this->view->bookmarks = Model_DbTable_Bookmark::getList();
+            	$uid = Zend_Auth::getInstance()->getStorage()->read()->id;    
+				$this->view->bookmarks = Model_DbTable_Bookmark::getList(array("columns" => array("userId" => $uid)));
 
             }
             catch(Exception $e){

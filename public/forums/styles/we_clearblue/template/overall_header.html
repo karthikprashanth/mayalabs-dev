@@ -50,17 +50,6 @@
 		var onload_functions = new Array();
 		var onunload_functions = new Array();
                
-                $(document).ready(function(){
-                    $.ajax({type:'GET',url:'/dashboard/showmenu',success:function(msg){$("#header-bg").append(msg);
-                    ddsmoothmenu.init({mainmenuid:'smoothmenu1',orientation:'h',classname:'ddsmoothmenu',contentsource:'markup'});
-
-$("[href='/forums']").css("background-color","#83ac52");
-$("[href='/forums']").css('border-radius','5px 5px 0px 0px');
-
-}});
-                    
-       
-                });
 		<!-- IF S_USER_PM_POPUP -->
 			if ({S_NEW_PM})
 			{
@@ -106,7 +95,7 @@ $("[href='/forums']").css('border-radius','5px 5px 0px 0px');
 	<script type="text/javascript" src="{T_TEMPLATE_PATH}/forum_fn.js"></script>
 </head>
 <body id="phpbb" class="section-{SCRIPT_NAME} {S_CONTENT_DIRECTION}">
-        <div id = 'header-bg'></div>
+        <div id = 'header-bg' style = 'height:50px'><iframe frameborder = 0 scrolling = no src = "/dashboard/showmenu" width = "100%" style = 'height:auto;'></iframe></div>
 <div id = 'wrapper'>
 
 	<div id="container">

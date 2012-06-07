@@ -93,7 +93,6 @@ body {
 #header-menu
 {    
     padding-top: 20px;
-    
     float:left;
     font-weight: normal;
 }
@@ -830,3 +829,28 @@ a:hover{
     padding: 5px;
 }
 /* End Report Configure */
+
+/* Admin Control Panel */
+
+#adminbuttons{	
+    margin-top: 14px;
+    padding: 5px;
+    border: solid 1px #b4b4b4;
+    border-top: none;		
+}
+
+#adminbuttons h3{
+    font-size: 13px;
+    text-align: center;
+    color: #fff;
+    padding: 5px;		
+    background-color: #2e4e68;
+    margin-top:-10px;
+    width:100%;
+    margin-left:-5px;
+}
+
+#adminbuttons h3 img{
+    margin-right: 8px;
+}
+/* End Admin Control Panel*/

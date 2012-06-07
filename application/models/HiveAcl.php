@@ -116,7 +116,7 @@ class Model_HiveAcl extends Zend_Acl {
         $this->allow('us','findings');
         $this->allow('us','upgrades');
         $this->allow('us','lte');
-        $this->allow('us','advertisement',array('view','randomad','list'));
+        $this->allow('us','advertisement',array('view','randomad'));
         $this->allow('us','bookmark');
         $this->allow('us','conference');
 		$this->allow('us','gallery');
@@ -148,6 +148,7 @@ class Model_HiveAcl extends Zend_Acl {
 		$this->allow('ca','administration',array('list','deleteacc','resetpassword'));
         $this->allow('sa','plant');
 		$this->allow('sa','gasturbine');
+		$this->allow('sa','advertisement');
 		$this->allow('sa','search');
 		$this->allow('sa','administration');
 

@@ -43,7 +43,7 @@ class Form_AdvertisementForm extends Zend_Form {
     ->addFilter('StringTrim');
 
 	$appath = substr(APPLICATION_PATH,0,strlen(APPLICATION_PATH)-12);
-
+	
     $adImg = new Zend_Form_Element_File('advertImage');
     $adImg->setLabel('Upload the Advertisement')
 		  ->setDestination($appath . '/public/uploads')
@@ -57,6 +57,3 @@ class Form_AdvertisementForm extends Zend_Form {
     $this->addElements(array($adid,$ts,$advertTitle, $GTModelNum, $description, $adImg, $submit));
   }
 }
-
-
-?>

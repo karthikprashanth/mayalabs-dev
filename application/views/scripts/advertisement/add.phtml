@@ -1,14 +1,17 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+	    $("input").blur(function(){
+	    	if(this.value == "" || this.value == null){
+	    		return;
+	    	}
+	        var formElementId = ($(this).parent().prev().find('label').attr('for'));
+	        doValidationPlant($(this).attr('id'),'../validation/validate?form=advertisement');
+	   });
+	});
+</script>
 <?php
 $this->jQuery()->enable();
 echo $this->headScript()->prependFile($this->baseUrl().'/js/ajaxvalidation.js');
-echo $this->adminId;
-echo $this->form;
+$this->tabPane("advertTab",$this->form,array('title'=>"Add Advertisement"));
+echo $this->tabContainer("advertTab",array());
 ?>
-<script type="text/javascript">
-    $(document).ready(function(){
-    $("input").blur(function(){
-        var formElementId = ($(this).parent().prev().find('label').attr('for'));
-        doValidation(formElementId,'/hive/public/advertisement/addvalidate/');
-   });
-});
-</script>

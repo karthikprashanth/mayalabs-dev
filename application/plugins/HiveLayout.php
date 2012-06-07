@@ -16,6 +16,7 @@ class Plugin_HiveLayout extends Zend_Controller_Plugin_Abstract  {
 		
         if($request->isXmlHttpRequest())
             return;
+		if($controller == "dashboard" && $action == "showmenu") return;
         $front = Zend_Controller_Front::getInstance();
         if (!$front->hasPlugin('Zend_Controller_Plugin_ActionStack')) {
             $actionStack = new Zend_Controller_Plugin_ActionStack();
@@ -44,12 +45,12 @@ class Plugin_HiveLayout extends Zend_Controller_Plugin_Abstract  {
             $_GET['keyword']='';
             unset($_GET['keyword']);
         }
-       	/*$advertAction = clone($request);
+       	$advertAction = clone($request);
         $advertAction->setActionName('randomad')
                 ->setControllerName('advertisement');
         $actionStack->pushStack($advertAction);
         
-        $notificationAction = clone($request);
+        /*$notificationAction = clone($request);
         $notificationAction->setActionName('view')->setControllerName('notification');
       	$actionStack->pushStack($notificationAction);*/
 

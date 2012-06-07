@@ -1,13 +1,32 @@
 <head>
 	<link rel = "stylesheet" href = "/css/style.css">
+	<link rel = "stylesheet" href = "/css/ddsmoothmenu.css">
+	<script type = 'text/javascript' src = '/js/jquery/js/jquery-1.5.1.min.js'></script>
+	<script type = 'text/javascript' src = '/js/ddsmoothmenu.js'></script>
+	<script type = 'text/javascript'>
+		$(document).ready(function(){
+			ddsmoothmenu.init(
+				{
+					mainmenuid:'smoothmenu1',
+					orientation:'h',
+					classname:'ddsmoothmenu',
+					contentsource:'markup'
+				}
+			);
+			$("a").attr("target","_parent");
+			$("[href='/forums']").css("background","#83ac52");
+			$("[href='/forums']").css("border-top-left-radius","5px");
+			$("[href='/forums']").css("border-top-right-radius","5px");
+		});		
+	</script>	
 </head>
 <div id="header">
 	<div id="header-logo">
 	    <a href="<?php echo $this->baseUrl() . "/dashboard/index" ?>"><img src="<?php echo $this->baseUrl(); ?>/images/logo_small_new.png"/></a>
-	</div>
-	
-	<div id="header-menu">
+	</div>	
+	<div id="header-menu" style = "margin-bottom:0px!important">
 		<div id="smoothmenu1" class="ddsmoothmenu">
+			
 			<?php
 				echo $this->navigation()->menu();
 			?>

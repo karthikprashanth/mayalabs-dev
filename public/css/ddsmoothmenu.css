@@ -3,7 +3,6 @@ margin-left: 50px;
 font:  12px Verdana;
 background: #2e4e68; /*background of menu bar (default state)*/
 width: 100%;
-height: 100%;
 }
 
 .ddsmoothmenu ul{
@@ -76,6 +75,7 @@ padding: 5px;
 margin: 0;
 border-top-width: 0;
 border-bottom: 1px solid gray;
+z-index: 200!important;
 }
 
 /* Holly Hack for IE \*/

@@ -78,6 +78,9 @@ class ValidationController extends Zend_Controller_Action
 			{	
 				$form = new Form_RegistrationForm();
 			}
+			else if($formname == "advertisement") {
+				$form = new Form_AdvertisementForm();	
+			}
 			if($formname != 'plant')
             {
             	$formData = $this->getRequest()->getPost();

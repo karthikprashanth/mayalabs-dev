@@ -119,7 +119,7 @@
 							//$gtdatamodel = new Model_DbTable_Gtdata();
 							//$unmailed = $gtdatamodel->fetchAll("mailed = 0");
 							//$unmailed = count($unmailed);
-							$unmailed = "Not defined";
+							$unmailed = "0";
                         ?>
 							<div id="advert"><?php echo $this->layout()->advert; ?></div>
                             <div id="bookmark"><?php echo $this->layout()->bookmark; ?></div><br><br>
@@ -132,11 +132,15 @@
                             	if($role == 'sa') :
 							?>
                             <div id = "adminbuttons" style = "margin-left:10px">
+                            	<h3 class = 'ui-corner-top'><img src = '/images/gt-configure.png'>Admin Control Panel</h3>
                             	<form action = "/search/searchindex">
                             		<input class = "reset-button" type = "submit" value = "Search Index">
                             	</form>
                             	<br><form action = "/administration/mailnotify">
                             		<input class = "reset-button" type = "submit" value = "Fortnight Mail (<?php echo $unmailed;?>)">
+                            	</form>
+                            	<br><form action = "/advertisement/list">
+                            		<input class = "reset-button" type = "submit" value = "Advertisements">
                             	</form>
                             </div>
                      <?php endif; ?>
